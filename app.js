@@ -264,54 +264,81 @@ function renderV(){
     pieChart('ch-vd-pie',[{l:'Local',v:locT},{l:'Del. interno',v:dtT},{l:'PedidosYa',v:yaT},{l:'Uber Eats',v:ubT}].filter(function(x){return x.v>0;}));
   }
 
-    // Proyección — normalizada por días, compara mismo mes año anterior
+// Proyección — normalizada por días, compara mismo mes
   var activeM=M.filter(function(m){return m.days_active>0;});
-  // Daily rate per month (eliminates partial-month distortion)
   function dailyRate(mo){ return getVenta(mo)/mo.days_active; }
-  // Weighted avg of last 6 months by daily rate (more weight to recent)
   var l6=activeM.slice(-6);
   var weights=[1,1,2,2,3,3];
   var wSum=0,wRate=0;
   l6.forEach(function(mo,i){var w=weights[i]||1;wSum+=w;wRate+=dailyRate(mo)*w;});
   var baseRate=wSum>0?wRate/wSum:0;
-  // Trend: compare first half vs second half of l6
   var h1=l6.slice(0,3), h2=l6.slice(3);
   var r1=h1.reduce(function(s,m){return s+dailyRate(m);},0)/Math.max(h1.length,1);
   var r2=h2.reduce(function(s,m){return s+dailyRate(m);},0)/Math.max(h2.length,1);
-  var trendPct=r1>0?(r2-r1)/r1:0; // monthly trend as % change
-  // Days per projected month
-  var projMonths=[
-    {l:'Marzo 2026',d:31},{l:'Abril 2026',d:30},{l:'Mayo 2026',d:31}
-  ];
-  // Prior year same months for sanity floor
-  var py2025={
-    'Marzo 2026': M.find(function(x){return x.month==='Marzo 2025';}),
-    'Abril 2026': M.find(function(x){return x.month==='Abril 2025';}),
-    'Mayo 2026':  M.find(function(x){return x.month==='Mayo 2025';})
-  };
-  var pi=l6.slice(-3).map(function(m){return{l:m.month,v:getVenta(m),proj:0};})
-    .concat(projMonths.map(function(pm,xi){
-      var projRate=baseRate*Math.pow(1+trendPct,xi+1);
-      var projV=projRate*pm.d;
-      var py=py2025[pm.l];
-      if(py){var pyRate=dailyRate(py);projV=projRate*pm.d*0.6+pyRate*pm.d*0.4;}
-      var base=baseRate*pm.d;
-      projV=Math.max(projV,base*0.75);projV=Math.min(projV,base*1.25);
-      return{l:pm.l,v:Math.round(projV),proj:1};
-    }));
+  var trendPct=r1>0?(r2-r1)/r1:0; 
+
   var lastRM=l6[l6.length-1];
-  if(lastRM&&lastRM.days_active<26){
+  if($('ch-vp') && lastRM){
     var mArr=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     var mPts=lastRM.month.split(' ');
     var mI=mArr.indexOf(mPts[0]); var yr=parseInt(mPts[1]);
     var dim=new Date(yr,mI+1,0).getDate();
-    var projected=Math.round(dailyRate(lastRM)*dim);
-    pi[pi.length-4]={l:lastRM.month+'*',v:projected,proj:2};
+    
+    // Mes actual: Real vs Proyectado
+    var currentActual=getVenta(lastRM);
+    var currentProj=Math.round(dailyRate(lastRM)*dim);
+    var pctMonth=Math.min(100, Math.round((lastRM.days_active/dim)*100));
+    var pctVenta=currentProj>0 ? Math.min(100, Math.round((currentActual/currentProj)*100)) : 0;
+
+    // Próximos 3 meses dinámicos
+    var nextMonthsHtml = '';
+    var maxProj = currentProj;
+    var futureData = [];
+    
+    for(var i=1; i<=3; i++){
+      var nxI = (mI + i) % 12;
+      var nxY = yr + Math.floor((mI + i) / 12);
+      var nxDim = new Date(nxY, nxI+1, 0).getDate();
+      var projRate = baseRate * Math.pow(1+trendPct, i);
+      var projV = Math.round(projRate * nxDim);
+      futureData.push({l: mArr[nxI].slice(0,3)+' '+nxY, v: projV});
+      if(projV > maxProj) maxProj = projV;
+    }
+
+    futureData.forEach(function(d){
+      var wPct = maxProj > 0 ? (d.v/maxProj*100) : 0;
+      nextMonthsHtml += '<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">'
+        +'<span style="width:65px;font-size:11.5px;color:var(--sub);font-weight:600">'+d.l+'</span>'
+        +'<div style="flex:1;height:6px;background:var(--s3);border-radius:4px">'
+          +'<div style="width:'+wPct+'%;background:rgba(0,212,255,.35);height:100%;border-radius:4px"></div>'
+        +'</div>'
+        +'<span style="width:65px;text-align:right;font-size:12px;font-family:var(--mono);color:var(--t)">'+fmtM(d.v)+'</span>'
+        +'</div>';
+    });
+
+    $('ch-vp').innerHTML = '<div style="display:flex;flex-direction:column;gap:20px;padding-top:6px">'
+      // Barra Mes Actual
+      +'<div style="background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:18px;position:relative">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:12px">'
+          +'<span style="font-size:11px;font-weight:700;color:var(--t);text-transform:uppercase;letter-spacing:.08em">Progreso '+lastRM.month+'</span>'
+          +'<span style="font-size:11px;font-weight:800;color:var(--a)">'+pctMonth+'% del mes</span>'
+        +'</div>'
+        +'<div style="height:12px;background:rgba(255,176,32,.15);border-radius:6px;display:flex;overflow:hidden;margin-bottom:10px">'
+          +'<div style="width:'+pctVenta+'%;background:var(--a);height:100%;border-radius:6px;transition:width .8s ease"></div>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:11.5px;font-family:var(--mono)">'
+          +'<span style="color:var(--t);font-weight:700">Llevamos: '+fmtM(currentActual)+'</span>'
+          +'<span style="color:var(--sub)">Meta est: '+fmtM(currentProj)+'</span>'
+        +'</div>'
+      +'</div>'
+      // Próximos meses
+      +'<div>'
+        +'<div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;border-bottom:1px solid var(--b);padding-bottom:8px">Proyección tendencia ('+(trendPct>0?'+':'')+ (trendPct*100).toFixed(1) +'%)</div>'
+        + nextMonthsHtml
+      +'</div>'
+    +'</div>';
   }
-  if($('ch-vp')) verticalBarChart('ch-vp',pi,function(d){
-    return d.proj===2?'rgba(255,180,32,.85)':d.proj===1?'rgba(0,212,255,.38)':'#00d4ff';
-  },fmtM)
-}
+} // <-- Fin de la función renderV()
 
 // ════ ANÁLISIS INTELIGENTE ════
 function initAnalisis(){
@@ -884,26 +911,43 @@ function handleFileImp(file){
   var reader=new FileReader();
   reader.onload=function(e){
     try{
-      var lines=e.target.result.split('\n').filter(function(l){return l.trim();});
-      if(lines.length<2){$('imp-st').textContent='Archivo vacío o sin datos.';return;}
-      var rows=lines.slice(1).map(function(l){return l.split('\t').map(function(c){return c.trim();});});
-      importPending=rows;
-      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; '+rows.length+' filas detectadas</span>';
-      // Preview table
-      var cols=importMode==='inv'
-        ?['Ingrediente','Costo unit','Unidad','Uso/sem']
-        :['Producto','Venta','Cantidad'];
+      var text = e.target.result;
+      var rows = [];
+      
+      // Si es el XLS directo de Toteat (que por dentro es código HTML)
+      if(text.indexOf('<tr')>=0 || text.indexOf('<TR')>=0){
+        var doc=new DOMParser().parseFromString(text,'text/html');
+        doc.querySelectorAll('tr').forEach(function(tr){
+          var cells=[];
+          tr.querySelectorAll('td,th').forEach(function(td){cells.push(td.textContent.trim());});
+          if(cells.some(function(c){return c;})) rows.push(cells);
+        });
+      } else {
+        // Si es un CSV o TXT (detecta automáticamente tabulaciones, comas o punto y coma)
+        var delimiter = text.indexOf('\t') >= 0 ? '\t' : (text.indexOf(';') >= 0 ? ';' : ',');
+        text.split(/\r?\n/).forEach(function(l){
+          if(l.trim()){
+            var cells = l.split(delimiter).map(function(c){return c.replace(/^"|"$/g,'').trim();});
+            if(cells.some(function(c){return c;})) rows.push(cells);
+          }
+        });
+      }
+      
+      if(rows.length<2){$('imp-st').textContent='Archivo vacío o sin datos válidos.';return;}
+      importPending=rows.slice(1); // Omitimos el encabezado
+      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; '+importPending.length+' filas detectadas</span>';
+      
+      var cols=importMode==='inv' ? ['Ingrediente','Costo unit','Unidad','Uso/sem'] : ['Producto','Venta','Cantidad'];
       $('imp-prev').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11.5px">'
         +'<tr>'+cols.map(function(c){return'<td style="padding:3px 8px;color:var(--sub);font-weight:700">'+c+'</td>';}).join('')+'</tr>'
-        +rows.slice(0,5).map(function(r){
+        +importPending.slice(0,5).map(function(r){
           return '<tr>'+r.slice(0,cols.length).map(function(c){return'<td style="padding:3px 8px">'+c+'</td>';}).join('')+'</tr>';
         }).join('')+'</table>';
       $('imp-act').style.display='flex';
-    }catch(err){$('imp-st').textContent='Error: '+err.message;}
+    }catch(err){$('imp-st').textContent='Error al leer el archivo: '+err.message;}
   };
   reader.readAsText(file,'UTF-8');
 }
-
 function applyImport(){
   if(!importPending) return;
   var updated=0,skipped=0;
@@ -1748,7 +1792,6 @@ function exportExcel(sec,mo){
   cm('m-export');
 }
 
-// ════ MODERN CHARTS ════
 function lineChart(elId,dataArr,color,vFmt){
   var el=$(elId); if(!el||!dataArr.length) return;
   var vals=dataArr.map(function(d){return d.v;});
@@ -1765,18 +1808,18 @@ function lineChart(elId,dataArr,color,vFmt){
   });
   var path=pts.map(function(p,i){return(i?'L':'M')+p.x+','+p.y;}).join(' ');
   var area='M'+pts[0].x+','+(pT+yR)+' '+pts.map(function(p){return'L'+p.x+','+p.y;}).join(' ')+' L'+pts[pts.length-1].x+','+(pT+yR)+' Z';
-  // Y-axis gridlines + labels
+  
   var grid=[0,.5,1].map(function(t){
     var v=minV+range*t, y=+(pT+yR-t*yR).toFixed(1);
     return '<line x1="'+pL+'" y1="'+y+'" x2="'+(W-pR)+'" y2="'+y+'" stroke="rgba(255,255,255,.05)" stroke-width="1"/>'
       +'<text x="'+(pL-4)+'" y="'+(y+4)+'" text-anchor="end" font-size="8.5" fill="var(--sub)" font-family="var(--mono)">'+(vFmt?vFmt(v).replace('$',''):Math.round(v))+'</text>';
   }).join('');
-  // X-axis labels (skip if crowded)
-  var step=n>16?Math.ceil(n/12):1;
-  var xlbls=pts.filter(function(_,i){return i%step===0;}).map(function(p){
-    return '<text x="'+p.x+'" y="'+(H-4)+'" text-anchor="middle" font-size="8" fill="var(--sub)">'+p.l+'</text>';
+  
+  // SOLUCIÓN: Rotar el texto -35 grados para que nunca se pise
+  var xlbls=pts.map(function(p){
+    return '<text x="'+p.x+'" y="'+(H-4)+'" text-anchor="end" transform="rotate(-35 '+p.x+','+(H-4)+')" font-size="9" fill="var(--sub)">'+p.l+'</text>';
   }).join('');
-  // Dots with hover
+  
   var dots=pts.map(function(p,i){
     var ttId=uid+'_tt'+i, lnId=uid+'_ln'+i;
     var tx=Math.max(0,Math.min(p.x-34,W-74));
@@ -1793,8 +1836,7 @@ function lineChart(elId,dataArr,color,vFmt){
       +'<rect x="'+tx+'" y="'+ty+'" width="72" height="28" rx="4" fill="#16161e" stroke="'+c+'" stroke-width=".7" opacity=".97"/>'
       +'<text x="'+(tx+36)+'" y="'+(ty+11)+'" text-anchor="middle" font-size="8.5" fill="var(--sub)">'+p.l+'</text>'
       +'<text x="'+(tx+36)+'" y="'+(ty+23)+'" text-anchor="middle" font-size="9.5" fill="'+c+'" font-family="var(--mono)" font-weight="700">'+lbl+'</text>'
-      +'</g>'
-      +'</g>';
+      +'</g></g>';
   }).join('');
   el.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block;min-width:280px">'
     +'<defs><linearGradient id="'+gId+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+c+'" stop-opacity=".16"/><stop offset="100%" stop-color="'+c+'" stop-opacity="0"/></linearGradient></defs>'
@@ -1804,7 +1846,6 @@ function lineChart(elId,dataArr,color,vFmt){
     +dots+xlbls
     +'</svg></div>';
 }
-
 function pieChart(elId,dataArr,title){
   var el=$(elId); if(!el||!dataArr.length) return;
   var tot=dataArr.reduce(function(s,d){return s+d.v;},0); if(!tot) return;
