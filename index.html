@@ -349,7 +349,7 @@ tr:last-child td{border-bottom:none}
 <div id="p-inv" class="page">
   <div class="ph">
     <div class="ph-acts">
-      <button class="btn-icon" title="Importar ingredientes desde Excel" onclick="openImport('inv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></button>
+      <button class="btn btn-sm" title="Importar ingredientes desde Excel" onclick="openImport('inv')" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Importar inventario</button>
       <button class="btn btn-sm" onclick="openUpload()" style="display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Subir Excel (Toteat)</button>
       <button class="btn btn-c btn-sm" onclick="openAddIngr()">+ Nuevo</button>
     </div>
@@ -1080,15 +1080,19 @@ function renderV(){
     var año = parseInt(parts[1]);
     var añoAnt = año - 1;
     var mesAnterior = mes + ' ' + añoAnt;
-    var mesActualData = sm[0]; // ya filtrado
+    var mesActualData = sm[0];
     var mesAnteriorData = SALES.monthly.find(function(m){ return m.month === mesAnterior; });
-    if(mesAnteriorData){
+    if(mesActualData && mesAnteriorData){
       compareDiv.style.display = 'block';
+      var daysMonth=new Date(año,['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'].indexOf(mes)+1,0).getDate();
+      var actualVal=getVenta(mesActualData);
+      var projectedVal=mesActualData.days_active>0?Math.round(actualVal/mesActualData.days_active*daysMonth):actualVal;
       var compareData = [
-        {l: aM, v: mesActualData.venta_neta},
-        {l: mesAnterior, v: mesAnteriorData.venta_neta}
+        {l: 'Avance '+aM, v: actualVal},
+        {l: 'Proy. '+aM, v: projectedVal},
+        {l: mesAnterior, v: getVenta(mesAnteriorData)}
       ];
-      verticalBarChart('ch-compare', compareData, ['#00d4ff', '#ff3fa4'], fmtM);
+      verticalBarChart('ch-compare', compareData, ['#00d4ff', '#a78bfa', '#ff3fa4'], fmtM);
     } else {
       compareDiv.style.display = 'none';
     }
@@ -1130,8 +1134,16 @@ function renderV(){
 
 // ════ PROYECCIÓN (usada en análisis) ════
 function renderProyeccion(){
+  var mNames=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   var activeM=SALES.monthly.filter(function(m){return m.days_active>0;});
-  function dailyRate(mo){ return mo.venta_neta/mo.days_active; }
+  if(!activeM.length){ lineChart('ch-vp',[], '#00d4ff', fmtM); return; }
+  function dailyRate(mo){ return mo.days_active>0?mo.venta_neta/mo.days_active:0; }
+  function monthDays(label){
+    var p=label.split(' '), y=parseInt(p[1],10), mi=mNames.indexOf(p[0]);
+    return mi>=0?new Date(y,mi+1,0).getDate():30;
+  }
+  function labelFor(y,mi){ return mNames[mi]+' '+y; }
+
   var l6=activeM.slice(-6);
   var weights=[1,1,2,2,3,3];
   var wSum=0,wRate=0;
@@ -1141,25 +1153,31 @@ function renderProyeccion(){
   var r1=h1.reduce(function(s,m){return s+dailyRate(m);},0)/Math.max(h1.length,1);
   var r2=h2.reduce(function(s,m){return s+dailyRate(m);},0)/Math.max(h2.length,1);
   var trendPct=r1>0?(r2-r1)/r1:0;
-  var projMonths=[
-    {l:'Marzo 2026',d:31},{l:'Abril 2026',d:30},{l:'Mayo 2026',d:31}
-  ];
-  var py2025={
-    'Marzo 2026': SALES.monthly.find(function(x){return x.month==='Marzo 2025';}),
-    'Abril 2026': SALES.monthly.find(function(x){return x.month==='Abril 2025';}),
-    'Mayo 2026':  SALES.monthly.find(function(x){return x.month==='Mayo 2025';})
-  };
-  var pi=l6.slice(-3).map(function(m){return{l:m.month+' ✓',v:m.venta_neta};})
-    .concat(projMonths.map(function(pm,i){
-      var projRate=baseRate*Math.pow(1+trendPct,i+1);
-      var projV=projRate*pm.d;
-      var py=py2025[pm.l];
-      if(py){ var pyRate=dailyRate(py); projV=projRate*pm.d*0.6+pyRate*pm.d*0.4; }
-      var base=baseRate*pm.d;
-      projV=Math.max(projV,base*0.75);
-      projV=Math.min(projV,base*1.25);
-      return{l:pm.l+' ~',v:Math.round(projV)};
-    }));
+
+  var last=activeM[activeM.length-1];
+  var parts=last.month.split(' '), y=parseInt(parts[1],10), mi=mNames.indexOf(parts[0]);
+  var dMonth=monthDays(last.month);
+  var curProj=Math.round(Math.max(last.venta_neta, dailyRate(last)*dMonth));
+  var prev1=activeM[activeM.length-2], prev2=activeM[activeM.length-3];
+  var pi=[];
+  if(prev2) pi.push({l:prev2.month+' ✓',v:prev2.venta_neta});
+  if(prev1) pi.push({l:prev1.month+' ✓',v:prev1.venta_neta});
+  pi.push({l:last.month+' (avance)',v:last.venta_neta});
+  pi.push({l:last.month+' (proy.)',v:curProj});
+
+  for(var i=1;i<=2;i++){
+    var nmi=(mi+i)%12, ny=y+Math.floor((mi+i)/12);
+    var lbl=labelFor(ny,nmi), d=monthDays(lbl);
+    var projRate=baseRate*Math.pow(1+trendPct,i);
+    var projV=projRate*d;
+    var yoy=SALES.monthly.find(function(x){ return x.month===labelFor(ny-1,nmi); });
+    if(yoy){ projV=projV*0.6 + dailyRate(yoy)*d*0.4; }
+    var base=baseRate*d;
+    projV=Math.max(projV,base*0.75);
+    projV=Math.min(projV,base*1.25);
+    pi.push({l:lbl+' ~',v:Math.round(projV)});
+  }
+
   lineChart('ch-vp', pi, '#00d4ff', fmtM);
 }
 
@@ -1827,6 +1845,11 @@ function initDelivery(){
   var intern_transf=SM.reduce(function(s,m){return s+(m.delivery_transferencia||0);},0);
   var ya_toteat=SM.reduce(function(s,m){return s+(m.delivery_ya||0);},0);
   var uber_toteat=SM.reduce(function(s,m){return s+(m.delivery_uber||0);},0);
+  if(total_ya_vta===0 && ya_toteat>0){
+    total_ya_vta=ya_toteat;
+    avg_tkt_ya=avg_tkt_ya||11000;
+    total_ya_ped=Math.round(total_ya_vta/Math.max(avg_tkt_ya,1));
+  }
   var plat_total=ya_toteat+uber_toteat;
   var local=SM.reduce(function(s,m){return s+Math.max(0,m.venta_neta-(m.delivery_ya||0)-(m.delivery_uber||0)-(m.delivery_transferencia||0));},0);
 
