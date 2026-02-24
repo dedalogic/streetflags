@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Street Flags · Importar Toteat</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0d0f;--s1:#16161a;--s2:#1e1e24;--b:#222;--b2:#2a2a32;--t:#e8e8ec;--sub:#666;--m:#00d4ff;--g:#00e5a0;--r:#ff5050;--y:#ffb420;--mono:'SF Mono',monospace}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;padding:32px 20px}
+.wrap{max-width:920px;margin:0 auto}
+h1{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.subtitle{font-size:13px;color:var(--sub);margin-top:4px;margin-bottom:32px}
+.card{background:var(--s1);border:1px solid var(--b);border-radius:14px;padding:24px;margin-bottom:18px;transition:opacity .2s}
+.card.off{opacity:.35;pointer-events:none}
+.card-hd{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--sub);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.num{width:20px;height:20px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--sub);flex-shrink:0}
+.num.on{background:rgba(0,212,255,.15);border-color:var(--m);color:var(--m)}
+.drop{border:2px dashed var(--b2);border-radius:10px;padding:44px 20px;text-align:center;cursor:pointer;transition:all .2s}
+.drop:hover,.drop.over{border-color:var(--m);background:rgba(0,212,255,.03)}
+.drop p{color:var(--sub);font-size:13px;line-height:1.9}
+.drop strong{color:#bbb}
+#fi{display:none}
+.finfo{margin-top:12px;font-size:12px;color:var(--sub);display:none}
+.row3{display:grid;grid-template-columns:1fr 1fr auto;gap:14px;align-items:end}
+label{font-size:11px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px}
+select{background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:9px 12px;color:var(--t);font-size:13px;width:100%;outline:none}
+select:focus{border-color:var(--m)}
+.log{background:#07070a;border:1px solid var(--b);border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.9;max-height:220px;overflow-y:auto;white-space:pre-wrap}
+.ok{color:var(--g)}.warn{color:var(--y)}.err{color:var(--r)}.info{color:var(--m)}.dim{color:#2a2a36}
+.tbl-w{overflow-x:auto;margin-top:16px;border-radius:8px;border:1px solid var(--b)}
+table{border-collapse:collapse;font-size:11px;width:100%}
+th{background:var(--s2);padding:8px 12px;font-weight:700;color:var(--sub);border-bottom:1px solid var(--b);white-space:nowrap;text-align:right}
+th:first-child{text-align:left}
+td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:#aaa;text-align:right;white-space:nowrap}
+td:first-child{text-align:left;color:var(--t);font-weight:600}
+tr.total td{border-bottom:none;font-weight:700;color:var(--t);background:rgba(255,255,255,.025)}
+.hi{color:var(--m)!important;font-weight:700!important}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:9px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-p{background:var(--m);color:#000}.btn-p:hover{background:#33ddff}
+.btn-p:disabled{background:#1a3a40;color:#2a6070;cursor:not-allowed}
+.btn-s{background:var(--s2);border:1px solid var(--b2);color:#aaa}.btn-s:hover{border-color:var(--m);color:var(--m)}
+.out{background:#06060a;border:1px solid var(--b);border-radius:8px;padding:14px;font-family:var(--mono);font-size:10.5px;color:#444;line-height:1.7;max-height:260px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+.acts{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.guide{background:#0a100a;border:1px solid #1a2a1a;border-radius:8px;padding:16px;margin-top:16px}
+.guide-hd{font-size:12px;font-weight:700;color:#2d7a3a;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.guide ol{padding-left:18px}
+.guide li{font-size:12px;color:var(--sub);line-height:2.3}
+code{background:var(--s2);padding:1px 6px;border-radius:4px;color:var(--m);font-family:var(--mono);font-size:11px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Street Flags · Importar Toteat</h1>
+<p class="subtitle">Carga el XLS de Toteat y genera el bloque <code>SALES</code> para pegar en <code>data.js</code></p>
+
+<!-- 1 -->
+<div class="card" id="c1">
+  <div class="card-hd"><span class="num on">1</span>Cargar archivo XLS de Toteat</div>
+  <div class="drop" id="drop" onclick="document.getElementById('fi').click()">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:.22;margin-bottom:12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="3"/></svg>
+    <p><strong>Click aquí</strong> o arrastra el archivo</p>
+    <p style="font-size:11px;margin-top:6px">Toteat → Reportes → Cuadro de Venta → Exportar XLS<br>El archivo puede llamarse <code>export.xls</code> o similar</p>
+  </div>
+  <input type="file" id="fi" accept=".xls,.xlsx,.html,.htm">
+  <div class="finfo" id="finfo"></div>
+</div>
+
+<!-- 2 -->
+<div class="card off" id="c2">
+  <div class="card-hd"><span class="num" id="n2">2</span>Configuración</div>
+  <div class="row3">
+    <div>
+      <label>Año de inicio del archivo</label>
+      <select id="sy"><option value="2024">2024</option><option value="2025" selected>2025</option><option value="2026">2026</option></select>
+    </div>
+    <div>
+      <label>Mes de inicio</label>
+      <select id="sm">
+        <option value="0" selected>Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+        <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+        <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+        <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+      </select>
+    </div>
+    <button class="btn btn-p" id="btngo" disabled onclick="run()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Procesar
+    </button>
+  </div>
+</div>
+
+<!-- 3 -->
+<div class="card off" id="c3">
+  <div class="card-hd"><span class="num" id="n3">3</span>Resultados</div>
+  <div class="log" id="logel"></div>
+  <div class="tbl-w"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+</div>
+
+<!-- 4 -->
+<div class="card off" id="c4">
+  <div class="card-hd"><span class="num" id="n4">4</span>Exportar a data.js</div>
+  <p style="font-size:12px;color:var(--sub);margin-bottom:12px">Copia esto y reemplaza el bloque <code>const SALES={</code> completo en <code>data.js</code>:</p>
+  <div class="out" id="outel"></div>
+  <div class="acts">
+    <button class="btn btn-p" onclick="doCopy()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span id="clbl">Copiar bloque SALES</span>
+    </button>
+    <button class="btn btn-s" onclick="doDownload()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Descargar SALES_block.js
+    </button>
+  </div>
+  <div class="guide">
+    <div class="guide-hd">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Cómo actualizar la app
+    </div>
+    <ol>
+      <li>Abre <code>data.js</code> en VS Code o cualquier editor</li>
+      <li>Busca <code>const SALES={</code> — selecciona todo hasta el <code>};</code> que lo cierra (son varias líneas)</li>
+      <li>Pega el bloque copiado (reemplaza todo ese bloque)</li>
+      <li>Guarda → sube a GitHub → la app se actualiza automáticamente</li>
+    </ol>
+  </div>
+</div>
+</div>
+
+<script>
+// Row indices (0-based, parser omite filas vacías):
+// 0=header  1=Venta Bruta  2=-Descuentos  3=Venta Neta  4=-IVA  5=VN s/IVA
+// 6=Costo  7=Margen  8=%Margen  9=Efectivo  10=TC  11=TD  12=Convenio
+// 13=PedidosYa  14=PY Vouchers  15=PY Cash  16=Rappi  17=UberEats
+// 18=Ticket Rest  19=Cheque Rest  20=Transferencia  21=Propinas  22=Despacho
+var R={vb:1,vn:3,siva:5,costo:6,margen:7,py:13,pyv:14,pyc:15,uber:17,transf:20};
+var MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var fileText='', parsed=[];
+
+// Drag & drop
+var dropEl=document.getElementById('drop');
+dropEl.addEventListener('dragover',function(e){e.preventDefault();dropEl.classList.add('over');});
+dropEl.addEventListener('dragleave',function(){dropEl.classList.remove('over');});
+dropEl.addEventListener('drop',function(e){e.preventDefault();dropEl.classList.remove('over');if(e.dataTransfer.files[0])load(e.dataTransfer.files[0]);});
+document.getElementById('fi').addEventListener('change',function(e){if(e.target.files[0])load(e.target.files[0]);});
+
+function load(f){
+  var fi=document.getElementById('finfo');
+  fi.style.display='block'; fi.textContent='Leyendo '+f.name+'…';
+  var r=new FileReader();
+  r.onload=function(e){
+    fileText=e.target.result;
+    fi.innerHTML='<span style="color:#00e5a0">✓</span> <strong>'+f.name+'</strong> · '+Math.round(f.size/1024)+'KB cargado';
+    on('c2','n2'); document.getElementById('btngo').disabled=false;
+  };
+  r.readAsText(f,'utf-8');
+}
+
+function on(cid,nid){
+  document.getElementById(cid).classList.remove('off');
+  if(nid){var n=document.getElementById(nid);n.classList.add('on');}
+}
+
+function pn(s){
+  var v=parseFloat(String(s).replace(/\$/g,'').replace(/%/g,'').replace(/\./g,'').replace(',','.'));
+  return isNaN(v)?0:v;
+}
+
+function parseTable(html){
+  var doc=new DOMParser().parseFromString(html,'text/html');
+  var rows=[];
+  doc.querySelectorAll('tr').forEach(function(tr){
+    var cells=[];
+    tr.querySelectorAll('td,th').forEach(function(td){cells.push(td.textContent.trim());});
+    if(cells.some(function(c){return c.trim();})) rows.push(cells);
+  });
+  return rows;
+}
+
+function lg(msg,cls){
+  var el=document.getElementById('logel');
+  var s=document.createElement('span');
+  s.className=cls||'dim'; s.textContent=msg+'\n'; el.appendChild(s);
+  el.scrollTop=el.scrollHeight;
+}
+
+function run(){
+  document.getElementById('logel').innerHTML='';
+  document.getElementById('thead').innerHTML='';
+  document.getElementById('tbody').innerHTML='';
+  on('c3','n3');
+
+  var sy=parseInt(document.getElementById('sy').value);
+  var sm2=parseInt(document.getElementById('sm').value);
+
+  lg('Parseando tabla HTML…','info');
+  var rows=parseTable(fileText);
+  if(!rows.length){lg('❌ Sin filas encontradas — verifica el archivo','err');return;}
+  lg('Filas: '+rows.length+' · Columnas: '+(rows[0]?rows[0].length:0),'info');
+
+  // Verify structure
+  var checks=[[R.vn,'Venta Neta'],[R.py,'PedidosYa'],[R.uber,'UberEats'],[R.transf,'Transferencia']];
+  var structOk=true;
+  checks.forEach(function(c){
+    var actual=rows[c[0]]?rows[c[0]][0]:'(vacío)';
+    if(!actual.toLowerCase().includes(c[1].toLowerCase())){
+      lg('⚠ Fila '+c[0]+': esperaba "'+c[1]+'" pero encontró "'+actual+'"','warn');
+      structOk=false;
+    }
+  });
+  if(structOk) lg('Estructura verificada ✓','ok');
+  else lg('La app intentará continuar de todas formas','warn');
+
+  // Detect month boundaries via day-number reset
+  var hdr=rows[0];
+  var dayCols=[], prev=0;
+  for(var c=1;c<hdr.length;c++){
+    var m=/\w+\s+(\d+)$/.exec(hdr[c].trim());
+    if(m) dayCols.push({c:c,d:parseInt(m[1])});
+  }
+  var mStarts=[dayCols[0].c];
+  dayCols.forEach(function(x){if(x.d<prev)mStarts.push(x.c); prev=x.d;});
+
+  // Find "Total" column (last labeled one)
+  var totCol=-1;
+  for(var i=hdr.length-1;i>=1;i--){if(hdr[i].trim()==='Total'){totCol=i;break;}}
+  if(totCol<0) totCol=dayCols[dayCols.length-1].c+1;
+
+  lg('Meses: '+mStarts.length+' · Columna Total: '+totCol,'info');
+  if(mStarts.length<1){lg('❌ No se detectaron meses','err');return;}
+
+  // Build monthly
+  parsed=[];
+  mStarts.forEach(function(cs,mi){
+    var ce=mi+1<mStarts.length?mStarts[mi+1]:totCol;
+    var days=ce-cs;
+    var absM=sm2+mi;
+    var yr=sy+Math.floor(absM/12);
+    var mo=absM%12;
+    var name=MN[mo]+' '+yr;
+
+    function S(ri){
+      var t=0;
+      for(var col=cs;col<ce;col++) if(rows[ri]&&col<rows[ri].length) t+=pn(rows[ri][col]);
+      return Math.round(t);
+    }
+
+    var vn=S(R.vn), siva=S(R.siva), co=S(R.costo), mg=S(R.margen);
+    var py=S(R.py)+S(R.pyv)+S(R.pyc);
+    var ub=S(R.uber), tr=S(R.transf);
+    var pct=vn>0?Math.round(mg/vn*1000)/10:0;
+
+    parsed.push({
+      month:name, venta_bruta:S(R.vb), venta_neta:vn, venta_sin_iva:siva,
+      costo:co, margen_pct:pct, days_active:days,
+      avg_daily:days?Math.round(vn/days):0, avg_daily_sin_iva:days?Math.round(siva/days):0,
+      delivery_ya:py, delivery_uber:ub, delivery_transferencia:tr
+    });
+
+    lg(name+':  VN $'+(vn/1e6).toFixed(1)+'M  PY $'+(py/1e6).toFixed(2)+'M  Uber $'+(ub/1e6).toFixed(2)+'M  Transf $'+(tr/1e6).toFixed(2)+'M  ('+days+'d)','ok');
+  });
+
+  var tot=parsed.reduce(function(s,m){return s+m.venta_neta;},0);
+  lg('──────────────────────────────────────────','dim');
+  lg('Total VN: $'+(tot/1e6).toFixed(1)+'M  en '+parsed.length+' meses','info');
+
+  buildTable(); buildOutput(); on('c4','n4');
+}
+
+function f(n){return '$'+(n/1e6).toFixed(2)+'M';}
+
+function buildTable(){
+  document.getElementById('thead').innerHTML='<tr><th>Mes</th><th>Venta Neta</th><th>Sin IVA</th><th>Costo</th><th>Margen%</th><th style="color:#ff3fa4">PedidosYa</th><th style="color:#a78bfa">Uber Eats</th><th style="color:#00e5a0">Del. Interno</th><th>Días</th></tr>';
+  var tot={vn:0,siva:0,co:0,py:0,ub:0,tr:0,d:0};
+  var rows=parsed.map(function(m){
+    tot.vn+=m.venta_neta;tot.siva+=m.venta_sin_iva;tot.co+=m.costo;
+    tot.py+=m.delivery_ya;tot.ub+=m.delivery_uber;tot.tr+=m.delivery_transferencia;tot.d+=m.days_active;
+    return '<tr><td>'+m.month+'</td><td class="hi">'+f(m.venta_neta)+'</td><td>'+f(m.venta_sin_iva)+'</td><td>'+f(m.costo)+'</td><td>'+m.margen_pct+'%</td><td style="color:#ff3fa4">'+f(m.delivery_ya)+'</td><td style="color:#a78bfa">'+f(m.delivery_uber)+'</td><td style="color:#00e5a0">'+f(m.delivery_transferencia)+'</td><td style="color:var(--sub)">'+m.days_active+'</td></tr>';
+  });
+  rows.push('<tr class="total"><td>TOTAL</td><td class="hi">'+f(tot.vn)+'</td><td>'+f(tot.siva)+'</td><td>'+f(tot.co)+'</td><td>—</td><td style="color:#ff3fa4">'+f(tot.py)+'</td><td style="color:#a78bfa">'+f(tot.ub)+'</td><td style="color:#00e5a0">'+f(tot.tr)+'</td><td style="color:var(--sub)">'+tot.d+'</td></tr>');
+  document.getElementById('tbody').innerHTML=rows.join('');
+}
+
+function buildOutput(){
+  document.getElementById('outel').textContent='const SALES='+JSON.stringify({monthly:parsed,daily:[]},null,2)+';';
+}
+
+function doCopy(){
+  var t=document.getElementById('outel').textContent;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(ok).catch(function(){
+    var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();
+  });
+  function ok(){
+    document.getElementById('clbl').textContent='¡Copiado!';
+    setTimeout(function(){document.getElementById('clbl').textContent='Copiar bloque SALES';},2200);
+  }
+}
+
+function doDownload(){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([document.getElementById('outel').textContent],{type:'text/javascript'}));
+  a.download='SALES_block.js'; a.click();
+}
+</script>
+</body>
+</html>
