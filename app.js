@@ -1018,7 +1018,6 @@ function initDelivery(){
   var ya_toteat=SM.reduce(function(s,m){return s+(m.delivery_ya||0);},0);
   var uber_toteat=SM.reduce(function(s,m){return s+(m.delivery_uber||0);},0);
   var local=SM.reduce(function(s,m){return s+Math.max(0,m.venta_neta-(m.delivery_ya||0)-(m.delivery_uber||0)-(m.delivery_transferencia||0));},0);
-  var plat_total=ya_toteat+uber_toteat;
 
   // KPIs
   var kpis;
@@ -1045,6 +1044,15 @@ function initDelivery(){
       {l:'Local presencial',v:fmtM(local),f:'Efectivo + tarjetas'},
       {l:'Total venta neta',v:fmtM(SM.reduce(function(s,m){return s+m.venta_neta;},0)),f:sv==='all'?'Todo el per\u00EDodo':'',m:1}
     ];
+  } else if(delSrc==='uber'){
+    var vtaTotal=SM.reduce(function(s,m){return s+m.venta_neta;},0);
+    var pctUber=vtaTotal>0?(uber_toteat/vtaTotal*100):0;
+    kpis=[
+      {l:'Venta Uber Eats',v:fmtM(uber_toteat),f:'Registrado en Toteat (POS)',m:1},
+      {l:'Participación',v:pctUber.toFixed(1)+'%',f:'Del total de ventas'},
+      {l:'Local presencial',v:fmtM(local),f:'Efectivo + tarjetas'},
+      {l:'Total venta neta',v:fmtM(vtaTotal),f:sv==='all'?'Todo el per\u00EDodo':'',m:1}
+    ];
   } else {
     kpis=[
       {l:'PedidosYa',v:fmtM(ya_toteat),f:'Registrado en Toteat'},
@@ -1059,24 +1067,27 @@ function initDelivery(){
       +'<div class="kpi-val">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
   }).join('');
 
+  // Setup de colores: Ya = rosado, Interno = morado, Uber = celeste
+  var delColor=delSrc==='ya'?'#ff3fa4':delSrc==='intern'?'#a78bfa':delSrc==='uber'?'#00d4ff':'#00e5a0';
+
   // ── Chart 1: tendencia mensual ──
   var ch=$('ch-del-mes');
   if(ch){
     if(delSrc==='ya'){
       if(!hasDM&&sv!=='all'){
-        lineChart('ch-del-mes',SM.map(function(m){return{l:m.month.split(' ')[0].slice(0,3),v:m.delivery_ya||0};}), '#ff3fa4',fmtM);
+        lineChart('ch-del-mes',SM.map(function(m){return{l:m.month.split(' ')[0].slice(0,3),v:m.delivery_ya||0};}), delColor,fmtM);
       } else {
         lineChart('ch-del-mes',(sv==='all'?DELIVERY_MONTHLY:DM).map(function(d){
           return{l:mNames[parseInt(d.mes.split('-')[1])-1].slice(0,3)+' '+d.mes.split('-')[0].slice(2),v:d.ventas};
-        }),'#ff3fa4',fmtM);
+        }),delColor,fmtM);
       }
     } else {
       var smData=SM.map(function(m){
-        var v=delSrc==='intern'?(m.delivery_transferencia||0):((m.delivery_ya||0)+(m.delivery_uber||0)+(m.delivery_transferencia||0));
+        var v=delSrc==='intern'?(m.delivery_transferencia||0):delSrc==='uber'?(m.delivery_uber||0):((m.delivery_ya||0)+(m.delivery_uber||0)+(m.delivery_transferencia||0));
         return{l:m.month.split(' ')[0].slice(0,3),v:v};
       });
       if(smData.length===1) smData=[{l:'',v:0},smData[0],{l:'',v:0}];
-      lineChart('ch-del-mes',smData,delSrc==='intern'?'#a78bfa':'#00e5a0',fmtM);
+      lineChart('ch-del-mes',smData,delColor,fmtM);
     }
   }
 
@@ -1084,70 +1095,24 @@ function initDelivery(){
   var ch2=$('ch-del-t');
   var ch2hd=$('del-ch2-title');
   if(ch2){
-    var delColor=delSrc==='ya'?'#ff3fa4':delSrc==='intern'?'#a78bfa':'#00e5a0';
-    var getDelVal=function(m){ return delSrc==='intern'?(m.delivery_transferencia||0):delSrc==='ya'?(m.delivery_ya||0):m.venta_neta; };
+    var getDelVal=function(m){ return delSrc==='intern'?(m.delivery_transferencia||0):delSrc==='ya'?(m.delivery_ya||0):delSrc==='uber'?(m.delivery_uber||0):m.venta_neta; };
     if(sv==='all'){
-      // Compare 2025 vs 2026 month by month
-      if(ch2hd) ch2hd.textContent='Comparación 2025 vs 2026';
-      var byYr={};
-      SM_all.forEach(function(m){
-        var pts=m.month.split(' '); var mn=pts[0].slice(0,3); var yr=pts[1];
-        if(!byYr[yr]) byYr[yr]={};
-        byYr[yr][mn]=(byYr[yr][mn]||0)+getDelVal(m);
-      });
-      var mOrder=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-      var has25=byYr['2025']||{}, has26=byYr['2026']||{};
-      var cmp=mOrder.filter(function(mn){return has25[mn]||has26[mn];}).map(function(mn){
-        return{l:mn,v:has25[mn]||0,v2:has26[mn]||0};
-      });
-      // Show both years as grouped bars
-      if(cmp.length>0){
-        var maxC=Math.max.apply(null,cmp.map(function(d){return Math.max(d.v,d.v2);}));
-        var n2=cmp.length, bW2=16, gap2=4, grpGap=10, pL2=6, pR2=6, pT2=26, pB2=36;
-        var W2=pL2+(bW2*2+gap2+grpGap)*n2-grpGap+pR2, H2=100, yR2=H2-pT2-pB2;
-        var uid2='cmp'+Math.random().toString(36).slice(2,6);
-        var svgBars=cmp.map(function(d,i){
-          var gx=pL2+i*(bW2*2+gap2+grpGap);
-          var bh25=maxC>0?Math.max(2,Math.round(d.v/maxC*yR2)):2;
-          var bh26=maxC>0?Math.max(2,Math.round(d.v2/maxC*yR2)):2;
-          var y25=pT2+yR2-bh25, y26=pT2+yR2-bh26;
-          var ttId=uid2+'_'+i;
-          var val25=fmtM(d.v).replace('$',''), val26=d.v2?fmtM(d.v2).replace('$',''):'—';
-          return '<g>'
-            +'<rect x="'+gx+'" y="'+y25+'" width="'+bW2+'" height="'+bh25+'" rx="2" fill="'+delColor+'" opacity=".45"'
-            +' onmouseover="document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'visible\')" onmouseout="document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'hidden\')" style="cursor:pointer"/>'
-            +'<rect x="'+(gx+bW2+gap2)+'" y="'+y26+'" width="'+bW2+'" height="'+bh26+'" rx="2" fill="'+delColor+'"'
-            +' onmouseover="document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'visible\')" onmouseout="document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'hidden\')" style="cursor:pointer"/>'
-            +'<text x="'+(gx+bW2)+'" y="'+(H2-pB2+14)+'" text-anchor="middle" font-size="8" fill="var(--sub)">'+d.l+'</text>'
-            +'<g id="'+ttId+'" visibility="hidden" pointer-events="none">'
-            +'<rect x="'+(Math.min(gx,W2-90))+'" y="'+(pT2-20)+'" width="86" height="32" rx="4" fill="#16161e" stroke="'+delColor+'" stroke-width=".7" opacity=".97"/>'
-            +'<text x="'+(Math.min(gx,W2-90)+43)+'" y="'+(pT2-9)+'" text-anchor="middle" font-size="8.5" fill="var(--sub)">'+d.l+': 2025 vs 2026</text>'
-            +'<text x="'+(Math.min(gx,W2-90)+43)+'" y="'+(pT2+2)+'" text-anchor="middle" font-size="8" fill="'+delColor+'" font-family="var(--mono)">'+val25+' / '+val26+'</text>'
-            +'</g>'
-            +'</g>';
-        }).join('');
-        // Legend
-        var lgd='<div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--sub)">'
-          +'<span><span style="display:inline-block;width:10px;height:10px;background:'+delColor+';opacity:.45;border-radius:2px;margin-right:4px"></span>2025</span>'
-          +'<span><span style="display:inline-block;width:10px;height:10px;background:'+delColor+';border-radius:2px;margin-right:4px"></span>2026</span>'
-          +'</div>';
-        ch2.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W2+' '+H2+'" style="min-width:'+W2+'px;width:100%;height:'+H2+'px;display:block">'+svgBars+'</svg></div>'+lgd;
-      }
+      if(ch2hd) ch2hd.textContent='Venta mensual';
+      lineChart('ch-del-t', SM.map(function(m){return{l:m.month.split(' ')[0].slice(0,3),v:getDelVal(m)};}), delColor, fmtM);
     } else {
-      // Single month selected: compare same month last year
       var p2x=sv.split('-'), mIdx2=parseInt(p2x[1])-1, yrX=parseInt(p2x[0]);
       var prevMes=(yrX-1)+'-'+(mIdx2+1<10?'0':'')+(mIdx2+1);
       var prevSM2=SM_all.filter(function(m){return m.month===mNames[mIdx2]+' '+(yrX-1);});
-      var curV=delSrc==='ya'?(hasDM?total_ya_vta:ya_toteat):delSrc==='intern'?intern_transf:SM.reduce(function(s,m){return s+m.venta_neta;},0);
+      var curV=delSrc==='ya'?(hasDM?total_ya_vta:ya_toteat):delSrc==='intern'?intern_transf:delSrc==='uber'?uber_toteat:SM.reduce(function(s,m){return s+m.venta_neta;},0);
       var prevV2=prevSM2.length?getDelVal(prevSM2[0]):0;
       if(ch2hd) ch2hd.textContent=mNames[mIdx2]+' '+yrX+' vs '+mNames[mIdx2]+' '+(yrX-1);
-      if(prevV2>0){
-        verticalBarChart('ch-del-t',[
+      if(prevV2>0 || curV>0){
+        barChart('ch-del-t',[
           {l:mNames[mIdx2].slice(0,3)+' '+yrX,v:curV},
           {l:mNames[mIdx2].slice(0,3)+' '+(yrX-1),v:prevV2}
-        ],[delColor,delColor+'55'],fmtM);
+        ],[delColor,'rgba(255,255,255,.1)'],fmtM, 140);
       } else {
-        ch2.innerHTML='<div class="empty" style="padding:20px 0;font-size:12px">Sin datos del a\u00f1o anterior</div>';
+        ch2.innerHTML='<div class="empty" style="padding:20px 0;font-size:12px">Sin datos</div>';
       }
     }
   }
@@ -1163,21 +1128,24 @@ function initDelivery(){
       var dayVals=dayRecs.map(function(d){
         var v=delSrc==='intern'?(d.delivery_transferencia||d.venta_neta*0.09)
               :delSrc==='ya'?(d.delivery_ya||d.venta_neta*0.20)
+              :delSrc==='uber'?(d.delivery_uber||d.venta_neta*0.06)
               :d.venta_neta;
-        return{l:d.date.replace(/\w+\s/,''),v:Math.round(v)||0};
+        return{l:d.date.replace(/[^\d]/g,''),v:Math.round(v)||0};
       }).filter(function(d){return d.v>0;});
-      var dColor=delSrc==='ya'?'#ff3fa4':delSrc==='intern'?'#a78bfa':'#00e5a0';
-      if(dayVals.length) verticalBarChart('ch-del-dias',dayVals,dColor,fmtM);
+      
+      if(dayVals.length) lineChart('ch-del-dias',dayVals,delColor,fmtM);
     } else {
       if(chD) chD.innerHTML='<div class="empty" style="padding:20px 0;font-size:12px;color:var(--sub)">Sin datos diarios</div>';
     }
   }
 
-  // ── Heatmap ──
+  // ── Heatmap (Solo muestra en Todos o Pedidos Ya) ──
   var hm=$('del-heatmap');
   if(hm){
     var totalPedPY=HEATMAP.reduce(function(s,h){return s+h.pedidos;},0);
-    if(!totalPedPY){hm.innerHTML='<div class="empty">Sin datos de heatmap</div>';}
+    if(!totalPedPY || delSrc==='uber' || delSrc==='intern'){
+      hm.innerHTML='<div class="empty">Mapa de calor exclusivo de PedidosYa</div>';
+    }
     else{
       var maxPed=Math.max.apply(null,HEATMAP.map(function(h){return h.pedidos;}));
       hm.innerHTML='<div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em">Pedidos PedidosYa por hora (Ago\u2013Ene)</div>'
@@ -1193,18 +1161,21 @@ function initDelivery(){
     }
   }
 
-  // ── Top platos ──
+  // ── Top platos (Ocultos si estás mirando específicamente otra plataforma, enfocados en PedidosYa) ──
   var tp=$('del-top-platos');
   if(tp){
-    var src2=sv==='all'?DISHES_6M:DISHES_RECENT;
-    var maxQ=src2.length?src2[0].qty:1;
-    tp.innerHTML='<div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase">'+(sv==='all'?'Top platos Ago25\u2013Ene26':'Top platos recientes')+'</div>'
-      +src2.slice(0,15).filter(function(d){return d.qty>0;}).map(function(d){
-        return mkBar(d.name,d.qty,maxQ,'#ff3fa4',function(v){return v+' un';},160);
-      }).join('');
+    if (delSrc === 'uber' || delSrc === 'intern') {
+        tp.innerHTML='<div class="empty">Datos de platos exclusivos de PedidosYa</div>';
+    } else {
+        var src2=sv==='all'?DISHES_6M:DISHES_RECENT;
+        var maxQ=src2.length?src2[0].qty:1;
+        tp.innerHTML='<div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase">'+(sv==='all'?'Top platos Ago25\u2013Ene26':'Top platos recientes')+'</div>'
+          +src2.slice(0,10).filter(function(d){return d.qty>0;}).map(function(d){
+            return mkBar(d.name,d.qty,maxQ,'#ff3fa4',function(v){return v+' un';},160);
+          }).join('');
+    }
   }
 }
-
 // ════ GASTOS FIJOS ════
 var GCAT_LABELS={'arriendo':'&#127968; Arriendo','servicios':'&#9889; Servicios','gas':'&#128293; Gas','personal':'&#128104;&#8205;&#127859; Personal','marketing':'&#128227; Marketing','mantencion':'&#128296; Mantención','software':'&#128187; Software','insumos':'&#127859; Insumos','otros':'&#128230; Otros'};
 var gTab='resumen';
