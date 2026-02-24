@@ -1651,51 +1651,27 @@ function exportSection(){
 function exportPrint(sec,mo){
   var M=SALES.monthly;
   var sm=mo==='all'?M:M.filter(function(m){return m.month===mo;});
-  var rows=sm.map(function(m){
-    return '<tr><td>'+m.month+'</td><td class="r">'+fmtM(m.venta_neta)+'</td>'
-      +'<td class="r">'+fmtM(m.venta_neta/1.19)+'</td>'
-      +'<td class="r">'+m.margen_pct.toFixed(1)+'%</td>'
-      +'<td class="r">'+m.days_active+'</td>'
-      +'<td class="r">'+fmtM(m.delivery_ya||0)+'</td>'
-      +'<td class="r">'+fmtM(m.delivery_transferencia||0)+'</td>'
-      +'</tr>';
-  }).join('');
-  var secLabels={ventas:'Ventas',gastos:'Gastos',delivery:'Delivery',analisis:'Análisis'};
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
-    +'<title>Street Flags — '+( secLabels[sec]||sec)+' '+(mo==='all'?'2025-2026':mo)+'</title>'
-    +'<style>body{font-family:system-ui,sans-serif;color:#111;padding:30px;max-width:900px;margin:0 auto}'
-    +'h1{font-size:20px;margin-bottom:4px}h2{font-size:14px;color:#666;font-weight:400;margin-top:0}'
-    +'table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px}'
-    +'th{background:#111;color:#fff;padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase}'
-    +'td{padding:8px 12px;border-bottom:1px solid #eee}.r{text-align:right}'
-    +'tr:nth-child(even){background:#f9f9f9}'
-    +'tfoot td{font-weight:700;border-top:2px solid #111;background:#f5f5f5}'
-    +'@media print{body{padding:0}}</style></head><body>'
-    +'<h1>&#9873; Street Flags — '+(secLabels[sec]||sec)+'</h1>'
-    +'<h2>'+(mo==='all'?'Enero 2025 – Febrero 2026':mo)+' &nbsp;|&nbsp; Generado '+new Date().toLocaleDateString('es-CL')+'</h2>';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Street Flags — Export</title>'
+    +'<style>body{font-family:system-ui,sans-serif;color:#111;padding:30px;max-width:900px;margin:0 auto} table{width:100%;border-collapse:collapse;margin-top:20px;font-size:12px} th{background:#111;color:#fff;padding:8px;text-align:left} td{padding:8px;border-bottom:1px solid #ddd} .r{text-align:right} @media print{body{padding:0}}</style></head><body>'
+    +'<h1>Street Flags Reporte</h1><h2>Fecha: '+new Date().toLocaleDateString('es-CL')+'</h2>';
 
   if(sec==='ventas'||sec==='all'){
     var tvn=sm.reduce(function(s,m){return s+m.venta_neta;},0);
-    html+='<table><thead><tr><th>Mes</th><th>Venta neta</th><th>Sin IVA</th><th>Margen</th><th>Días</th><th>PedidosYa</th><th>Del. interno</th></tr></thead>'
-      +'<tbody>'+rows+'</tbody>'
-      +'<tfoot><tr><td>TOTAL</td><td class="r">'+fmtM(tvn)+'</td><td class="r">'+fmtM(tvn/1.19)+'</td><td class="r">—</td><td class="r">—</td>'
-      +'<td class="r">'+fmtM(sm.reduce(function(s,m){return s+(m.delivery_ya||0);},0))+'</td>'
-      +'<td class="r">'+fmtM(sm.reduce(function(s,m){return s+(m.delivery_transferencia||0);},0))+'</td>'
-      +'</tr></tfoot></table>';
+    html+='<h3>Ventas</h3><table><thead><tr><th>Mes</th><th>Venta neta</th><th>Sin IVA</th><th>PedidosYa</th><th>Del. interno</th></tr></thead><tbody>'
+      +sm.map(function(m){return '<tr><td>'+m.month+'</td><td class="r">'+fmtM(m.venta_neta)+'</td><td class="r">'+fmtM(m.venta_neta/1.19)+'</td><td class="r">'+fmtM(m.delivery_ya||0)+'</td><td class="r">'+fmtM(m.delivery_transferencia||0)+'</td></tr>';}).join('')
+      +'<tr style="font-weight:700;background:#f5f5f5"><td>TOTAL</td><td class="r">'+fmtM(tvn)+'</td><td class="r">'+fmtM(tvn/1.19)+'</td><td class="r">—</td><td class="r">—</td></tr></tbody></table>';
   }
   if(sec==='gastos'||sec==='all'){
-    html+='<h2 style="margin-top:30px">Gastos fijos</h2>'
-      +'<table><thead><tr><th>Gasto</th><th>Categoría</th><th>Proveedor</th><th>Frecuencia</th><th>Monto/mes</th><th>Monto/año</th></tr></thead><tbody>'
-      +GASTOS.map(function(g){
-        return '<tr><td>'+g.name+'</td><td>'+(GCAT_LABELS[g.cat]||g.cat).replace(/&#\d+;/g,'')+'</td>'
-          +'<td>'+(g.prov||'')+'</td><td>'+g.freq+'</td>'
-          +'<td class="r">'+fmt(Math.round(toMes(g)))+'</td>'
-          +'<td class="r">'+fmt(Math.round(toAno(g)))+'</td></tr>';
-      }).join('')
-      +'<tr style="font-weight:700"><td colspan="4">TOTAL</td>'
-      +'<td class="r">'+fmt(Math.round(GASTOS.reduce(function(s,g){return s+toMes(g);},0)))+'</td>'
-      +'<td class="r">'+fmt(Math.round(GASTOS.reduce(function(s,g){return s+toAno(g);},0)))+'</td></tr>'
-      +'</tbody></table>';
+    html+='<h3>Gastos Fijos</h3><table><thead><tr><th>Gasto</th><th>Categoría</th><th>Frecuencia</th><th>Monto/mes</th></tr></thead><tbody>'
+      +GASTOS.map(function(g){return '<tr><td>'+g.name+'</td><td>'+g.cat+'</td><td>'+g.freq+'</td><td class="r">'+fmt(Math.round(toMes(g)))+'</td></tr>';}).join('')+'</tbody></table>';
+  }
+  if(sec==='inventario'||sec==='all'){
+    html+='<h3>Inventario</h3><table><thead><tr><th>Ingrediente</th><th>Categoría</th><th>Costo Unit.</th><th>Uso/Sem</th></tr></thead><tbody>'
+      +INGR.map(function(i){return '<tr><td>'+i.name+'</td><td>'+i.category+'</td><td class="r">'+fmt(i.cost)+'</td><td class="r">'+i.weekly_avg+' '+i.unit+'</td></tr>';}).join('')+'</tbody></table>';
+  }
+  if(sec==='recetas'||sec==='all'){
+    html+='<h3>Recetas</h3><table><thead><tr><th>Receta</th><th>Categoría</th><th>Costo Total</th></tr></thead><tbody>'
+      +RECIPES.map(function(r){return '<tr><td>'+r.name+'</td><td>'+r.cat+'</td><td class="r">'+fmt(r.cost)+'</td></tr>';}).join('')+'</tbody></table>';
   }
   html+='</body></html>';
   var w=window.open('','_blank');
@@ -1706,24 +1682,40 @@ function exportPrint(sec,mo){
 function exportExcel(sec,mo){
   var M=SALES.monthly;
   var sm=mo==='all'?M:M.filter(function(m){return m.month===mo;});
-  // Build CSV
-  var rows=[['Mes','Venta neta','Sin IVA','Margen %','Días activos','PedidosYa','Del. interno (transf)','Uber Eats','Local']];
-  sm.forEach(function(m){
-    var dy=m.delivery_ya||0, du=m.delivery_uber||0, dt=m.delivery_transferencia||0;
-    rows.push([m.month,m.venta_neta,Math.round(m.venta_neta/1.19),m.margen_pct,m.days_active,dy,dt,dr,du,Math.max(0,m.venta_neta-dy-dr-du-dt)]);
-  });
-  if(sec==='gastos'||sec==='all'){
-    rows.push([]);
-    rows.push(['GASTOS FIJOS','Categoría','Proveedor','Frecuencia','Monto/mes','Monto/año']);
-    GASTOS.forEach(function(g){
-      rows.push([g.name,g.cat,g.prov||'',g.freq,Math.round(toMes(g)),Math.round(toAno(g))]);
+  var rows=[];
+  
+  if(sec==='ventas'||sec==='all'){
+    rows.push(['VENTAS','','','','','','','','']);
+    rows.push(['Mes','Venta neta','Sin IVA','Margen %','Días activos','PedidosYa','Uber Eats','Del. interno','Local']);
+    sm.forEach(function(m){
+      var dy=m.delivery_ya||0, du=m.delivery_uber||0, dt=m.delivery_transferencia||0;
+      rows.push([m.month, m.venta_neta, Math.round(m.venta_neta/1.19), m.margen_pct, m.days_active, dy, du, dt, Math.max(0,m.venta_neta-dy-du-dt)]);
     });
+    rows.push([]);
   }
+  if(sec==='gastos'||sec==='all'){
+    rows.push(['GASTOS FIJOS','','','','','']);
+    rows.push(['Nombre','Categoría','Proveedor','Frecuencia','Monto/mes','Monto/año']);
+    GASTOS.forEach(function(g){ rows.push([g.name, g.cat, g.prov||'', g.freq, Math.round(toMes(g)), Math.round(toAno(g))]); });
+    rows.push([]);
+  }
+  if(sec==='inventario'||sec==='all'){
+    rows.push(['INVENTARIO','','','','']);
+    rows.push(['Código','Nombre','Categoría','Costo','Uso Semanal']);
+    INGR.forEach(function(i){ rows.push([i.code, i.name, i.category, i.cost, i.weekly_avg]); });
+    rows.push([]);
+  }
+  if(sec==='recetas'||sec==='all'){
+    rows.push(['RECETAS','','','']);
+    rows.push(['ID','Nombre','Categoría','Costo Insumos']);
+    RECIPES.forEach(function(r){ rows.push([r.id, r.name, r.cat, r.cost]); });
+  }
+
   var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
-  a.href=url; a.download='StreetFlags_'+(mo==='all'?'2025-2026':mo.replace(' ','_'))+'.csv';
+  a.href=url; a.download='StreetFlags_Export.csv';
   a.click(); URL.revokeObjectURL(url);
   cm('m-export');
 }
@@ -1788,91 +1780,96 @@ function lineChart(elId,dataArr,color,vFmt){
 function pieChart(elId,dataArr,title){
   var el=$(elId); if(!el||!dataArr.length) return;
   var tot=dataArr.reduce(function(s,d){return s+d.v;},0); if(!tot) return;
-  var cls=['#00d4ff','#ff3fa4','#00e5a0','#ffb020','#a78bfa','#ff6b6b','#4ecdc4','#f7b731'];
   var isCanal=(elId==='ch-vd-pie'||elId==='ch-ci');
-  var R=isCanal?100:62, iR=isCanal?52:32;
-  var W=R*2+20, H=R*2+20, cx=W/2, cy=H/2;
+  var R=isCanal?100:70, iR=isCanal?60:40; 
+  var W=R*2+40, H=R*2+40, cx=W/2, cy=H/2;
   var uid='pie'+Math.random().toString(36).slice(2,6);
+
+  // Colores degradados sutiles y elegantes
+  var pales = [
+    {id:'g1', c1:'#00d4ff', c2:'#0088cc'}, {id:'g2', c1:'#ff3fa4', c2:'#cc1a7a'},
+    {id:'g3', c1:'#00e5a0', c2:'#00a878'}, {id:'g4', c1:'#ffb020', c2:'#cc8800'},
+    {id:'g5', c1:'#a78bfa', c2:'#7c3aed'}, {id:'g6', c1:'#ff6b6b', c2:'#ee5253'}
+  ];
+
+  var defs='<defs>'+pales.map(function(p){
+    return '<linearGradient id="'+uid+'_'+p.id+'" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="'+p.c1+'" stop-opacity="0.95"/><stop offset="100%" stop-color="'+p.c2+'" stop-opacity="0.75"/></linearGradient>';
+  }).join('')+'</defs>';
+
   var ang=-Math.PI/2, slices=[];
-  dataArr.slice(0,8).forEach(function(d,i){
+  dataArr.slice(0,6).forEach(function(d,i){
     var sl=d.v/tot*Math.PI*2; if(sl<0.005) return;
-    slices.push({d:d,i:i,ang:ang,sl:sl}); ang+=sl;
+    slices.push({d:d, i:i, ang:ang, sl:sl, p:pales[i%pales.length]}); ang+=sl;
   });
+
   var paths=slices.map(function(s){
-    var d=s.d,i=s.i,a=s.ang,sl=s.sl,c=cls[i%cls.length];
-    var mid=a+sl/2;
-    var x1=cx+R*Math.cos(a),y1=cy+R*Math.sin(a);
-    var x2=cx+R*Math.cos(a+sl),y2=cy+R*Math.sin(a+sl);
-    var ix1=cx+iR*Math.cos(a+sl),iy1=cy+iR*Math.sin(a+sl);
-    var ix2=cx+iR*Math.cos(a),iy2=cy+iR*Math.sin(a);
-    var lg=sl>Math.PI?1:0;
-    var ttId=uid+'_tt'+i;
-    // translate outward on hover via CSS transform-origin at mid of slice
-    var tx=(cx+(R+iR)/2*Math.cos(mid)*0.08).toFixed(1);
-    var ty=(cy+(R+iR)/2*Math.sin(mid)*0.08).toFixed(1);
-    return '<g style="cursor:pointer;transform-origin:'+cx+'px '+cy+'px;transition:transform .15s"'
-      +' onmouseover="this.style.transform=\'scale(1.07)\';document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'visible\')"'
-      +' onmouseout="this.style.transform=\'scale(1)\';document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'hidden\')">'
+    var x1=cx+R*Math.cos(s.ang), y1=cy+R*Math.sin(s.ang);
+    var x2=cx+R*Math.cos(s.ang+s.sl), y2=cy+R*Math.sin(s.ang+s.sl);
+    var ix1=cx+iR*Math.cos(s.ang+s.sl), iy1=cy+iR*Math.sin(s.ang+s.sl);
+    var ix2=cx+iR*Math.cos(s.ang), iy2=cy+iR*Math.sin(s.ang);
+    var lg=s.sl>Math.PI?1:0;
+    var ttId=uid+'_tt'+s.i;
+    return '<g style="cursor:pointer;transition:transform .2s;transform-origin:'+cx+'px '+cy+'px"'
+      +' onmouseover="this.style.transform=\'scale(1.05)\';document.getElementById(\''+ttId+'\').style.opacity=\'1\'"'
+      +' onmouseout="this.style.transform=\'scale(1)\';document.getElementById(\''+ttId+'\').style.opacity=\'0\'">'
       +'<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+R+','+R+' 0 '+lg+',1 '+x2.toFixed(1)+','+y2.toFixed(1)+' L'+ix1.toFixed(1)+','+iy1.toFixed(1)+' A'+iR+','+iR+' 0 '+lg+',0 '+ix2.toFixed(1)+','+iy2.toFixed(1)+' Z"'
-      +' fill="'+c+'" stroke="var(--bg)" stroke-width="2.5"/>'
-      +'<g id="'+ttId+'" visibility="hidden" pointer-events="none">'
-      +'<rect x="'+(cx-52)+'" y="'+(cy+iR+4)+'" width="104" height="26" rx="5" fill="#16161e" stroke="'+c+'" stroke-width=".7" opacity=".97"/>'
-      +'<text x="'+cx+'" y="'+(cy+iR+17)+'" text-anchor="middle" font-size="9" fill="var(--sub)">'+d.l+'</text>'
-      +'<text x="'+cx+'" y="'+(cy+iR+27)+'" text-anchor="middle" font-size="8.5" fill="'+c+'" font-family="var(--mono)" font-weight="700">'+(d.v/tot*100).toFixed(1)+'% · '+fmtM(d.v)+'</text>'
-      +'</g>'
-      +'</g>';
+      +' fill="url(#'+uid+'_'+s.p.id+')" stroke="var(--bg)" stroke-width="2.5"/>'
+      +'<g id="'+ttId+'" style="opacity:0;transition:opacity .2s;pointer-events:none">'
+      +'<rect x="'+(cx-60)+'" y="'+(cy+R+10)+'" width="120" height="30" rx="6" fill="var(--s1)" stroke="'+s.p.c1+'" stroke-width="1" style="box-shadow:0 4px 12px rgba(0,0,0,.5)"/>'
+      +'<text x="'+cx+'" y="'+(cy+R+30)+'" text-anchor="middle" font-size="12" fill="'+s.p.c1+'" font-weight="700">'+s.d.l+' · '+(s.d.v/tot*100).toFixed(1)+'%</text>'
+      +'</g></g>';
   }).join('');
-  // Center label
-  var top=dataArr[0], c0=cls[0];
-  var ctr='<text x="'+cx+'" y="'+(cy-7)+'" text-anchor="middle" font-size="9.5" fill="var(--sub)">'+top.l+'</text>'
-    +'<text x="'+cx+'" y="'+(cy+12)+'" text-anchor="middle" font-size="'+(isCanal?'18':'13')+'" font-weight="800" fill="'+c0+'" font-family="var(--mono)">'+(top.v/tot*100).toFixed(0)+'%</text>'
-    +'<text x="'+cx+'" y="'+(cy+27)+'" text-anchor="middle" font-size="9.5" fill="var(--sub)">'+fmtM(top.v)+'</text>';
-  // Legend
-  var leg=dataArr.slice(0,8).map(function(d,i){
-    var pct=(d.v/tot*100).toFixed(1), c=cls[i%cls.length];
-    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">'
-      +'<span style="width:8px;height:8px;border-radius:2px;background:'+c+';flex-shrink:0;box-shadow:0 0 5px '+c+'70"></span>'
-      +'<span style="font-size:11px;color:var(--sub);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+d.l+'</span>'
-      +'<span style="font-size:11px;font-family:var(--mono);color:var(--t);font-weight:700">'+pct+'%</span>'
+
+  var top=dataArr[0], topC=pales[0].c1;
+  var ctr='<text x="'+cx+'" y="'+(cy-12)+'" text-anchor="middle" font-size="12" fill="var(--sub)">'+top.l.split(' ')[0]+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size="'+(isCanal?'26':'20')+'" font-weight="800" fill="'+topC+'" font-family="var(--mono)">'+(top.v/tot*100).toFixed(0)+'%</text>';
+
+  var leg=slices.map(function(s){
+    var pct=(s.d.v/tot*100).toFixed(1);
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03)">'
+      +'<div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg, '+s.p.c1+', '+s.p.c2+');flex-shrink:0"></div>'
+      +'<span style="font-size:13px;color:var(--t);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.d.l+'</span>'
+      +'<span style="font-size:13px;font-family:var(--mono);color:var(--sub);font-weight:700">'+pct+'%</span>'
       +'</div>';
   }).join('');
-  el.innerHTML='<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:4px 0">'
-    +'<svg viewBox="0 0 '+W+' '+H+'" style="width:'+W+'px;height:'+H+'px;flex-shrink:0;overflow:visible;display:block">'+paths+ctr+'</svg>'
-    +'<div style="flex:1;min-width:100px">'+leg+'</div></div>';
+
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:35px;flex-wrap:wrap;padding:10px 0">'
+    +'<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="overflow:visible;display:block">'+defs+paths+ctr+'</svg>'
+    +'<div style="flex:1;min-width:180px;max-width:280px">'+leg+'</div></div>';
 }
 
 function verticalBarChart(elId,dataArr,color,vFmt){
   var el=$(elId);if(!el||!dataArr.length)return;
-  var maxV=Math.max.apply(null,dataArr.map(function(d){return d.v;}));if(!maxV)return;
+  var maxV=Math.max.apply(null,dataArr.map(function(d){return d.v;}));if(!maxV)maxV=1;
   var n=dataArr.length;
-  var bW=n<=2?56:n<=4?44:n<=7?34:n<=12?26:20;
-  var gap=n<=4?14:n<=8?10:7;
-  var pL=6,pR=6,pT=26,pB=36;
-  var W=pL+(bW+gap)*n-gap+pR, H=n<=2?110:100, yR=H-pT-pB;
+  // Calculamos anchos fijos para evitar que se deformen
+  var bW=Math.min(44, Math.max(16, 300/n)); 
+  var gap=Math.min(24, Math.max(8, 150/n));
+  var pL=15, pR=15, pT=35, pB=45;
+  var W=pL+(bW+gap)*n-gap+pR;
+  var H=180, yR=H-pT-pB;
   var uid='v'+Math.random().toString(36).slice(2,6);
+  
   var bars=dataArr.map(function(d,i){
-    var bh=Math.max(3,Math.round(d.v/maxV*yR)),x=pL+i*(bW+gap),y=pT+yR-bh;
+    var bh=Math.max(4,Math.round(d.v/maxV*yR)), x=pL+i*(bW+gap), y=pT+yR-bh;
     var c=typeof color==='function'?color(d):(Array.isArray(color)?color[i%color.length]:(color||'#00d4ff'));
-    var lbl=(d.l||'').length>7?(d.l||'').slice(0,6)+'\u2026':(d.l||'');
+    var lbl=(d.l||'').length>9?(d.l||'').slice(0,8)+'\u2026':(d.l||'');
     var val=vFmt?vFmt(d.v).replace('$',''):d.v;
-    var ttId=uid+'t'+i, glId=uid+'g'+i;
-    return '<g>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+bW+'" height="'+bh+'" rx="3" fill="'+c+'" opacity=".88"'
-      +' onmouseover="this.setAttribute(\'opacity\',\'1\');document.getElementById(\''+glId+'\').setAttribute(\'opacity\',\'0.4\');document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'visible\')"'
-      +' onmouseout="this.setAttribute(\'opacity\',\'.88\');document.getElementById(\''+glId+'\').setAttribute(\'opacity\',\'0\');document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'hidden\')"'
-      +' style="cursor:pointer"/>'
-      +'<rect id="'+glId+'" x="'+(x-2)+'" y="'+(y-2)+'" width="'+(bW+4)+'" height="'+(bh+4)+'" rx="5" fill="none" stroke="'+c+'" stroke-width="1.5" opacity="0" pointer-events="none"/>'
-      +'<text x="'+(x+bW/2)+'" y="'+(y-5)+'" text-anchor="middle" font-size="8" fill="'+c+'" font-family="var(--mono)" opacity=".75" pointer-events="none">'+val+'</text>'
-      +'<text x="'+(x+bW/2)+'" y="'+(H-pB+14)+'" text-anchor="middle" font-size="8" fill="var(--sub)" pointer-events="none">'+lbl+'</text>'
-      +'<g id="'+ttId+'" visibility="hidden" pointer-events="none">'
-      +'<rect x="'+(Math.max(0,Math.min(x+bW/2-34,W-72)))+'" y="'+(y-28)+'" width="68" height="20" rx="4" fill="#1a1a26" stroke="'+c+'" stroke-width=".7" opacity=".96"/>'
-      +'<text x="'+(x+bW/2)+'" y="'+(y-14)+'" text-anchor="middle" font-size="9" fill="'+c+'" font-family="var(--mono)" font-weight="700">'+val+'</text>'
-      +'</g>'
-      +'</g>';
+    var ttId=uid+'t'+i;
+    
+    return '<g style="cursor:pointer" onmouseover="document.getElementById(\''+ttId+'\').setAttribute(\'opacity\',\'1\')" onmouseout="document.getElementById(\''+ttId+'\').setAttribute(\'opacity\',\'0\')">'
+      +'<rect x="'+x+'" y="'+y+'" width="'+bW+'" height="'+bh+'" rx="5" fill="'+c+'" opacity=".85" style="transition:all .2s"/>'
+      +'<text x="'+(x+bW/2)+'" y="'+(y-8)+'" text-anchor="middle" font-size="10.5" fill="'+c+'" font-family="var(--mono)" font-weight="600">'+val+'</text>'
+      +'<text x="'+(x+bW/2)+'" y="'+(H-pB+20)+'" text-anchor="middle" font-size="11" fill="var(--sub)">'+lbl+'</text>'
+      +'<g id="'+ttId+'" opacity="0" style="transition:opacity .2s;pointer-events:none">'
+      +'<rect x="'+(Math.max(0,Math.min(x+bW/2-45,W-90)))+'" y="'+(y-40)+'" width="90" height="26" rx="6" fill="var(--s2)" stroke="'+c+'" stroke-width="1" style="box-shadow:0 4px 12px rgba(0,0,0,.5)"/>'
+      +'<text x="'+(x+bW/2)+'" y="'+(y-22)+'" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">'+val+'</text>'
+      +'</g></g>';
   }).join('');
-  el.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" style="min-width:'+W+'px;width:100%;height:'+H+'px;display:block">'+bars+'</svg></div>';
+  
+  // Envolvemos en un flex para centrarlo limpiamente sin estirar
+  el.innerHTML='<div style="display:flex;justify-content:center;overflow-x:auto;width:100%;padding:10px 0"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="display:block;min-width:'+W+'px">'+bars+'</svg></div>';
 }
-
 
 // ════ INIT ════
 $('c-fecha').value=new Date().toISOString().split('T')[0];
