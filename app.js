@@ -236,7 +236,7 @@ function renderV(){
     pieChart('ch-vd-pie',[{l:'Local',v:locT},{l:'Del. interno',v:dtT},{l:'PedidosYa',v:yaT},{l:'Uber Eats',v:ubT}].filter(function(x){return x.v>0;}));
   }
 
-    // Proyección — normalizada por días, compara mismo mes año anterior
+  // Proyección — normalizada por días, compara mismo mes año anterior
   var activeM=M.filter(function(m){return m.days_active>0;});
   // Daily rate per month (eliminates partial-month distortion)
   function dailyRate(mo){ return getVenta(mo)/mo.days_active; }
@@ -1084,7 +1084,7 @@ function initDelivery(){
           {l:mNames[mIdx2].slice(0,3)+' '+(yrX-1),v:prevV2}
         ],[delColor,delColor+'55'],fmtM);
       } else {
-        ch2.innerHTML='<div class="empty" style="padding:20px 0;font-size:12px">Sin datos del a\u00f1o anterior</div>';
+        ch2.innerHTML='<div class="empty" style="padding:20px 0;font-size:12px">Sin datos del año anterior</div>';
       }
     }
   }
@@ -1192,7 +1192,7 @@ function renderGastos(){
       +'<div class="kpi-val">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
   }).join('');
 
-  // category bars
+  // category bars (si quieres que respete el filtro, cambia GASTOS → filtG)
   var byCat={};
   GASTOS.forEach(function(g){byCat[g.cat]=(byCat[g.cat]||0)+toMes(g);});
   var cats=Object.keys(byCat).map(function(k){return{l:GCAT_LABELS[k]||k,v:byCat[k]};}).sort(function(a,b){return b.v-a.v;});
@@ -1506,7 +1506,9 @@ var OBJETIVOS = (function(){
     return s ? JSON.parse(s) : {};
   } catch(e) { return {}; }
 })();
-function saveObj(){ try{localStorage.setItem(OBJ_KEY,JSON.stringify(OBJETIVOS));}catch(e){} }
+function saveObj(){
+  try{localStorage.setItem(OBJ_KEY,JSON.stringify(OBJETIVOS));}catch(e){}
+}
 
 function iconSVG(name){
   var ic={
@@ -1523,15 +1525,12 @@ function iconSVG(name){
   return '<span style="display:inline-flex;align-items:center;margin-right:4px;vertical-align:middle;opacity:.9">'+(ic[name]||'')+'</span>';
 }
 
-// ── OBJETIVOS STORAGE ──
-var OBJETIVOS = (function(){
-  try{ return JSON.parse(localStorage.getItem('sf_objetivos')||'{}'); }
-  catch(e){ return {}; }
-})();
-function saveObjetivos(){ try{localStorage.setItem('sf_objetivos',JSON.stringify(OBJETIVOS));}catch(e){} }
+function updateObj(weekKey,key,val){
+  if(!OBJETIVOS[weekKey]) OBJETIVOS[weekKey]={};
+  OBJETIVOS[weekKey][key]=val;
+  saveObj();
+}
 
-function updateObj(wk,k,v){ if(!OBJETIVOS[wk]) OBJETIVOS[wk]={}; OBJETIVOS[wk][k]=v; saveObjetivos(); }
-function deleteObj(wk,k){ if(OBJETIVOS[wk]) delete OBJETIVOS[wk][k]; saveObjetivos(); renderObjetivos(); }
 function addCustomObj(){
   var lbl=prompt('Nombre del objetivo:'); if(!lbl||!lbl.trim()) return;
   var val=parseFloat(prompt('Valor objetivo ($):')||'0');
@@ -1540,7 +1539,7 @@ function addCustomObj(){
   var k='custom_'+Date.now();
   if(!OBJETIVOS[wk]) OBJETIVOS[wk]={};
   OBJETIVOS[wk][k]={label:lbl.trim(),target:val||0,custom:true};
-  saveObjetivos(); renderObjetivos();
+  saveObj(); renderObjetivos();
 }
 
 function renderObjetivos(){
@@ -1621,11 +1620,11 @@ function renderObjetivos(){
     +'</div>';
 }
 
-
-function updateObj(weekKey,key,val){
-  if(!OBJETIVOS[weekKey]) OBJETIVOS[weekKey]={};
-  OBJETIVOS[weekKey][key]=val;
+function deleteObj(wk,k){
+  if(!OBJETIVOS[wk]) return;
+  delete OBJETIVOS[wk][k];
   saveObj();
+  renderObjetivos();
 }
 
 // ════ EXPORT MODAL ════
@@ -1709,8 +1708,21 @@ function exportExcel(sec,mo){
   // Build CSV
   var rows=[['Mes','Venta neta','Sin IVA','Margen %','Días activos','PedidosYa','Del. interno (transf)','Uber Eats','Local']];
   sm.forEach(function(m){
-    var dy=m.delivery_ya||0, du=m.delivery_uber||0, dt=m.delivery_transferencia||0;
-    rows.push([m.month,m.venta_neta,Math.round(m.venta_neta/1.19),m.margen_pct,m.days_active,dy,dt,dr,du,Math.max(0,m.venta_neta-dy-dr-du-dt)]);
+    var dy=m.delivery_ya||0;
+    var du=m.delivery_uber||0;
+    var dt=m.delivery_transferencia||0;
+    var local=Math.max(0,m.venta_neta-dy-du-dt);
+    rows.push([
+      m.month,
+      m.venta_neta,
+      Math.round(m.venta_neta/1.19),
+      m.margen_pct,
+      m.days_active,
+      dy,
+      dt,
+      du,
+      local
+    ]);
   });
   if(sec==='gastos'||sec==='all'){
     rows.push([]);
@@ -1807,7 +1819,6 @@ function pieChart(elId,dataArr,title){
     var ix2=cx+iR*Math.cos(a),iy2=cy+iR*Math.sin(a);
     var lg=sl>Math.PI?1:0;
     var ttId=uid+'_tt'+i;
-    // translate outward on hover via CSS transform-origin at mid of slice
     var tx=(cx+(R+iR)/2*Math.cos(mid)*0.08).toFixed(1);
     var ty=(cy+(R+iR)/2*Math.sin(mid)*0.08).toFixed(1);
     return '<g style="cursor:pointer;transform-origin:'+cx+'px '+cy+'px;transition:transform .15s"'
