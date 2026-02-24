@@ -68,13 +68,15 @@ function initDash(){
   var M=SALES.monthly;
   var sm=sv==='all'?M:M.filter(function(m){return m.month===sv});
   if(!sm.length) sm=M;
+  
   var tvn=sm.reduce(function(s,m){return s+m.venta_neta},0);
   var tco=INGR.reduce(function(s,i){return s+i.total_cost},0);
   var amg=sm.reduce(function(s,m){return s+m.margen_pct},0)/sm.length;
   var pk=sm.slice().sort(function(a,b){return b.venta_neta-a.venta_neta})[0];
   var lbl=sv==='all'?'Ene 25–Feb 26':sv;
+  
   $('kpi-dash').innerHTML=[
-    {l:'Venta neta (c/IVA)',v:fmtM(tvn),                      f:lbl},
+    {l:'Venta neta (c/IVA)',v:fmtM(tvn),                       f:lbl},
     {l:'Base imponible',   v:fmtM(Math.round(tvn/1.19)),       f:'Sin IVA real · '+lbl, m:1},
     {l:sv==='all'?'Mejor mes':'Días activos', v:sv==='all'?pk.month.split(' ')[0]:sm[0].days_active+'d', f:sv==='all'?fmtM(pk.venta_neta):''},
     {l:'Margen neto prom.',v:amg.toFixed(1)+'%',               f:'Sin IVA'},
@@ -83,22 +85,48 @@ function initDash(){
     return '<div class="kpi'+(k.m?' m':'')+'"><div class="kpi-lbl">'+k.l+'</div>'
       +'<div class="kpi-val">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
   }).join('');
+  
   var totalVenta=M.reduce(function(s,m){return s+m.venta_neta;},0);
   var monthRatio=totalVenta>0?tvn/totalVenta:1;
-  lineChart('ch-vn',sm.map(function(m){return{l:m.month,v:m.venta_sin_iva||(Math.round(m.venta_neta/1.19))};}), '#00d4ff', fmtM);
+  
+  // 1. Gráfico Principal (Línea)
+  var cardHd=$('ch-vn').previousElementSibling; 
+  if(sv==='all'){
+    if(cardHd) cardHd.textContent='Venta neta mensual';
+    // Abreviamos el mes (Ene, Feb) para que no se amontone el texto
+    lineChart('ch-vn',sm.map(function(m){return{l:m.month.split(' ')[0].slice(0,3),v:m.venta_sin_iva||(Math.round(m.venta_neta/1.19))};}), '#00d4ff', fmtM);
+  } else {
+    if(cardHd) cardHd.textContent='Venta diaria — '+sv;
+    // Buscamos los datos diarios del mes específico
+    var sd=SALES.daily.filter(function(d){return d.month===sv && d.venta_neta>0;});
+    if(sd.length>0){
+      lineChart('ch-vn',sd.map(function(d){
+         var num=d.date.replace(/[^\d]/g,''); // Sacamos solo el número del día
+         return{l:num, v:Math.round(d.venta_neta/1.19)};
+      }), '#00d4ff', fmtM);
+    } else {
+      $('ch-vn').innerHTML='<div class="empty" style="padding:40px 0">Sin datos diarios para este mes</div>';
+    }
+  }
+  
   var ya_t=sm.reduce(function(s,m){return s+(m.delivery_ya||0);},0);
   var ub_t=sm.reduce(function(s,m){return s+(m.delivery_uber||0);},0);
   var tr_t=sm.reduce(function(s,m){return s+(m.delivery_transferencia||0);},0);
   var lc_t=Math.max(0,tvn-ya_t-ub_t-tr_t);
   var canalData=[{l:'Local',v:lc_t},{l:'PedidosYa',v:ya_t},{l:'Del. interno',v:tr_t},{l:'Uber Eats',v:ub_t}].filter(function(x){return x.v>0;});
   setTimeout(function(){pieChart('ch-ci', canalData, 'Canales de venta');},50);
+  
+  // 2. Gráficos de Ranking pasados a horizontales (texto 100% legible)
   var topDishes=PRODUCT_SALES.filter(function(p){return p.weekly_qty>0&&p.venta>0&&!p.is_modifier})
     .map(function(p){return{l:p.name,v:Math.round(p.weekly_qty*monthRatio*4.33)};})
-    .sort(function(a,b){return b.v-a.v;}).slice(0,10);
-  setTimeout(function(){verticalBarChart('ch-pv',topDishes,['#00e5a0','#00d4ff','#ff3fa4','#ffb020','#a78bfa'],function(v){return v+'u';});},80);
-  verticalBarChart('ch-rc',RECIPES.filter(function(r){return r.cost>200&&r.cost<9000;}).sort(function(a,b){return b.cost-a.cost;}).slice(0,10).map(function(r){return{l:r.name,v:r.cost};}), '#00d4ff', fmt);
+    .sort(function(a,b){return b.v-a.v;}).slice(0,8);
+  setTimeout(function(){
+    barChart('ch-pv',topDishes,['#00e5a0','#00d4ff','#ff3fa4','#ffb020','#a78bfa'],function(v){return v+'u';}, 160);
+  },80);
+  
+  var topRec=RECIPES.filter(function(r){return r.cost>200&&r.cost<9000;}).sort(function(a,b){return b.cost-a.cost;}).slice(0,8).map(function(r){return{l:r.name,v:r.cost};});
+  barChart('ch-rc',topRec, '#00d4ff', fmt, 160);
 }
-
 // ════ VENTAS ════
 var aM='all';
 var vCanal='all'; // all | local | intern | ya | uber
