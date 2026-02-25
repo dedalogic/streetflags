@@ -567,30 +567,57 @@ function renderPag(id,total,page,per,cb){
 // ════ UPLOAD ════
 function openUpload(){pendingUpload=null;$('up-st').textContent='';$('up-prev').innerHTML='';$('up-act').style.display='none';$('m-up').classList.add('on')}
 function handleDrop(e){e.preventDefault();$('dz').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFile(f)}
-function handleFile(file){
+function handleFileImp(file){
   if(!file) return;
-  $('up-st').textContent='Procesando: '+file.name+'...';
+  $('imp-st').textContent='Procesando: '+file.name+'...';
   var reader=new FileReader();
   reader.onload=function(e){
     try{
-      var lines=e.target.result.split('\n');var parsed=[];
-      for(var i=1;i<lines.length;i++){
-        var cols=lines[i].split('\t');if(cols.length<7)continue;
-        var code=cols[0].trim().replace(/^\*+/,'');var name=cols[1].trim().replace(/^\*+/,'');
-        var desc=cols[2].trim();var cost=parseFloat(cols[3].trim())||0;var unit=cols[6].trim();
-        if(!code||!name)continue;
-        parsed.push({code:code,name:name,brand:desc,cost:cost,unit:unit});
+      var text = e.target.result;
+      var rows = [];
+      if(text.indexOf('<tr')>=0 || text.indexOf('<TR')>=0){
+        var doc=new DOMParser().parseFromString(text,'text/html');
+        doc.querySelectorAll('tr').forEach(function(tr){
+          var cells=[];
+          tr.querySelectorAll('td,th').forEach(function(td){cells.push(td.textContent.trim());});
+          if(cells.some(function(c){return c;})) rows.push(cells);
+        });
+      } else {
+        var delimiter = text.indexOf('\t') >= 0 ? '\t' : (text.indexOf(';') >= 0 ? ';' : ',');
+        text.split(/\r?\n/).forEach(function(l){
+          if(l.trim()){
+            var cells = l.split(delimiter).map(function(c){return c.replace(/^"|"$/g,'').trim();});
+            if(cells.some(function(c){return c;})) rows.push(cells);
+          }
+        });
       }
-      if(!parsed.length){$('up-st').textContent='Sin filas válidas. Verifica el formato.';return}
-      pendingUpload=parsed;
-      $('up-st').innerHTML='<span style="color:var(--g)">✓ '+parsed.length+' ingredientes detectados</span>';
-      $('up-prev').innerHTML='<table style="width:100%;font-size:11.5px;border-collapse:collapse">'
-        +'<tr style="color:var(--sub)"><td style="padding:3px 8px">Código</td><td>Nombre</td><td>Costo</td><td>Unidad</td></tr>'
-        +parsed.slice(0,5).map(function(p){return'<tr><td style="padding:3px 8px;font-family:var(--mono);font-size:10.5px">'+p.code+'</td>'
-          +'<td style="padding:3px 8px">'+p.name+'</td><td style="padding:3px 8px;font-family:var(--mono)">$'+p.cost.toLocaleString('es-CL')+'</td>'
-          +'<td style="padding:3px 8px">'+p.unit+'</td></tr>'}).join('')+'</table>';
-      $('up-act').style.display='flex';
-    }catch(err){$('up-st').textContent='Error: '+err.message}
+      if(rows.length<2){$('imp-st').textContent='Archivo vacío o sin datos válidos.';return;}
+      
+      // ── FIX INFALIBLE: LA FILA MÁS ANCHA ES LA DE LOS DÍAS ──
+      var headerIdx = 0;
+      var maxCols = 0;
+      for (var idx = 0; idx < rows.length; idx++) {
+          if (rows[idx].length > maxCols) {
+              maxCols = rows[idx].length;
+              headerIdx = idx;
+          }
+      }
+
+      var headers = rows[headerIdx];
+      window.importHeaders = headers; 
+      importPending = rows.slice(headerIdx + 1); 
+      
+      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; '+maxCols+' columnas detectadas correctamente</span>';
+      
+      // ── RESTAURAMOS LA VISTA PREVIA PARA QUE SE VEA ──
+      $('imp-prev').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'
+        +'<tr>'+headers.slice(0,10).map(function(c){return '<td style="padding:3px 8px;color:var(--sub);font-weight:700;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>'
+        +importPending.slice(0,4).map(function(r){
+          return '<tr>'+r.slice(0,10).map(function(c){return '<td style="padding:3px 8px;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>';
+        }).join('')+'</table>';
+
+      $('imp-act').style.display='flex';
+    }catch(err){$('imp-st').textContent='Error al leer el archivo: '+err.message;}
   };
   reader.readAsText(file,'UTF-8');
 }
