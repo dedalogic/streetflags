@@ -1205,10 +1205,10 @@ function setGTab(tab,el){
   if(tab==='cred')      {credUnlocked=false;renderCreds();}
 }
 
-// ── FLUJO DE CAJA (BANCO ITAÚ) ──
-// ── FLUJO DE CAJA (BANCO ITAÚ DIRECTO EN LA APP) ──
+// ── FLUJO DE CAJA Y AUDITORÍA (BANCO ITAÚ + CAJA CHICA) ──
 
-// Herramienta para leer las columnas del CSV del banco
+function formatMoney(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
+
 function parseCSVLine(text) {
   var ret = [], val = '', inQ = false;
   for(var i=0; i<text.length; i++) {
@@ -1220,10 +1220,8 @@ function parseCSVLine(text) {
   ret.push(val); return ret;
 }
 
-// Procesa el archivo cuando lo seleccionas
 function handleBankFile(input) {
-  var file = input.files[0];
-  if(!file) return;
+  var file = input.files[0]; if(!file) return;
   var reader = new FileReader();
   reader.onload = function(e) {
     var text = e.target.result;
@@ -1234,12 +1232,10 @@ function handleBankFile(input) {
     
     var txs = [];
     lines.forEach(function(l) {
-      var p = parseCSVLine(l); 
-      if(p.length < 6) return;
+      var p = parseCSVLine(l); if(p.length < 6) return;
       var dateStr = p[0].trim();
       if(/^\d{2}\/\d{2}$/.test(dateStr)) {
-        var pts = dateStr.split('/'); 
-        var isoDate = year + '-' + pts[1] + '-' + pts[0];
+        var pts = dateStr.split('/'); var isoDate = year + '-' + pts[1] + '-' + pts[0];
         var abono = parseInt(p[4].replace(/[^0-9]/g, '')) || 0;
         var cargo = parseInt(p[5].replace(/[^0-9]/g, '')) || 0;
         if(abono > 0 || cargo > 0) txs.push({ date: isoDate, desc: p[3].trim(), in: abono, out: cargo });
@@ -1247,7 +1243,6 @@ function handleBankFile(input) {
     });
     
     if(txs.length > 0) {
-      // Combina con lo que ya estaba guardado sin duplicar
       var existing = JSON.parse(localStorage.getItem('bank_tx') || '[]');
       var all = existing.concat(txs);
       var unique = []; var seen = new Set();
@@ -1255,62 +1250,122 @@ function handleBankFile(input) {
         var str = t.date + t.desc + t.in + t.out;
         if(!seen.has(str)) { seen.add(str); unique.push(t); }
       });
-      // Ordena por fecha (más reciente primero)
       unique.sort(function(a,b){return b.date.localeCompare(a.date)});
-      
-      // Guarda en la memoria de la app
       localStorage.setItem('bank_tx', JSON.stringify(unique));
-      alert('Cartola procesada: ' + txs.length + ' movimientos. ¡Recuerda presionar "Subir Nube" para respaldarlo!');
-      renderFlujoCaja();
+      
+      alert('Cartola procesada: ' + txs.length + ' movimientos. ¡Presiona "Subir Nube" para respaldar!');
+      
+      // Limpiamos el selector para que se regenere
+      document.getElementById('flujo-mes-sel').innerHTML = '<option value="all">Todos los meses</option>';
+      renderFlujoCaja(false);
     } else {
-      alert('No se encontraron movimientos válidos. ¿Estás seguro que es el CSV del Itaú?');
+      alert('No se encontraron movimientos válidos.');
     }
   };
   reader.readAsText(file, 'utf-8');
-  input.value = ''; // Resetea el botón
+  input.value = ''; 
 }
 
-function renderFlujoCaja(){
-  // Intenta leer de la memoria de la app, si no hay, busca en data.js (por si acaso)
+function renderFlujoCaja(isFilterChange){
   var bankData = [];
   var lsBank = localStorage.getItem('bank_tx');
-  if(lsBank) {
-    bankData = JSON.parse(lsBank);
-  } else if(typeof BANK_TX !== 'undefined') {
-    bankData = BANK_TX; 
-  }
+  if(lsBank) bankData = JSON.parse(lsBank);
+  else if(typeof BANK_TX !== 'undefined') bankData = BANK_TX; 
   
+  var tbody = document.getElementById('flujo-body');
+  var kpiDiv = document.getElementById('kpi-flujo');
+  var sel = document.getElementById('flujo-mes-sel');
+  var panels = document.getElementById('flujo-panels');
+  
+  if(!tbody || !kpiDiv) return;
+
   if(!bankData || !bankData.length){
-    $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty" style="padding:30px 0">Presiona "+ Importar Cartola CSV" para cargar tus datos del banco.</td></tr>';
-    $('kpi-flujo').innerHTML = '';
-    return;
+    tbody.innerHTML = '<tr><td colspan="4" class="empty" style="padding:30px 0;text-align:center;color:#666">Presiona "+ Importar Cartola CSV" para cargar tus datos del banco.</td></tr>';
+    kpiDiv.innerHTML = ''; panels.style.display = 'none'; return;
   }
 
+  // 1. Extraer meses únicos y llenar el selector si está vacío
+  if(sel.options.length <= 1 && !isFilterChange) {
+    var months = new Set();
+    bankData.forEach(function(t){ months.add(t.date.substring(0,7)); });
+    var mArr = Array.from(months).sort().reverse(); // Más nuevo primero
+    mArr.forEach(function(m){
+      var opt = document.createElement('option');
+      opt.value = m;
+      var pts = m.split('-');
+      var mNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      opt.text = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
+      sel.appendChild(opt);
+    });
+    if(mArr.length > 0) sel.value = mArr[0]; // Selecciona el mes más reciente por defecto
+  }
+
+  var currentMonth = sel.value;
+  var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
+
+  // 2. Calcular KPIs del Banco y armar tabla
   var tIn = 0, tOut = 0;
-  var rows = bankData.map(function(t){
-    tIn += t.in; 
-    tOut += t.out;
+  var topOutMap = {}, topInMap = {};
+
+  var rows = filteredBank.map(function(t){
+    tIn += t.in; tOut += t.out;
+    
+    // Agrupar proveedores (Limpiamos los nombres un poco)
+    if(t.out > 0) {
+      var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim();
+      topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
+    }
+    // Agrupar ingresos por día
+    if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
+
     return '<tr>'
       +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
       +'<td style="text-align:left;font-weight:600;color:var(--t)">'+t.desc+'</td>'
-      +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? fmt(t.in) : '—')+'</td>'
-      +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? fmt(t.out) : '—')+'</td>'
+      +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? formatMoney(t.in) : '—')+'</td>'
+      +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? formatMoney(t.out) : '—')+'</td>'
       +'</tr>';
   }).join('');
 
-  var saldo = tIn - tOut;
-  var saldoFormatted = (saldo < 0 ? '-' : '') + fmtM(Math.abs(saldo));
+  // 3. Cruzar con la "Caja Chica" (Gastos Manuales de la app)
+  var manualGastos = JSON.parse(localStorage.getItem('app_gastos') || '[]');
+  var totalManual = 0;
+  manualGastos.forEach(function(g) {
+    if(currentMonth === 'all' || g.date.startsWith(currentMonth)) totalManual += parseInt(g.monto) || 0;
+  });
 
-  $('kpi-flujo').innerHTML = [
-    {l:'Total Ingresos (Abonos)', v:fmtM(tIn), f:'Transbank, transferencias', c:'var(--g)'},
-    {l:'Total Egresos (Cargos)', v:fmtM(tOut), f:'Pago proveedores, sueldos', c:'var(--r)'},
-    {l:'Flujo Neto', v:saldoFormatted, f:'Ingresos vs Egresos', c:saldo>=0?'var(--g)':'var(--r)'}
+  // 4. Calcular Flujos
+  var saldoBanco = tIn - tOut;
+  var cajaReal = saldoBanco - totalManual;
+
+  kpiDiv.innerHTML = [
+    {l:'Abonos Banco', v:formatMoney(tIn), f:'Transbank, transferencias', c:'var(--g)'},
+    {l:'Cargos Banco', v:formatMoney(tOut), f:'Pago a proveedores', c:'var(--r)'},
+    {l:'Gastos Hormiga (Caja)', v:formatMoney(totalManual), f:'Efectivo / Manuales', c:'var(--y)'},
+    {l:'Caja Real Restante', v:(cajaReal<0?'-':'')+formatMoney(Math.abs(cajaReal)), f:'Banco menos Caja Chica', c:cajaReal>=0?'var(--g)':'var(--r)'}
   ].map(function(k){
     return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div>'
       +'<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
   }).join('');
   
-  $('flujo-body').innerHTML = rows;
+  tbody.innerHTML = rows;
+
+  // 5. Dibujar Rankings
+  panels.style.display = 'grid';
+  
+  var sortedOut = Object.keys(topOutMap).map(function(k){return {n:k, v:topOutMap[k]}}).sort(function(a,b){return b.v-a.v}).slice(0,5);
+  document.getElementById('flujo-top-out').innerHTML = sortedOut.length ? sortedOut.map(function(o){
+    var pct = Math.round((o.v / tOut) * 100) || 0;
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+      +'<span style="font-size:12px;color:#aaa">'+o.n+'</span>'
+      +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
+  }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">No hay egresos este mes</div>';
+
+  var sortedIn = Object.keys(topInMap).map(function(k){return {n:k, v:topInMap[k]}}).sort(function(a,b){return b.v-a.v}).slice(0,4);
+  document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(function(o){
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+      +'<span style="font-size:12px;color:#aaa">Día '+o.n+'</span>'
+      +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">'+formatMoney(o.v)+'</span></div>';
+  }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">No hay ingresos este mes</div>';
 }
 function setGCatFilter(cat,el){
   gCatFilter=cat;
