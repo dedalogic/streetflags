@@ -938,13 +938,13 @@ function parseCSVRow(text, delimiter) {
   return ret;
 }
 
+
 function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFileImp(f);}
 
 function handleFileImp(file){
   if(!file) return;
   $('imp-st').textContent='Procesando: '+file.name+'...';
   
-  // Guardamos el nombre del archivo para que la app sepa de qué mes es
   window.importFileName = file.name.toLowerCase(); 
   
   var reader=new FileReader();
@@ -983,12 +983,10 @@ function handleFileImp(file){
       importPending = rows; 
 
       if(typeof importMode !== 'undefined' && importMode === 'inv') {
-          // --- VISTA PREVIA INVENTARIO ---
-          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Inventario detectado</span>';
+          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Inventario detectado ('+rows.length+' filas)</span>';
           $('imp-act').style.display='flex';
       } else {
-          // --- VISTA PREVIA DE VENTAS COMPLETAS (INTELIGENTE) ---
-          
+          // --- VISTA PREVIA VENTAS ---
           var findRow = function(keyword) { 
               return rows.findIndex(function(r){ 
                   return r.some(function(c){ return String(c).toLowerCase().includes(keyword); }); 
@@ -996,22 +994,39 @@ function handleFileImp(file){
           };
 
           var vIdx = findRow('venta neta');
-          var eIdx = findRow('efectivo');
-          var pyIdx = findRow('pedidosya') === -1 ? findRow('pedidos ya') : findRow('pedidosya');
-          var ubIdx = findRow('uber');
-
           if(vIdx === -1) {
               $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró la palabra "Venta Neta"</span>';
               $('imp-act').style.display='none';
               return;
           }
 
+          // FIX CRÍTICO: Buscar la fila de días comprobando que contenga "lunes", "martes", etc.
           var dayRowIdx = vIdx - 1;
-          while(dayRowIdx >= 0 && !rows[dayRowIdx].some(function(c){ return /\d+/.test(String(c)); })) {
+          var isDayRow = function(r) {
+              return r.some(function(c){ 
+                  var val = String(c).toLowerCase();
+                  return val.includes('lunes') || val.includes('martes') || val.includes('miercoles') || val.includes('miércoles') || val.includes('jueves') || val.includes('viernes') || val.includes('sabado') || val.includes('sábado') || val.includes('domingo');
+              });
+          };
+          
+          while(dayRowIdx >= 0 && !isDayRow(rows[dayRowIdx])) {
               dayRowIdx--;
           }
+          
+          if(dayRowIdx < 0) {
+              // Respaldo por si el reporte no trae nombres de días: usar la fila más ancha antes de Venta Neta
+              var max = 0;
+              for(var k=0; k<vIdx; k++) {
+                  if(rows[k].length > max) { max = rows[k].length; dayRowIdx = k; }
+              }
+          }
+          
           var dayRow = dayRowIdx >= 0 ? rows[dayRowIdx] : [];
           
+          var eIdx = findRow('efectivo');
+          var pyIdx = findRow('pedidosya') === -1 ? findRow('pedidos ya') : findRow('pedidosya');
+          var ubIdx = findRow('uber');
+
           var rowEfectivo = eIdx >= 0 ? rows[eIdx] : [];
           var rowPy = pyIdx >= 0 ? rows[pyIdx] : [];
           var rowUb = ubIdx >= 0 ? rows[ubIdx] : [];
@@ -1022,11 +1037,13 @@ function handleFileImp(file){
           var currentYear = new Date().getFullYear();
           var currentMonthIdx = new Date().getMonth();
           
-          var fileY = window.importFileName.match(/20\d{2}/);
-          if(fileY) currentYear = parseInt(fileY[0]);
-          
-          var fileM = mNames.findIndex(function(m){ return window.importFileName.includes(m); });
-          if(fileM >= 0) currentMonthIdx = fileM;
+          if (window.importFileName) {
+              var fileY = window.importFileName.match(/20\d{2}/);
+              if(fileY) currentYear = parseInt(fileY[0]);
+              
+              var fileM = mNames.findIndex(function(m){ return window.importFileName.includes(m); });
+              if(fileM >= 0) currentMonthIdx = fileM;
+          }
 
           var prevDayNum = 0;
           
@@ -1135,6 +1152,16 @@ function applyImport(){
     alert('✓ Datos de ' + count + ' mes(es) aplicados exitosamente.');
   }
 }
+
+
+
+
+
+
+
+
+
+
 // ════ DELIVERY ════
 var delSrc='all'; // all | intern | ya
 
