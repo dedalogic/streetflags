@@ -925,7 +925,7 @@ function openImport(mode){
   $('m-import').classList.add('on');
 }
 
-// ─── MOTOR DE LECTURA CSV ───
+// ─── MOTOR DE LECTURA CSV AVANZADO ───
 function parseCSVRow(text, delimiter) {
   var ret = [], val = '', inQ = false;
   for(var i=0; i<text.length; i++) {
@@ -949,7 +949,6 @@ function handleFileImp(file){
       var text = e.target.result;
       var rows = [];
       
-      // Lector dual (HTML o CSV)
       if(text.toLowerCase().includes('<tr') || text.toLowerCase().includes('<table')){
         var doc=new DOMParser().parseFromString(text,'text/html');
         doc.querySelectorAll('tr').forEach(function(tr){
@@ -958,7 +957,15 @@ function handleFileImp(file){
           if(cells.some(function(c){return c;})) rows.push(cells);
         });
       } else {
-        var delimiter = text.includes(';') ? ';' : (text.includes('\t') ? '\t' : ',');
+        // DETECTOR INTELIGENTE DE SEPARADOR (Cuenta cuál se usa más en tu archivo)
+        var tabs = (text.match(/\t/g) || []).length;
+        var semis = (text.match(/;/g) || []).length;
+        var commas = (text.match(/,/g) || []).length;
+        
+        var delimiter = ','; // default
+        if (tabs > semis && tabs > commas) delimiter = '\t';
+        else if (semis > commas && semis > tabs) delimiter = ';';
+
         var lines = text.split(/\r\n|\n|\r/); 
         lines.forEach(function(l){
           if(l.trim()){
@@ -970,17 +977,19 @@ function handleFileImp(file){
       
       if(rows.length<2){$('imp-st').textContent='Archivo vacío o formato no válido.';return;}
 
-      // Guardamos la matriz completa en memoria
       window.toteatRows = rows; 
       importPending = rows; 
       
-      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Archivo leído con éxito ('+rows.length+' filas)</span>';
+      var maxCols = 0;
+      rows.forEach(function(r){ if(r.length > maxCols) maxCols = r.length; });
+
+      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Archivo leído: '+rows.length+' filas y '+maxCols+' columnas</span>';
       
-      // Vista previa simple
-      var previewRows = rows.slice(0, 4);
-      $('imp-prev').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11.5px">'
+      // Vista previa visual CON BORDES para confirmar que se cortó bien
+      var previewRows = rows.slice(0, 6);
+      $('imp-prev').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'
         +previewRows.map(function(r){
-          return '<tr>'+r.slice(0,6).map(function(c){return'<td style="padding:3px 8px;white-space:nowrap;border-bottom:1px solid var(--b)">'+(String(c)||'').substring(0,15)+'</td>';}).join('')+'</tr>';
+          return '<tr>'+r.slice(0,8).map(function(c){return'<td style="padding:4px; border:1px solid var(--b2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;">'+(String(c)||'')+'</td>';}).join('')+'</tr>';
         }).join('')+'</table>';
 
       $('imp-act').style.display='flex';
@@ -1010,63 +1019,83 @@ function applyImport(){
     alert('✓ Inventario actualizado: '+updated+' ingredientes.');
 
   } else {
-    // ── LÓGICA DIRECTA Y EXACTA PARA EFECTIVO ──
+    // ── LÓGICA DE EFECTIVO (BÚSQUEDA Y SUMA EXACTA) ──
     var rows = window.toteatRows || [];
     
-    // 1. Buscamos las filas por su nombre exacto (ignorando mayúsculas/minúsculas)
     var vIdx = rows.findIndex(function(r){ return r.some(function(c){ return String(c).trim().toLowerCase() === 'venta neta'; }); });
     var eIdx = rows.findIndex(function(r){ return r.some(function(c){ return String(c).trim().toLowerCase() === 'efectivo'; }); });
 
-    if(vIdx === -1) {
-        alert('❌ No se encontró la fila "Venta Neta". Verifica que sea el Cuadro de Ventas de Toteat.');
+    if(vIdx === -1 || eIdx === -1) {
+        alert('❌ No se encontró la fila "Venta Neta" o "Efectivo" en el archivo.');
         return;
     }
 
-    // 2. La fila de los días SIEMPRE está justo arriba de la Venta Neta
-    var headerRow = rows[vIdx - 1] || [];
-    if(!headerRow.some(function(c){ return /\d+/.test(c); })) {
-        headerRow = rows[vIdx - 2] || []; // Respaldo por si hay una fila en blanco
+    var dayRowIdx = vIdx - 1;
+    while(dayRowIdx >= 0 && !rows[dayRowIdx].some(function(c){ return /\d+/.test(String(c)); })) {
+        dayRowIdx--;
     }
-
-    var rowEfectivo = eIdx >= 0 ? rows[eIdx] : null;
+    var dayRow = rows[dayRowIdx] || [];
+    var monthRow = rows[dayRowIdx - 1] || [];
+    var rowEfectivo = rows[eIdx];
 
     var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     var sumByMonth = {}; 
     
-    var currentMonthIdx = 0; // Arrancamos en Enero
-    var currentYear = 2025;  
-    var prevDayNum = 0;
-
-    // 3. Iteramos según las columnas de la cabecera
-    for (var i = 0; i < headerRow.length; i++) {
-        var colTitle = String(headerRow[i]).toLowerCase().trim();
-        var match = colTitle.match(/\d+/);
-
-        // Ignoramos columnas que no tengan número de día o sean totales
-        if (!match || colTitle.includes('total') || colTitle.includes('sem')) continue;
-
-        var dayNum = parseInt(match[0]);
-
-        // Si el día cae (ej: 31 a 1), avanzamos de mes
-        if (dayNum === 1 && prevDayNum >= 28) {
-            currentMonthIdx++;
-            if (currentMonthIdx > 11) {
-                currentMonthIdx = 0;
-                currentYear++;
+    var currentMonthIdx = 0;
+    var currentYear = new Date().getFullYear();
+    var foundStart = false;
+    
+    for(var r=0; r<=dayRowIdx; r++) {
+        for(var c=0; c<rows[r].length; c++) {
+            var cell = String(rows[r][c]).toLowerCase();
+            var matchY = cell.match(/20\d{2}/);
+            var matchM = mNames.findIndex(function(m){ return cell.includes(m.toLowerCase()); });
+            if(matchY && matchM >= 0) {
+                currentMonthIdx = matchM;
+                currentYear = parseInt(matchY[0]);
+                foundStart = true;
+                break;
             }
         }
-        if (dayNum > 0 && dayNum <= 31) prevDayNum = dayNum;
+        if(foundStart) break;
+    }
+
+    var prevDayNum = 0;
+
+    for (var i = 0; i < dayRow.length; i++) {
+        var dCell = String(dayRow[i]).toLowerCase().trim();
+        if (!dCell || dCell.includes('total') || dCell.includes('sem')) continue;
+
+        var dayMatch = dCell.match(/\d+/);
+        if (!dayMatch) continue; 
+        
+        var dayNum = parseInt(dayMatch[0]);
+        if (dayNum < 1 || dayNum > 31) continue; 
+
+        var mCell = String(monthRow[i] || '').trim();
+        if (mCell && /[a-zA-Z]/.test(mCell)) {
+            var overrideM = mNames.findIndex(function(m){ return mCell.toLowerCase().includes(m.toLowerCase()); });
+            var overrideY = mCell.match(/20\d{2}/);
+            if (overrideM >= 0) currentMonthIdx = overrideM;
+            if (overrideY) currentYear = parseInt(overrideY[0]);
+        } else {
+            if (dayNum === 1 && prevDayNum >= 28) {
+                currentMonthIdx++;
+                if (currentMonthIdx > 11) {
+                    currentMonthIdx = 0;
+                    currentYear++;
+                }
+            }
+        }
+        prevDayNum = dayNum;
 
         var label = mNames[currentMonthIdx] + ' ' + currentYear;
-        
-        // Sacamos la plata de esa misma columna `i`. Si no hay, asumimos 0.
-        var eStr = rowEfectivo ? String(rowEfectivo[i] || '0').replace(/[^0-9]/g, '') : '0';
+        var eStr = String(rowEfectivo[i] || '0').replace(/[^0-9]/g, '');
         var eVal = parseInt(eStr) || 0;
         
         sumByMonth[label] = (sumByMonth[label] || 0) + eVal;
     }
 
-    // 4. Inyectamos en memoria
     var mesesActualizados = [];
     for (var monthLabel in sumByMonth) {
         var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
@@ -1077,7 +1106,7 @@ function applyImport(){
     }
 
     localStorage.setItem('app_sales', JSON.stringify(SALES));
-    alert('✓ Efectivo sumado mes a mes con éxito:\n' + mesesActualizados.join(' | '));
+    alert('✓ Efectivo calculado y distribuido:\n' + mesesActualizados.join(' | '));
     
     if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
     cm('m-import'); 
