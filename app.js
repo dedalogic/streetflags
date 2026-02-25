@@ -2086,3 +2086,72 @@ function renderFlujoCaja(){
   
   $('flujo-body').innerHTML = rows;
 }
+// ════ SINCRONIZACIÓN CON GOOGLE DRIVE (CLOUD) ════
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzQeVRcatdllVHgoDHccnmqigBtLZpYM_K7uz0Vf2QJtYySwhIjGEUf1zNCT3bdmqRdnw/exec";
+
+async function saveToCloud(btn) {
+  if(!confirm('¿Guardar todos tus registros actuales (gastos manuales, configuraciones, conteos) en Google Drive?')) return;
+  
+  var ogText = btn.innerHTML;
+  btn.innerHTML = '⏳ Subiendo...';
+  
+  // Recopilamos todo lo que está en la memoria del navegador
+  var dataToSave = {};
+  for(var i=0; i<localStorage.length; i++){
+    var key = localStorage.key(i);
+    dataToSave[key] = localStorage.getItem(key);
+  }
+  
+  try {
+    var res = await fetch(CLOUD_URL, {
+      method: 'POST',
+      body: JSON.stringify(dataToSave),
+      headers: {'Content-Type': 'text/plain'} // Text plain evita bloqueos de seguridad del navegador
+    });
+    var json = await res.json();
+    
+    if(json.status === 'ok') {
+      btn.innerHTML = '✅ Guardado';
+      setTimeout(function(){ btn.innerHTML = ogText; }, 2500);
+    } else {
+      alert('Error en el servidor: ' + json.message);
+      btn.innerHTML = ogText;
+    }
+  } catch(e) {
+    alert('Error de conexión. Verifica tu internet.');
+    btn.innerHTML = ogText;
+  }
+}
+
+async function loadFromCloud(btn) {
+  if(!confirm('ALERTA: ¿Sobrescribir tu memoria actual con los datos de la nube? (La página se recargará)')) return;
+  
+  var ogText = btn.innerHTML;
+  btn.innerHTML = '⏳ Descargando...';
+  
+  try {
+    var res = await fetch(CLOUD_URL);
+    var data = await res.json();
+    
+    if(data.status === "empty") {
+      alert('Aún no hay ningún archivo de respaldo guardado en tu Drive.');
+      btn.innerHTML = ogText;
+      return;
+    }
+    
+    // Limpiamos la memoria actual y volcamos lo descargado
+    localStorage.clear();
+    for(var key in data) {
+      if(data.hasOwnProperty(key)) {
+        localStorage.setItem(key, data[key]);
+      }
+    }
+    
+    btn.innerHTML = '✅ Listo';
+    setTimeout(function(){ location.reload(); }, 800);
+    
+  } catch(e) {
+    alert('Error al descargar desde la nube.');
+    btn.innerHTML = ogText;
+  }
+}
