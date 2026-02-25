@@ -11,10 +11,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .wrap{max-width:920px;margin:0 auto}
 h1{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px}
 .subtitle{font-size:13px;color:var(--sub);margin-top:4px;margin-bottom:24px}
-.tabs{display:flex;gap:10px;margin-bottom:24px;border-bottom:1px solid var(--b);padding-bottom:16px}
+.tabs{display:flex;gap:10px;margin-bottom:24px;border-bottom:1px solid var(--b);padding-bottom:16px;flex-wrap:wrap}
 .tab{padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;border:1px solid transparent;background:transparent;color:var(--sub);transition:all .2s}
 .tab.on.tot{background:rgba(0,212,255,.1);border-color:var(--m);color:var(--m)}
 .tab.on.py{background:rgba(255,63,164,.1);border-color:var(--py);color:var(--py)}
+.tab.on.ita{background:rgba(255,180,32,.1);border-color:var(--y);color:var(--y)}
 .tab:hover:not(.on){color:var(--t);background:var(--s2)}
 .card{background:var(--s1);border:1px solid var(--b);border-radius:14px;padding:24px;margin-bottom:18px;transition:opacity .2s}
 .card.off{opacity:.35;pointer-events:none}
@@ -22,9 +23,11 @@ h1{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px}
 .num{width:20px;height:20px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--sub);flex-shrink:0}
 .num.on{background:rgba(0,212,255,.15);border-color:var(--m);color:var(--m)}
 .mode-py .num.on{background:rgba(255,63,164,.15);border-color:var(--py);color:var(--py)}
+.mode-ita .num.on{background:rgba(255,180,32,.15);border-color:var(--y);color:var(--y)}
 .drop{border:2px dashed var(--b2);border-radius:10px;padding:44px 20px;text-align:center;cursor:pointer;transition:all .2s}
 .drop:hover,.drop.over{border-color:var(--m);background:rgba(0,212,255,.03)}
 .mode-py .drop:hover,.mode-py .drop.over{border-color:var(--py);background:rgba(255,63,164,.03)}
+.mode-ita .drop:hover,.mode-ita .drop.over{border-color:var(--y);background:rgba(255,180,32,.03)}
 .drop p{color:var(--sub);font-size:13px;line-height:1.9}
 .drop strong{color:#bbb}
 #fi{display:none}
@@ -56,7 +59,8 @@ tr.total td{border-bottom:none;font-weight:700;color:var(--t);background:rgba(25
 
 <div class="tabs">
   <button class="tab on tot" id="tab-tot" onclick="setMode('tot')">📊 Toteat (Ventas Totales)</button>
-  <button class="tab py" id="tab-py" onclick="setMode('py')">🛵 PedidosYa (Delivery & Heatmap)</button>
+  <button class="tab py" id="tab-py" onclick="setMode('py')">🛵 PedidosYa (Delivery)</button>
+  <button class="tab ita" id="tab-ita" onclick="setMode('ita')">🏦 Banco Itaú (Flujo de Caja)</button>
 </div>
 
 <div class="card" id="c1">
@@ -98,7 +102,7 @@ tr.total td{border-bottom:none;font-weight:700;color:var(--t);background:rgba(25
 
 <div class="card off" id="c4">
   <div class="card-hd"><span class="num" id="n4">4</span>Exportar a data.js</div>
-  <p style="font-size:12px;color:var(--sub);margin-bottom:12px" id="out-hint">Copia esto y reemplaza el bloque en data.js:</p>
+  <p style="font-size:12px;color:var(--sub);margin-bottom:12px" id="out-hint"></p>
   <div class="out" id="outel"></div>
   <div class="acts">
     <button class="btn btn-p" onclick="doCopy()"><span id="clbl">Copiar código</span></button>
@@ -114,13 +118,15 @@ var MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septi
 
 function setMode(m) {
   mode = m;
-  document.getElementById('body-wrap').className = m === 'py' ? 'mode-py' : '';
+  document.getElementById('body-wrap').className = m === 'py' ? 'mode-py' : (m === 'ita' ? 'mode-ita' : '');
   document.getElementById('tab-tot').className = 'tab tot' + (m==='tot'?' on':'');
   document.getElementById('tab-py').className = 'tab py' + (m==='py'?' on':'');
+  document.getElementById('tab-ita').className = 'tab ita' + (m==='ita'?' on':'');
   document.getElementById('c2').style.display = m==='tot' ? 'block' : 'none';
-  document.getElementById('drop-hint').innerHTML = m==='tot' 
-    ? 'Toteat → Reportes → Cuadro de Venta → Exportar XLS'
-    : '<span style="color:var(--py)">Arrastra aquí tus archivos CSV de PedidosYa todos juntos.</span><br>Ej: ordersPerMonth, heatmap, y los dos popularDishes.';
+  
+  if(m==='tot') document.getElementById('drop-hint').innerHTML = 'Toteat → Reportes → Cuadro de Venta → Exportar XLS';
+  else if(m==='py') document.getElementById('drop-hint').innerHTML = '<span style="color:var(--py)">Arrastra aquí tus archivos CSV de PedidosYa todos juntos.</span><br>ordersPerMonth, heatmap, y popularDishes.';
+  else if(m==='ita') document.getElementById('drop-hint').innerHTML = '<span style="color:var(--y)">Arrastra tu Cartola Histórica de Banco Itaú en formato CSV.</span>';
   
   loadedFiles = []; fileText = '';
   document.getElementById('finfo').style.display = 'none';
@@ -139,10 +145,10 @@ function load(files) {
     var r = new FileReader();
     r.onload = function(e) { fileText = e.target.result; on('c2', 'n2'); document.getElementById('btngo').disabled = false; };
     r.readAsText(files[0], 'utf-8');
-  } else {
-    loadedFiles = Array.from(files);
-    on('c3', 'n3');
-    runPY();
+  } else if (mode === 'py') {
+    loadedFiles = Array.from(files); on('c3', 'n3'); runPY();
+  } else if (mode === 'ita') {
+    loadedFiles = Array.from(files); on('c3', 'n3'); runIta();
   }
 }
 
@@ -155,6 +161,7 @@ document.getElementById('fi').addEventListener('change',function(e){if(e.target.
 function on(cid,nid){ document.getElementById(cid).classList.remove('off'); if(nid) document.getElementById(nid).classList.add('on'); }
 function lg(msg,cls){ var el=document.getElementById('logel'); var s=document.createElement('span'); s.className=cls||'dim'; s.textContent=msg+'\n'; el.appendChild(s); el.scrollTop=el.scrollHeight; }
 function f(n){return '$'+(n/1e6).toFixed(2)+'M';}
+function fmt(n){return '$'+n.toLocaleString('es-CL');}
 function pn(s){var v=parseFloat(String(s).replace(/\$/g,'').replace(/%/g,'').replace(/\./g,'').replace(',','.')); return isNaN(v)?0:v;}
 
 function parseTable(html){
@@ -166,42 +173,6 @@ function parseTable(html){
   });
   return rows;
 }
-
-// ─── PROCESADOR TOTEAT ───
-function runTot(){
-  document.getElementById('logel').innerHTML=''; document.getElementById('thead').innerHTML=''; document.getElementById('tbody').innerHTML='';
-  document.getElementById('tbl-w').style.display='block';
-  on('c3','n3');
-  var sy=parseInt(document.getElementById('sy').value), sm2=parseInt(document.getElementById('sm').value);
-  var rows=parseTable(fileText);
-  if(!rows.length){lg('❌ Sin filas encontradas — verifica el archivo','err');return;}
-  
-  var R={vb:1,vn:3,siva:5,costo:6,margen:7,py:13,pyv:14,pyc:15,uber:17,transf:20};
-  var hdr=rows[0], dayCols=[], prev=0;
-  for(var c=1;c<hdr.length;c++){ var m=/\w+\s+(\d+)$/.exec(hdr[c].trim()); if(m) dayCols.push({c:c,d:parseInt(m[1])}); }
-  var mStarts=[dayCols[0].c];
-  dayCols.forEach(function(x){if(x.d<prev)mStarts.push(x.c); prev=x.d;});
-  var totCol=-1;
-  for(var i=hdr.length-1;i>=1;i--){if(hdr[i].trim()==='Total'){totCol=i;break;}}
-  if(totCol<0) totCol=dayCols[dayCols.length-1].c+1;
-
-  var parsed=[];
-  mStarts.forEach(function(cs,mi){
-    var ce=mi+1<mStarts.length?mStarts[mi+1]:totCol, days=ce-cs, absM=sm2+mi, yr=sy+Math.floor(absM/12), mo=absM%12, name=MN[mo]+' '+yr;
-    function S(ri){var t=0; for(var col=cs;col<ce;col++) if(rows[ri]&&col<rows[ri].length) t+=pn(rows[ri][col]); return Math.round(t);}
-    var vn=S(R.vn), siva=S(R.siva), co=S(R.costo), mg=S(R.margen), py=S(R.py)+S(R.pyv)+S(R.pyc), ub=S(R.uber), tr=S(R.transf);
-    parsed.push({month:name, venta_bruta:S(R.vb), venta_neta:vn, venta_sin_iva:siva, costo:co, margen_pct:vn>0?Math.round(mg/vn*1000)/10:0, days_active:days, avg_daily:days?Math.round(vn/days):0, avg_daily_sin_iva:days?Math.round(siva/days):0, delivery_ya:py, delivery_uber:ub, delivery_transferencia:tr});
-    lg(name+': VN $'+(vn/1e6).toFixed(1)+'M / PY $'+(py/1e6).toFixed(2)+'M ('+days+'d)','ok');
-  });
-
-  document.getElementById('thead').innerHTML='<tr><th>Mes</th><th>Venta Neta</th><th>PedidosYa</th><th>Uber Eats</th><th>Del. Interno</th></tr>';
-  document.getElementById('tbody').innerHTML=parsed.map(function(m){return '<tr><td>'+m.month+'</td><td style="color:var(--m)">'+f(m.venta_neta)+'</td><td style="color:#ff3fa4">'+f(m.delivery_ya)+'</td><td style="color:#a78bfa">'+f(m.delivery_uber)+'</td><td style="color:#00e5a0">'+f(m.delivery_transferencia)+'</td></tr>';}).join('');
-  document.getElementById('outel').textContent='const SALES='+JSON.stringify({monthly:parsed,daily:[]},null,2)+';';
-  document.getElementById('out-hint').innerHTML='Copia y reemplaza todo el bloque <code>const SALES = {...};</code> en data.js:';
-  on('c4','n4');
-}
-
-// ─── PROCESADOR PEDIDOS YA ───
 function parseCSVLine(text) {
   let ret = [], val = '', inQ = false;
   for(let i=0; i<text.length; i++) {
@@ -212,71 +183,100 @@ function parseCSVLine(text) {
   }
   ret.push(val); return ret;
 }
-function parsePYAmount(str) { return parseInt(str.replace(/["\.]/g, '').split(',')[0]) || 0; }
 
+// ─── PROCESADOR TOTEAT ───
+function runTot(){
+  document.getElementById('logel').innerHTML=''; document.getElementById('thead').innerHTML=''; document.getElementById('tbody').innerHTML='';
+  document.getElementById('tbl-w').style.display='block';
+  on('c3','n3');
+  var sy=parseInt(document.getElementById('sy').value), sm2=parseInt(document.getElementById('sm').value);
+  var rows=parseTable(fileText);
+  if(!rows.length){lg('❌ Sin filas encontradas — verifica el archivo','err');return;}
+  var R={vb:1,vn:3,siva:5,costo:6,margen:7,py:13,pyv:14,pyc:15,uber:17,transf:20};
+  var hdr=rows[0], dayCols=[], prev=0;
+  for(var c=1;c<hdr.length;c++){ var m=/\w+\s+(\d+)$/.exec(hdr[c].trim()); if(m) dayCols.push({c:c,d:parseInt(m[1])}); }
+  var mStarts=[dayCols[0].c];
+  dayCols.forEach(function(x){if(x.d<prev)mStarts.push(x.c); prev=x.d;});
+  var totCol=-1;
+  for(var i=hdr.length-1;i>=1;i--){if(hdr[i].trim()==='Total'){totCol=i;break;}}
+  if(totCol<0) totCol=dayCols[dayCols.length-1].c+1;
+  var parsed=[];
+  mStarts.forEach(function(cs,mi){
+    var ce=mi+1<mStarts.length?mStarts[mi+1]:totCol, days=ce-cs, absM=sm2+mi, yr=sy+Math.floor(absM/12), mo=absM%12, name=MN[mo]+' '+yr;
+    function S(ri){var t=0; for(var col=cs;col<ce;col++) if(rows[ri]&&col<rows[ri].length) t+=pn(rows[ri][col]); return Math.round(t);}
+    var vn=S(R.vn), siva=S(R.siva), co=S(R.costo), mg=S(R.margen), py=S(R.py)+S(R.pyv)+S(R.pyc), ub=S(R.uber), tr=S(R.transf);
+    parsed.push({month:name, venta_bruta:S(R.vb), venta_neta:vn, venta_sin_iva:siva, costo:co, margen_pct:vn>0?Math.round(mg/vn*1000)/10:0, days_active:days, avg_daily:days?Math.round(vn/days):0, avg_daily_sin_iva:days?Math.round(siva/days):0, delivery_ya:py, delivery_uber:ub, delivery_transferencia:tr});
+    lg(name+': VN $'+(vn/1e6).toFixed(1)+'M / PY $'+(py/1e6).toFixed(2)+'M ('+days+'d)','ok');
+  });
+  document.getElementById('thead').innerHTML='<tr><th>Mes</th><th>Venta Neta</th><th>PedidosYa</th><th>Uber Eats</th><th>Del. Interno</th></tr>';
+  document.getElementById('tbody').innerHTML=parsed.map(function(m){return '<tr><td>'+m.month+'</td><td style="color:var(--m)">'+f(m.venta_neta)+'</td><td style="color:#ff3fa4">'+f(m.delivery_ya)+'</td><td style="color:#a78bfa">'+f(m.delivery_uber)+'</td><td style="color:#00e5a0">'+f(m.delivery_transferencia)+'</td></tr>';}).join('');
+  document.getElementById('outel').textContent='const SALES='+JSON.stringify({monthly:parsed,daily:[]},null,2)+';';
+  document.getElementById('out-hint').innerHTML='Copia y reemplaza el bloque <code>const SALES = {...};</code> en data.js:';
+  on('c4','n4');
+}
+
+// ─── PROCESADOR PEDIDOS YA ───
+function parsePYAmount(str) { return parseInt(str.replace(/["\.]/g, '').split(',')[0]) || 0; }
 async function runPY() {
-  document.getElementById('logel').innerHTML='';
-  document.getElementById('tbl-w').style.display='none'; 
+  document.getElementById('logel').innerHTML=''; document.getElementById('tbl-w').style.display='none'; 
   let results = { dm: [], hm: [], d6: [], dr: [] };
   lg('Procesando archivos de PedidosYa...', 'info');
-  
   for(let f of loadedFiles) {
-    let text = await f.text();
-    let lines = text.split(/\r?\n/).filter(x => x.trim());
-    if(!lines.length) continue;
+    let text = await f.text(); let lines = text.split(/\r?\n/).filter(x => x.trim()); if(!lines.length) continue;
     let header = lines[0].toLowerCase();
-    
     if (header.includes('rechazados')) {
-       results.dm = lines.slice(1).map(l => {
-          let p = parseCSVLine(l);
-          if(p.length < 4) return null;
-          return { mes: p[0], pedidos: parseInt(p[1])||0, rechazados: parseInt(p[2])||0, ventas: parsePYAmount(p[3]) };
-       }).filter(x => x);
+       results.dm = lines.slice(1).map(l => { let p = parseCSVLine(l); return p.length<4 ? null : { mes: p[0], pedidos: parseInt(p[1])||0, rechazados: parseInt(p[2])||0, ventas: parsePYAmount(p[3]) };}).filter(x => x);
        lg('✓ Leído: Reporte mensual (' + results.dm.length + ' meses detectados)', 'ok');
-    } 
-    else if (header.includes('hora') && header.includes('ingresos')) {
-       results.hm = lines.slice(1).map(l => {
-          let p = parseCSVLine(l);
-          if(p.length < 3) return null;
-          return { hora: parseInt(p[0])||0, pedidos: parseInt(p[1])||0, ingresos: parsePYAmount(p[2]) };
-       }).filter(x => x);
-       lg('✓ Leído: Mapa de calor horario (' + results.hm.length + ' horas de tráfico)', 'ok');
-    } 
-    else if (header.includes('producto') && header.includes('total')) {
-       let data = lines.slice(1).map(l => {
-          let p = parseCSVLine(l);
-          if(p.length < 5) return null;
-          return { name: p[0], qty: parseInt(p[3])||0, venta: parsePYAmount(p[4]) };
-       }).filter(x => x);
-       
-       if (f.name.includes('popularDishes') || data.length > 0) {
-           let dates = f.name.match(/\d{8}/g);
-           if (dates && dates.length >= 2) {
-               let d1 = new Date(dates[0].slice(0,4), dates[0].slice(4,6)-1, dates[0].slice(6,8));
-               let d2 = new Date(dates[1].slice(0,4), dates[1].slice(4,6)-1, dates[1].slice(6,8));
-               let diffDays = (d2 - d1) / (1000 * 60 * 60 * 24);
-               if (diffDays > 30) { results.d6 = data; lg('✓ Leído: Ranking de Platos (Histórico Largo)', 'ok'); }
-               else { results.dr = data; lg('✓ Leído: Ranking de Platos (Reciente)', 'ok'); }
-           } else {
-               if(data.reduce((s,x)=>s+x.qty,0) > 1000) { results.d6 = data; lg('✓ Leído: Ranking de Platos (Histórico)', 'ok'); }
-               else { results.dr = data; lg('✓ Leído: Ranking de Platos (Reciente)', 'ok'); }
-           }
-       }
-    } else {
-       lg('⚠ Archivo ignorado/no reconocido: ' + f.name, 'warn');
+    } else if (header.includes('hora') && header.includes('ingresos')) {
+       results.hm = lines.slice(1).map(l => { let p = parseCSVLine(l); return p.length<3 ? null : { hora: parseInt(p[0])||0, pedidos: parseInt(p[1])||0, ingresos: parsePYAmount(p[2]) };}).filter(x => x);
+       lg('✓ Leído: Mapa de calor horario (' + results.hm.length + ' horas)', 'ok');
+    } else if (header.includes('producto') && header.includes('total')) {
+       let data = lines.slice(1).map(l => { let p = parseCSVLine(l); return p.length<5 ? null : { name: p[0], qty: parseInt(p[3])||0, venta: parsePYAmount(p[4]) };}).filter(x => x);
+       if(data.reduce((s,x)=>s+x.qty,0) > 1000) { results.d6 = data; lg('✓ Leído: Ranking Platos Histórico', 'ok'); }
+       else { results.dr = data; lg('✓ Leído: Ranking Platos Reciente', 'ok'); }
     }
   }
-  
   let outText = '';
   if(results.dm.length) outText += 'const DELIVERY_MONTHLY=' + JSON.stringify(results.dm) + ';\n\n';
   if(results.hm.length) outText += 'const HEATMAP=' + JSON.stringify(results.hm) + ';\n\n';
   if(results.d6.length) outText += 'const DISHES_6M=' + JSON.stringify(results.d6) + ';\n\n';
   if(results.dr.length) outText += 'const DISHES_RECENT=' + JSON.stringify(results.dr) + ';\n';
-  
   if(!outText) { lg('❌ No se generó información. ¿Subiste los CSV correctos?', 'err'); return; }
-  
   document.getElementById('outel').textContent = outText;
-  document.getElementById('out-hint').innerHTML = 'Copia esto y reemplaza <strong>los 4 bloques</strong> al final de tu data.js:';
+  document.getElementById('out-hint').innerHTML = 'Copia esto y reemplaza <strong>los 4 bloques</strong> de delivery en data.js:';
+  on('c4', 'n4');
+}
+
+// ─── PROCESADOR BANCO ITAU ───
+function parseItaAmount(str) { return parseInt(str.replace(/[^0-9]/g, '')) || 0; }
+async function runIta() {
+  document.getElementById('logel').innerHTML=''; document.getElementById('tbl-w').style.display='block'; 
+  let allTx = []; lg('Procesando cartolas de Itaú...', 'info');
+  for(let fi of loadedFiles) {
+    let text = await fi.text(); let lines = text.split(/\r?\n/).filter(x => x.trim());
+    let year = new Date().getFullYear();
+    let pMatch = text.match(/Período.*?(\d{4})/i); if(pMatch) year = pMatch[1];
+    let txs = [];
+    lines.forEach(l => {
+      let p = parseCSVLine(l); if(p.length < 6) return;
+      let dateStr = p[0].trim();
+      if(/^\d{2}\/\d{2}$/.test(dateStr)) {
+        let pts = dateStr.split('/'); let isoDate = year + '-' + pts[1] + '-' + pts[0];
+        let abono = parseItaAmount(p[4]); let cargo = parseItaAmount(p[5]);
+        if(abono > 0 || cargo > 0) txs.push({ date: isoDate, desc: p[3].trim(), in: abono, out: cargo });
+      }
+    });
+    if(txs.length) { lg('✓ ' + txs.length + ' movimientos extraídos ('+year+').', 'ok'); allTx = allTx.concat(txs); }
+  }
+  if(!allTx.length) { lg('❌ No hay datos válidos.', 'err'); return; }
+  allTx.sort((a,b) => b.date.localeCompare(a.date));
+  document.getElementById('thead').innerHTML='<tr><th>Fecha</th><th style="text-align:left">Descripción</th><th>Abono (+)</th><th>Cargo (-)</th></tr>';
+  document.getElementById('tbody').innerHTML=allTx.slice(0,30).map(function(t){
+    return '<tr><td>'+t.date+'</td><td style="text-align:left;color:var(--t)">'+t.desc+'</td><td style="color:#00e5a0">'+(t.in>0?fmt(t.in):'-')+'</td><td style="color:#ff5050">'+(t.out>0?fmt(t.out):'-')+'</td></tr>';
+  }).join('') + (allTx.length>30?'<tr><td colspan="4" style="text-align:center;color:var(--sub);padding:15px">... y '+ (allTx.length-30) +' movimientos más ocultos ...</td></tr>':'');
+  
+  document.getElementById('outel').textContent='const BANK_TX=' + JSON.stringify(allTx) + ';';
+  document.getElementById('out-hint').innerHTML='Copia este bloque y pégalo <strong>al final de tu archivo <code>data.js</code></strong> (es un bloque nuevo):';
   on('c4', 'n4');
 }
 
