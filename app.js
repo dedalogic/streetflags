@@ -2139,23 +2139,41 @@ function renderFlujoCaja(isFilterChange){
       +'</tr>';
   }).join('');
 
-  // Caja Chica
+  // Caja Chica (Gastos Manuales)
   var manualGastos = JSON.parse(localStorage.getItem('app_gastos') || '[]');
   var totalManual = 0;
   manualGastos.forEach(function(g) {
     if(currentMonth === 'all' || g.date.startsWith(currentMonth)) totalManual += parseInt(g.monto) || 0;
   });
 
-  var saldoBanco = tIn - tOut;
-  var cajaReal = saldoBanco - totalManual;
+  // Buscar el Efectivo físico guardado desde Toteat
+  var efectivoToteat = 0;
+  if (typeof SALES !== 'undefined' && SALES.monthly) {
+    if (currentMonth === 'all') {
+      efectivoToteat = SALES.monthly.reduce(function(sum, m) { return sum + (m.efectivo || 0); }, 0);
+    } else {
+      var pts = currentMonth.split('-');
+      var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var targetName = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
+      var match = SALES.monthly.find(function(m) { return m.month === targetName; });
+      if(match) efectivoToteat = match.efectivo || 0;
+    }
+  }
 
+  var saldoBanco = tIn - tOut;
+  var cajaRealFisica = efectivoToteat - totalManual;
+
+  // Renderizar 6 KPIs a 3 columnas sin emojis
+  kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
   kpiDiv.innerHTML = [
-    {l:'Abonos Banco', v:formatMoney(tIn), f:'Transbank, transferencias', c:'var(--g)'},
-    {l:'Cargos Banco', v:formatMoney(tOut), f:'Pago a proveedores', c:'var(--r)'},
-    {l:'Gastos Hormiga (Caja)', v:formatMoney(totalManual), f:'Efectivo / Manuales', c:'var(--y)'},
-    {l:'Caja Real Restante', v:(cajaReal<0?'-':'')+formatMoney(Math.abs(cajaReal)), f:'Banco menos Caja Chica', c:cajaReal>=0?'var(--g)':'var(--r)'}
+    {l:'Abonos Banco', v:formatMoney(tIn), f:'Transbank y Transferencias', c:'var(--g)'},
+    {l:'Cargos Banco', v:formatMoney(tOut), f:'Pago a Proveedores', c:'var(--r)'},
+    {l:'Saldo Banco', v:(saldoBanco<0?'-':'')+formatMoney(Math.abs(saldoBanco)), f:'Neto en la cuenta', c:saldoBanco>=0?'var(--g)':'var(--r)'},
+    {l:'Efectivo Entrante', v:formatMoney(efectivoToteat), f:'Según sistema Toteat', c:'var(--g)'},
+    {l:'Gastos en Efectivo', v:formatMoney(totalManual), f:'Caja Chica y manuales', c:'var(--y)'},
+    {l:'Caja Fuerte', v:(cajaRealFisica<0?'-':'')+formatMoney(Math.abs(cajaRealFisica)), f:'Efectivo Neto Real', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
   ].map(function(k){
-    return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div>'
+    return '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div>'
       +'<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
   }).join('');
   
@@ -2180,7 +2198,6 @@ function renderFlujoCaja(isFilterChange){
     }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">No hay ingresos este mes</div>';
   }
 }
-
 // ── FLUJO DE CAJA Y AUDITORÍA (BANCO ITAÚ + CAJA CHICA) ──
 
 function formatMoney(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
