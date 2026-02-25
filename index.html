@@ -237,7 +237,7 @@ tr:last-child td{border-bottom:none}
   <div class="nav-tabs">
     <div class="nt on" id="t-dash"     onclick="go('dash')">Dashboard</div>
     <div class="nt"    id="t-ventas"   onclick="go('ventas')">Ventas</div>
-    <div class="nt"    id="t-analisis" onclick="go('analisis')">Análisis</div>
+    <div class="nt"    id="t-analisis" onclick="go('analisis')">An&#225;lisis</div>
     <div class="nt"    id="t-delivery" onclick="go('delivery')">Delivery</div>
     <div class="nt"    id="t-stock"    onclick="go('stock')">Stock</div>
     <div class="nt"    id="t-rec"      onclick="go('rec')">Recetas</div>
@@ -291,6 +291,7 @@ tr:last-child td{border-bottom:none}
     <div class="mm-item" onclick="go('obj'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Objetivos</div>
   </div>
 </div>
+
 
 <div id="p-dash" class="page on">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
@@ -382,6 +383,7 @@ tr:last-child td{border-bottom:none}
     <div id="insight-cards"></div>
   </div>
 </div>
+
 
 <div id="p-stock" class="page">
   
@@ -514,7 +516,6 @@ tr:last-child td{border-bottom:none}
     <div class="cnt-grid" id="c-grid"></div>
   </div>
 </div>
-
 <div id="p-rec" class="page">
   <div class="ctrls">
     <input class="inp w280" type="text" id="rq" placeholder="Buscar receta..." oninput="filterR()">
@@ -607,7 +608,7 @@ tr:last-child td{border-bottom:none}
       <div id="del-heatmap" style="margin-top:8px"></div>
     </div>
     <div class="card">
-      <div class="card-hd">Top platos (últimos 6 meses · PedidosYa)</div>
+      <div class="card-hd">Top platos (&#250;ltimos 6 meses · PedidosYa)</div>
       <div class="bars" id="del-top-platos"></div>
     </div>
   </div>
@@ -634,7 +635,7 @@ tr:last-child td{border-bottom:none}
   <div id="gview-resumen" class="gview">
     <div id="kpi-gastos" class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
     <div class="g2" style="margin-bottom:20px">
-      <div class="card"><div class="card-hd">Por categoría (mensual)</div><div class="bars" id="ch-gcat"></div></div>
+      <div class="card"><div class="card-hd">Por categor&#237;a (mensual)</div><div class="bars" id="ch-gcat"></div></div>
       <div class="card"><div class="card-hd">Impacto sobre venta mensual prom.</div><div id="gasto-impact" style="padding:12px 0"></div></div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="gcat-filters">
@@ -648,8 +649,8 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="tbl-shell"><div class="tbl-scroll"><table>
       <thead><tr>
-        <th>Gasto</th><th class="hide-sm">Categoría</th><th class="hide-sm">Proveedor / Contacto</th>
-        <th class="r">Sem</th><th class="r hide-xs">Mes</th><th class="r hide-xs">Año</th>
+        <th>Gasto</th><th class="hide-sm">Categor&#237;a</th><th class="hide-sm">Proveedor / Contacto</th>
+        <th class="r">Sem</th><th class="r hide-xs">Mes</th><th class="r hide-xs">A&#241;o</th>
         <th class="hide-xs">Vencimiento</th><th></th>
       </tr></thead>
       <tbody id="g-body"></tbody>
@@ -671,7 +672,7 @@ tr:last-child td{border-bottom:none}
     <div style="margin-top:12px"><button class="btn btn-sm btn-c" onclick="openAddHist()">+ Agregar pago</button></div>
   </div>
 
-  <div id="gview-flujo" class="gview" style="display:none">
+<div id="gview-flujo" class="gview" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <div style="font-size:12px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Auditoría Financiera</div>
@@ -850,17 +851,17 @@ tr:last-child td{border-bottom:none}
     <input class="f-inp" type="text" id="mg-name" placeholder="Ej: Arriendo local">
     <div class="f2">
       <div>
-        <label class="f-lbl">Categoría</label>
+        <label class="f-lbl">Categor&#237;a</label>
         <select class="f-inp" id="mg-cat">
-          <option value="arriendo">🏢 Arriendo</option>
-          <option value="servicios">⚡ Servicios básicos</option>
-          <option value="gas">🔥 Gas</option>
-          <option value="personal">👨‍🍳 Personal</option>
-          <option value="marketing">📢 Marketing</option>
-          <option value="mantencion">🔧 Mantencion</option>
-          <option value="software">💻 Software/Sistemas</option>
-          <option value="insumos">🍽️ Insumos</option>
-          <option value="otros">📦 Otros</option>
+          <option value="arriendo">&#127968; Arriendo</option>
+          <option value="servicios">&#9889; Servicios b&#225;sicos</option>
+          <option value="gas">&#128293; Gas</option>
+          <option value="personal">&#128104;&#8205;&#127859; Personal</option>
+          <option value="marketing">&#128227; Marketing</option>
+          <option value="mantencion">&#128296; Mantenci&#243;n</option>
+          <option value="software">&#128187; Software/Sistemas</option>
+          <option value="insumos">&#127859; Insumos</option>
+          <option value="otros">&#128230; Otros</option>
         </select>
       </div>
       <div>
