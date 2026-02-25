@@ -925,6 +925,19 @@ function openImport(mode){
   $('m-import').classList.add('on');
 }
 
+// ─── MOTOR DE LECTURA CSV ───
+function parseCSVRow(text, delimiter) {
+  var ret = [], val = '', inQ = false;
+  for(var i=0; i<text.length; i++) {
+    var c = text[i];
+    if(c === '"') inQ = !inQ;
+    else if(c === delimiter && !inQ) { ret.push(val.replace(/^"|"$/g,'').trim()); val=''; }
+    else val += c;
+  }
+  ret.push(val.replace(/^"|"$/g,'').trim()); 
+  return ret;
+}
+
 function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFileImp(f);}
 
 function handleFileImp(file){
@@ -936,8 +949,8 @@ function handleFileImp(file){
       var text = e.target.result;
       var rows = [];
       
-      // Si es el XLS directo de Toteat (que por dentro es código HTML)
-      if(text.indexOf('<tr')>=0 || text.indexOf('<TR')>=0){
+      // Lector dual (HTML o CSV)
+      if(text.toLowerCase().includes('<tr') || text.toLowerCase().includes('<table')){
         var doc=new DOMParser().parseFromString(text,'text/html');
         doc.querySelectorAll('tr').forEach(function(tr){
           var cells=[];
@@ -945,42 +958,31 @@ function handleFileImp(file){
           if(cells.some(function(c){return c;})) rows.push(cells);
         });
       } else {
-        // Si es un CSV o TXT, usamos el motor seguro (parseCSVRow) que creamos antes
-        var delimiter = text.indexOf('\t') >= 0 ? '\t' : (text.indexOf(';') >= 0 ? ';' : ',');
-        text.split(/\r?\n/).forEach(function(l){
+        var delimiter = text.includes(';') ? ';' : (text.includes('\t') ? '\t' : ',');
+        var lines = text.split(/\r\n|\n|\r/); 
+        lines.forEach(function(l){
           if(l.trim()){
-            var cells = parseCSVRow(l, delimiter); // Esto evita que las comas en los números rompan la lectura
+            var cells = parseCSVRow(l, delimiter);
             if(cells.some(function(c){return c;})) rows.push(cells);
           }
         });
       }
       
-      if(rows.length<2){$('imp-st').textContent='Archivo vacío o sin datos válidos.';return;}
+      if(rows.length<2){$('imp-st').textContent='Archivo vacío o formato no válido.';return;}
 
-      // ── FIX INFALIBLE: ENCONTRAR LA FILA REAL DE LOS DÍAS ──
-      var headerIdx = 0;
-      var maxCols = 0;
-      for (var idx = 0; idx < rows.length; idx++) {
-          if (rows[idx].length > maxCols) {
-              maxCols = rows[idx].length;
-              headerIdx = idx;
-          }
-      }
-
-      var headers = rows[headerIdx];
-      window.importHeaders = headers; 
-      importPending = rows.slice(headerIdx + 1); // Omitimos todos los títulos decorativos que estén arriba
+      // Guardamos la matriz completa en memoria
+      window.toteatRows = rows; 
+      importPending = rows; 
       
-      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; '+maxCols+' columnas detectadas</span>';
+      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Archivo leído con éxito ('+rows.length+' filas)</span>';
       
-      var cols = importMode==='inv' ? ['Ingrediente','Costo unit','Unidad','Uso/sem'] : headers.slice(0, 5); // Preview dinámico
-      
+      // Vista previa simple
+      var previewRows = rows.slice(0, 4);
       $('imp-prev').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11.5px">'
-        +'<tr>'+cols.map(function(c){return'<td style="padding:3px 8px;color:var(--sub);font-weight:700;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>'
-        +importPending.slice(0,5).map(function(r){
-          return '<tr>'+r.slice(0,cols.length).map(function(c){return'<td style="padding:3px 8px;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>';
+        +previewRows.map(function(r){
+          return '<tr>'+r.slice(0,6).map(function(c){return'<td style="padding:3px 8px;white-space:nowrap;border-bottom:1px solid var(--b)">'+(String(c)||'').substring(0,15)+'</td>';}).join('')+'</tr>';
         }).join('')+'</table>';
-        
+
       $('imp-act').style.display='flex';
     }catch(err){$('imp-st').textContent='Error al leer el archivo: '+err.message;}
   };
@@ -1008,75 +1010,76 @@ function applyImport(){
     alert('✓ Inventario actualizado: '+updated+' ingredientes.');
 
   } else {
-    // ── LÓGICA DE EFECTIVO (REPARADA Y BLINDADA) ──
-    var headers = window.importHeaders || [];
+    // ── LÓGICA DIRECTA Y EXACTA PARA EFECTIVO ──
+    var rows = window.toteatRows || [];
     
-    // Buscamos "Efectivo" en cualquiera de las primeras 3 columnas
-    var efectivoRow = importPending.find(function(r){ 
-        return r.slice(0, 3).some(function(cell){ 
-            return cell && String(cell).toUpperCase().trim().includes('EFECTIVO'); 
-        }); 
-    });
+    // 1. Buscamos las filas por su nombre exacto (ignorando mayúsculas/minúsculas)
+    var vIdx = rows.findIndex(function(r){ return r.some(function(c){ return String(c).trim().toLowerCase() === 'venta neta'; }); });
+    var eIdx = rows.findIndex(function(r){ return r.some(function(c){ return String(c).trim().toLowerCase() === 'efectivo'; }); });
 
-    if (efectivoRow && headers.length > 5) {
-        var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-        var sumByMonth = {}; 
-        
-        var currentMonthIdx = 0; // Arrancamos en Enero
-        var currentYear = 2025;  // de 2025
-        var prevDayNum = 0;
-
-        for (var i = 1; i < headers.length; i++) {
-            var colTitle = (headers[i] || '').trim().toLowerCase();
-            
-            // Evitamos que Toteat nos engañe con columnas de "Total" o "Semana"
-            if (!colTitle || colTitle.includes('total') || colTitle.includes('sem')) continue;
-
-            // Extraemos solo el número ("lunes 1" -> 1)
-            var match = colTitle.match(/\d+/);
-            if (!match) continue; 
-            var dayNum = parseInt(match[0]);
-
-            // Si estábamos a fin de mes (ej: 28, 30, 31) y cae a 1, avanzamos de mes
-            if (dayNum === 1 && prevDayNum >= 28) {
-                currentMonthIdx++;
-                if (currentMonthIdx > 11) {
-                    currentMonthIdx = 0;
-                    currentYear++;
-                }
-            }
-            
-            // Guardamos memoria del día actual para el próximo ciclo
-            if (dayNum > 0 && dayNum <= 31) {
-                prevDayNum = dayNum;
-            }
-
-            var label = mNames[currentMonthIdx] + ' ' + currentYear;
-            
-            // Usamos || '0' por si acaso Toteat deja celdas vacías al final
-            var rawCell = efectivoRow[i] || '0'; 
-            var val = parseInt(String(rawCell).replace(/[^0-9]/g, '')) || 0;
-            
-            sumByMonth[label] = (sumByMonth[label] || 0) + val;
-        }
-
-        // Inyectar en memoria
-        var mesesActualizados = [];
-        for (var monthLabel in sumByMonth) {
-            var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
-            if (targetMonth) {
-                targetMonth.efectivo = sumByMonth[monthLabel];
-                mesesActualizados.push(monthLabel);
-            }
-        }
-
-        localStorage.setItem('app_sales', JSON.stringify(SALES));
-        alert('✓ Efectivo extraído mes a mes con éxito:\n' + mesesActualizados.join(' | '));
-        
-        if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
-    } else {
-        alert('No se encontró la fila "Efectivo" o hubo un error con los encabezados (Detectadas: ' + headers.length + ' columnas).');
+    if(vIdx === -1) {
+        alert('❌ No se encontró la fila "Venta Neta". Verifica que sea el Cuadro de Ventas de Toteat.');
+        return;
     }
+
+    // 2. La fila de los días SIEMPRE está justo arriba de la Venta Neta
+    var headerRow = rows[vIdx - 1] || [];
+    if(!headerRow.some(function(c){ return /\d+/.test(c); })) {
+        headerRow = rows[vIdx - 2] || []; // Respaldo por si hay una fila en blanco
+    }
+
+    var rowEfectivo = eIdx >= 0 ? rows[eIdx] : null;
+
+    var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var sumByMonth = {}; 
+    
+    var currentMonthIdx = 0; // Arrancamos en Enero
+    var currentYear = 2025;  
+    var prevDayNum = 0;
+
+    // 3. Iteramos según las columnas de la cabecera
+    for (var i = 0; i < headerRow.length; i++) {
+        var colTitle = String(headerRow[i]).toLowerCase().trim();
+        var match = colTitle.match(/\d+/);
+
+        // Ignoramos columnas que no tengan número de día o sean totales
+        if (!match || colTitle.includes('total') || colTitle.includes('sem')) continue;
+
+        var dayNum = parseInt(match[0]);
+
+        // Si el día cae (ej: 31 a 1), avanzamos de mes
+        if (dayNum === 1 && prevDayNum >= 28) {
+            currentMonthIdx++;
+            if (currentMonthIdx > 11) {
+                currentMonthIdx = 0;
+                currentYear++;
+            }
+        }
+        if (dayNum > 0 && dayNum <= 31) prevDayNum = dayNum;
+
+        var label = mNames[currentMonthIdx] + ' ' + currentYear;
+        
+        // Sacamos la plata de esa misma columna `i`. Si no hay, asumimos 0.
+        var eStr = rowEfectivo ? String(rowEfectivo[i] || '0').replace(/[^0-9]/g, '') : '0';
+        var eVal = parseInt(eStr) || 0;
+        
+        sumByMonth[label] = (sumByMonth[label] || 0) + eVal;
+    }
+
+    // 4. Inyectamos en memoria
+    var mesesActualizados = [];
+    for (var monthLabel in sumByMonth) {
+        var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
+        if (targetMonth) {
+            targetMonth.efectivo = sumByMonth[monthLabel];
+            mesesActualizados.push(monthLabel);
+        }
+    }
+
+    localStorage.setItem('app_sales', JSON.stringify(SALES));
+    alert('✓ Efectivo sumado mes a mes con éxito:\n' + mesesActualizados.join(' | '));
+    
+    if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
     cm('m-import'); 
   }
   importPending = null;
