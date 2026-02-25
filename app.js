@@ -57,76 +57,14 @@ function barChart(id,items,color,vFmt,lw){
 }
 
 // ════ DASHBOARD ════
-function initDelivery(){
-  var sel=$('del-mes-sel'); var sv=sel?sel.value:'all';
-
-  // 1. Filtrar Data
-  var mNames=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  var SM_all=SALES.monthly;
-  var SM=(function(){
-    if(sv==='all') return SM_all;
-    var p2=sv.split('-'); var mName=mNames[parseInt(p2[1])-1]+' '+p2[0];
-    return SM_all.filter(function(m){return m.month===mName;});
-  })();
-
-  // 2. Cálculos Críticos
-  var intern_transf=SM.reduce((s,m)=>s+(m.delivery_transferencia||0),0);
-  var ya_toteat=SM.reduce((s,m)=>s+(m.delivery_ya||0),0);
-  var uber_toteat=SM.reduce((s,m)=>s+(m.delivery_uber||0),0);
-  var vtaTotal=SM.reduce((s,m)=>s+m.venta_neta,0);
-  var local=Math.max(0,vtaTotal-ya_toteat-uber_toteat-intern_transf);
-
-  // 3. Renderizar KPIs según el canal seleccionado
-  var kpis=[];
-  if(delSrc==='ya'){
-    var DM=sv==='all'?DELIVERY_MONTHLY:DELIVERY_MONTHLY.filter(m=>m.mes===sv);
-    var t_vta=DM.reduce((s,m)=>s+m.ventas,0);
-    var t_ped=DM.reduce((s,m)=>s+m.pedidos,0);
-    kpis=[
-      {l:'Pedidos PedidosYa',v:t_ped.toLocaleString(),f:'Datos CSV'},
-      {l:'Venta PedidosYa',v:fmtM(t_vta||ya_toteat),f:'Plataforma',m:1},
-      {l:'Ticket prom.',v:fmt(t_ped>0?t_vta/t_ped:0),f:''},
-      {l:'Tasa rechazo',v:(DM.length?DM.reduce((s,m)=>s+(m.rechazados/Math.max(m.pedidos,1)),0)/DM.length*100:0).toFixed(1)+'%',f:'',m:1}
-    ];
-  } else if(delSrc==='uber'){
-    kpis=[
-      {l:'Venta Uber Eats',v:fmtM(uber_toteat),f:'Vía Toteat',m:1},
-      {l:'Participación',v:(vtaTotal>0?uber_toteat/vtaTotal*100:0).toFixed(1)+'%',f:'Sobre venta neta'},
-      {l:'Local presencial',v:fmtM(local),f:''},
-      {l:'Venta Total',v:fmtM(vtaTotal),f:'',m:1}
-    ];
-  } else if(delSrc==='intern'){
-    kpis=[
-      {l:'Delivery Interno',v:fmtM(intern_transf),f:'Transferencias',m:1},
-      {l:'Pedidos est.',v:Math.round(intern_transf/9500).toLocaleString(),f:'$9.500 ticket prom'},
-      {l:'Venta Local',v:fmtM(local),f:''},
-      {l:'Venta Total',v:fmtM(vtaTotal),f:'',m:1}
-    ];
-  } else {
-    kpis=[
-      {l:'PedidosYa',v:fmtM(ya_toteat),f:''},
-      {l:'Uber Eats',v:fmtM(uber_toteat),f:'',m:1},
-      {l:'Interno',v:fmtM(intern_transf),f:''},
-      {l:'Local',v:fmtM(local),f:'',m:1}
-    ];
-  }
-
-  $('kpi-del').innerHTML=kpis.map(k=>`<div class="kpi${k.m?' m':''}"><div class="kpi-lbl">${k.l}</div><div class="kpi-val" style="color:var(--t)">${k.v}</div><div class="kpi-foot">${k.f}</div></div>`).join('');
-
-  // 4. Gráfico de Tendencia
-  var delColor=delSrc==='ya'?'#ff3fa4':delSrc==='intern'?'#a78bfa':delSrc==='uber'?'#00d4ff':'#00e5a0';
-  var g1Data=SM.map(m=>({
-    l:m.month.split(' ')[0].slice(0,3),
-    v:delSrc==='uber'?m.delivery_uber:delSrc==='intern'?m.delivery_transferencia:delSrc==='ya'?m.delivery_ya:m.venta_neta
-  }));
-  if(g1Data.length===1) g1Data=[{l:'',v:0},g1Data[0],{l:'',v:0}]; // Padding para gráfico de un solo mes
-  lineChart('ch-del-mes', g1Data, delColor, fmtM);
-
-  // 5. Gestión de Paneles Extra (Ocultar si no hay data)
-  var extra1 = $('del-heatmap');
-  var extra2 = $('del-top-platos');
-  if(extra1) extra1.parentElement.style.display = (delSrc === 'ya' ? 'block' : 'none');
-  if(extra2) extra2.parentElement.style.display = (delSrc === 'ya' ? 'block' : 'none');
+function initDashSel(){
+  var M=SALES.monthly;
+  var now=new Date();
+  var mN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var cur=mN[now.getMonth()]+' '+now.getFullYear();
+  var html='<option value="all">Todos los meses</option>';
+  M.forEach(function(m){ html+='<option value="'+m.month+'"'+(m.month===cur?' selected':'')+'>'+m.month+'</option>'; });
+  $('dash-mes-sel').innerHTML=html;
 }
 
 function initDash(){
@@ -2174,33 +2112,24 @@ function renderTablaFlujo(data, esFiltroManual, nombreProv) {
   if(!tbody) return;
 
   var rows = data.map(function(t){
-    var reglasMemoria = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
-    var categoriaFinal = t.cat !== "Otros" ? t.cat : (reglasMemoria[t.desc.toUpperCase()] || null);
-    
-    // Iconos de estado: ● Verificado, ○ Pendiente
-    var statusIcon = categoriaFinal 
-      ? '<span style="color:var(--g); margin-right:8px; font-size:12px;">●</span>' 
-      : '<span style="color:#444; margin-right:8px; font-size:12px;">○</span>';
-
-    var catBadge = categoriaFinal 
-      ? '<br><span style="font-size:9px;color:var(--m);text-transform:uppercase;font-weight:700;">['+categoriaFinal+']</span>' 
-      : '';
-    
+    var catBadge = t.cat !== "Otros" ? '<br><span style="font-size:9px;color:var(--m);text-transform:uppercase">['+t.cat+']</span>' : '';
     return '<tr>'
       +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
-      +'<td style="text-align:left;font-weight:600;color:var(--t);cursor:pointer" onclick="asociarProveedor(\''+t.desc+'\')">'
-      + statusIcon + t.desc + catBadge +'</td>'
+      +'<td style="text-align:left;font-weight:600;color:var(--t)">'+t.desc + catBadge +'</td>'
       +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? formatMoney(t.in) : '—')+'</td>'
       +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? formatMoney(t.out) : '—')+'</td>'
       +'</tr>';
   }).join('');
 
-  tbody.innerHTML = esFiltroManual ? 
-    '<tr><td colspan="4" style="background:rgba(0,212,255,0.05);padding:10px;text-align:center;font-size:12px">'
-    +'Filtrado por: <strong>'+nombreProv+'</strong> '
-    +'<button onclick="renderFlujoCaja(true)" style="background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;margin-left:10px">Ver todos</button></td></tr>' + rows 
-    : rows;
+  if(esFiltroManual) {
+    tbody.innerHTML = '<tr><td colspan="4" style="background:rgba(0,212,255,0.05);padding:10px;text-align:center;font-size:12px">'
+      +'Mostrando movimientos de: <strong>'+nombreProv+'</strong> '
+      +'<button onclick="renderFlujoCaja(true)" style="background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;margin-left:10px">Ver todos</button></td></tr>' + rows;
+  } else {
+    tbody.innerHTML = rows;
+  }
 }
+
 function renderFlujoCaja(isFilterChange){
   var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
   var kpiDiv = document.getElementById('kpi-flujo');
@@ -2213,7 +2142,7 @@ function renderFlujoCaja(isFilterChange){
   var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
 
   var tIn = 0, tOut = 0;
-  var topOutMap = {}, topInNames = {};
+  var topOutMap = {}, topInMap = {};
 
   filteredBank.forEach(function(t){
     tIn += t.in; tOut += t.out;
@@ -2221,93 +2150,46 @@ function renderFlujoCaja(isFilterChange){
       var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim().toUpperCase();
       topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
     }
-    // Ranking de quién transfiere más dinero (Ingresos)
-    if(t.in > 0) {
-      var cleanIn = t.desc.replace(/Transferencia De /i, '').substring(0,20).trim().toUpperCase();
-      topInNames[cleanIn] = (topInNames[cleanIn] || 0) + t.in;
-    }
+    if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
   });
 
-  // --- Lógica de Efectivo (Fila 11 de tu Excel) ---
+  // Render KPIs
   var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce((s,g) => s + (g.date.startsWith(currentMonth) ? parseInt(g.monto) : 0), 0);
   var efectivoToteat = 0;
-  
-  // Datos extraídos directamente de la fila 11 de tu archivo "export (5).xls"
-  var manualData = {
-    "Enero 2025": 443643, "Febrero 2025": 378919, "Marzo 2025": 358191, 
-    "Abril 2025": 351906, "Mayo 2025": 380423, "Junio 2025": 319154, 
-    "Julio 2025": 406936, "Agosto 2025": 298306, "Septiembre 2025": 338485, 
-    "Octubre 2025": 301387, "Noviembre 2025": 339813, "Diciembre 2025": 380700, 
-    "Enero 2026": 312498, "Febrero 2026": 148965
-  };
-
-  if (currentMonth === 'all') {
-    efectivoToteat = Object.values(manualData).reduce((a, b) => a + b, 0);
-  } else {
-    var mArr = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  if (typeof SALES !== 'undefined' && SALES.monthly) {
     var pts = currentMonth.split('-');
-    var label = mArr[parseInt(pts[1]) - 1] + ' ' + pts[0];
-    efectivoToteat = manualData[label] || 0;
+    var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var target = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
+    var match = SALES.monthly.find(m => m.month === target);
+    if(match) efectivoToteat = match.efectivo || 0;
   }
 
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
-  // Render KPIs (6 cajas, estilo profesional sin emojis)
   kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
   kpiDiv.innerHTML = [
     {l:'Abonos Banco', v:formatMoney(tIn), f:'Total Digital', c:'var(--g)'},
     {l:'Cargos Banco', v:formatMoney(tOut), f:'Egresos Digitales', c:'var(--r)'},
     {l:'Saldo Banco', v:formatMoney(saldoBanco), f:'Neto Banco', c:saldoBanco>=0?'var(--g)':'var(--r)'},
-    {l:'Efectivo Entrante', v:formatMoney(efectivoToteat), f:'Fila 11 Toteat', c:'var(--g)'},
+    {l:'Efectivo Entrante', v:formatMoney(efectivoToteat), f:'Ventas Toteat', c:'var(--g)'},
     {l:'Gastos Efectivo', v:formatMoney(totalManual), f:'Caja Chica', c:'var(--y)'},
     {l:'Caja Fuerte', v:formatMoney(cajaRealFisica), f:'Billetes Reales', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
   ].map(k => '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>').join('');
 
   renderTablaFlujo(filteredBank, false);
 
-  // --- Rankings ---
+  // Módulo 1: Ranking expandible y clickeable
   if(panels) {
     panels.style.display = 'grid';
+    var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v);
+    var topDisplay = sortedOut.slice(0, 10); // Mostramos hasta 10
     
-    // Top 10 Egresos (Proveedores)
-    var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v).slice(0, 10);
-    document.getElementById('flujo-top-out').innerHTML = sortedOut.map(o => 
-      '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer">'
-      +'<span style="font-size:11px;color:var(--m)">'+o.n+'</span>'
-      +'<span style="font-size:11px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+'</span></div>'
-    ).join('');
-
-    // Top 5 Clientes (Quién transfiere más)
-    var sortedIn = Object.keys(topInNames).map(k => ({n:k, v:topInNames[k]})).sort((a,b) => b.v-a.v).slice(0, 5);
-    document.getElementById('flujo-top-in').innerHTML = sortedIn.map(o => 
-      '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-      +'<span style="font-size:11px;color:var(--sub)">' + o.n + '</span>'
-      +'<span style="font-size:11px;color:var(--g);font-family:var(--mono)">' + formatMoney(o.v) + '</span></div>'
-    ).join('');
+    document.getElementById('flujo-top-out').innerHTML = topDisplay.length ? topDisplay.map(function(o){
+      var pct = Math.round((o.v / tOut) * 100) || 0;
+      return '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer" title="Clic para ver detalle">'
+        +'<span style="font-size:12px;color:var(--m)">'+o.n+'</span>'
+        +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
+    }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">Sin registros</div>';
   }
-}
-
-// Función para asociar y categorizar transferencias al presionar
-function asociarProveedor(nombreOriginal) {
-    var nombreLimpio = nombreOriginal.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').trim();
-    var categoria = prompt("¿A qué categoría pertenece '" + nombreLimpio + "'? (Ej: Gas, Agua, Personal, Arriendo)");
-    
-    if (categoria) {
-        // 1. Guardar regla en memoria
-        var reglasActuales = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
-        reglasActuales[nombreOriginal.toUpperCase()] = categoria;
-        localStorage.setItem('reglas_prov', JSON.stringify(reglasActuales));
-        
-        // 2. Aplicar cambio a los datos cargados para que el icono cambie de inmediato
-        var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
-        var dataActualizada = bankData.map(function(t) {
-            if (t.desc === nombreOriginal) t.cat = categoria;
-            return t;
-        });
-        localStorage.setItem('bank_tx', JSON.stringify(dataActualizada));
-
-        renderFlujoCaja(true);
-        if(typeof toast === 'function') toast('Regla guardada: ' + categoria);
-    }
 }
