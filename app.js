@@ -1054,10 +1054,15 @@ function initDeliveryMesSel(){
   sel.innerHTML=html;
 }
 
-function setDelSrc(src,el){
-  delSrc=src;
-  document.querySelectorAll('[id^="del-src-"]').forEach(function(b){b.classList.remove('on')});
+function setDelSrc(src, el) {
+  delSrc = src;
+  // Quita la clase 'on' de todos los botones de la sección delivery
+  document.querySelectorAll('#p-delivery .pill-sel').forEach(function(b) {
+    b.classList.remove('on');
+  });
+  // Se la pone al que presionaste
   el.classList.add('on');
+  // Recarga la data
   initDelivery();
 }
 
