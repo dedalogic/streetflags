@@ -1,3 +1,7 @@
+// Carga automática de ventas desde la memoria
+if (localStorage.getItem('app_sales')) {
+  SALES = JSON.parse(localStorage.getItem('app_sales'));
+}
 // ─── RUNTIME ───
 var INGR = JSON.parse(JSON.stringify(INGR_RAW));
 var GASTOS = JSON.parse(JSON.stringify(GASTOS_INIT));
