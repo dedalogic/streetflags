@@ -948,7 +948,6 @@ function applyImport(){
   var updated=0, skipped=0;
 
   if(importMode === 'inv'){
-    // Lógica de importación de Inventario
     importPending.forEach(function(r){
       if(r.length<2) return;
       var name=r[0]; var cost=parseFloat((r[1]||'').replace(/[^0-9.]/g,''))||0;
@@ -962,50 +961,74 @@ function applyImport(){
       } else { skipped++; }
     });
     cm('m-import'); renderIngr(); initDash();
-    alert('✓ Inventario actualizado: '+updated+' ingredientes. '+skipped+' no encontrados.');
+    alert('✓ Inventario actualizado: '+updated+' ingredientes.');
 
   } else {
-    // ─── LÓGICA DE EXTRACCIÓN DE EFECTIVO (VENTAS TOTEAT) ───
-    
-    // 1. Buscamos la fila que en su primera columna diga exactamente "Efectivo"
-    var efectivoRow = importPending.find(function(r){ 
-        return r[0] && r[0].trim().toUpperCase() === 'EFECTIVO'; 
-    });
+    // ── LÓGICA DE EFECTIVO (REPARADA Y EXACTA) ──
+    var headers = window.importHeaders || [];
+    var efectivoRow = importPending.find(function(r){ return r[0] && r[0].trim().toUpperCase() === 'EFECTIVO'; });
 
-    if (efectivoRow) {
-        var mesIndex = 0;
+    if (efectivoRow && headers.length > 1) {
+        var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        var sumByMonth = {}; 
         
-        // 2. Recorremos las columnas de izq a derecha (saltando la celda 0 que es el título "Efectivo")
-        for (var i = 1; i < efectivoRow.length; i++) {
-            // Limpiamos el texto para dejar solo los números (ej: de "$ 443.643" a "443643")
-            var rawVal = efectivoRow[i].replace(/[^0-9]/g, ''); 
+        var currentMonthIdx = 0; // Arrancamos en Enero
+        var currentYear = 2025;  // de 2025
+        var prevDayNum = 0;
+
+        for (var i = 1; i < headers.length; i++) {
+            var colTitle = (headers[i] || '').trim().toLowerCase();
             
-            if (rawVal !== '') {
-                var val = parseInt(rawVal) || 0;
-                
-                // 3. Asignamos al mes correspondiente. 
-                if (mesIndex < SALES.monthly.length) {
-                    SALES.monthly[mesIndex].efectivo = val;
-                    mesIndex++;
+            // Evitamos que Toteat nos engañe con columnas de "Total" o "Semana"
+            if (!colTitle || colTitle.includes('total') || colTitle.includes('sem')) continue;
+
+            // Extraemos solo el número ("lunes 1" -> 1)
+            var match = colTitle.match(/\d+/);
+            if (!match) continue; 
+            var dayNum = parseInt(match[0]);
+
+            // Si estábamos a fin de mes (ej: 28, 30, 31) y cae a 1, avanzamos de mes
+            if (dayNum === 1 && prevDayNum >= 28) {
+                currentMonthIdx++;
+                if (currentMonthIdx > 11) {
+                    currentMonthIdx = 0;
+                    currentYear++;
                 }
             }
+            
+            // Guardamos memoria del día actual para el próximo ciclo
+            if (dayNum > 0 && dayNum <= 31) {
+                prevDayNum = dayNum;
+            }
+
+            var label = mNames[currentMonthIdx] + ' ' + currentYear;
+            
+            // Usamos || '0' por si acaso Toteat deja celdas vacías al final
+            var rawCell = efectivoRow[i] || '0'; 
+            var val = parseInt(String(rawCell).replace(/[^0-9]/g, '')) || 0;
+            
+            sumByMonth[label] = (sumByMonth[label] || 0) + val;
         }
-        
-        // 4. Guardamos el objeto SALES modificado en localStorage para que no se borre
+
+        // Inyectar en memoria
+        var mesesActualizados = [];
+        for (var monthLabel in sumByMonth) {
+            var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
+            if (targetMonth) {
+                targetMonth.efectivo = sumByMonth[monthLabel];
+                mesesActualizados.push(monthLabel);
+            }
+        }
+
         localStorage.setItem('app_sales', JSON.stringify(SALES));
+        alert('✓ Efectivo agrupado mes a mes con éxito:\n' + mesesActualizados.join(' | '));
         
-        alert('✓ Se extrajo el Efectivo de ' + mesIndex + ' meses correctamente. Se reflejará en el Flujo de Caja.');
-        
-        // Refrescamos el flujo de caja inmediatamente
         if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
-        
     } else {
-        alert('No se encontró la fila "Efectivo" en este archivo. Asegúrate de subir el consolidado de Toteat correcto.');
+        alert('No se encontró la fila "Efectivo" o hubo un error con los encabezados.');
     }
-    
-    cm('m-import'); // Cierra el modal
+    cm('m-import'); 
   }
-  
   importPending = null;
 }
 
@@ -2193,16 +2216,35 @@ function renderFlujoCaja(isFilterChange){
   
   if(!kpiDiv) return;
 
-  if(!bankData.length){
-    $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco. Importa tu cartola.</td></tr>';
-    kpiDiv.innerHTML = '';
-    if(panels) panels.style.display = 'none';
-    return;
+  // 1. AUTO-GENERAR MESES (Desde Enero 2025 hasta la actualidad)
+  if (sel && sel.options.length <= 3) { 
+      var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var d = new Date();
+      var currentYear = d.getFullYear();
+      var currentMonth = d.getMonth();
+      var optionsHtml = '<option value="all">Todos los meses</option>';
+      
+      for (var y = currentYear; y >= 2025; y--) {
+          var mStart = (y === currentYear) ? currentMonth : 11;
+          for (var m = mStart; m >= 0; m--) {
+              var val = y + '-' + (m + 1 < 10 ? '0' : '') + (m + 1);
+              var label = mNames[m] + ' ' + y;
+              optionsHtml += '<option value="' + val + '">' + label + '</option>';
+          }
+      }
+      sel.innerHTML = optionsHtml;
+      
+      // Si el filtro no se activó a mano, intentar preseleccionar el mes actual
+      if (!isFilterChange) {
+          var currentVal = currentYear + '-' + (currentMonth + 1 < 10 ? '0' : '') + (currentMonth + 1);
+          if (sel.querySelector('option[value="'+currentVal+'"]')) sel.value = currentVal;
+      }
   }
 
   var currentMonth = sel ? sel.value : 'all';
   var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
 
+  // 2. CÁLCULOS DEL BANCO (Si no hay, simplemente quedan en 0)
   var tIn = 0, tOut = 0;
   var topOutMap = {}, topInMap = {};
 
@@ -2215,9 +2257,13 @@ function renderFlujoCaja(isFilterChange){
     if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
   });
 
-  var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce((s,g) => s + (g.date.startsWith(currentMonth) ? parseInt(g.monto) : 0), 0);
+  // 3. CÁLCULO DE EFECTIVO Y GASTOS MANUALES (Garantizado, aunque no haya banco)
+  var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce(function(s, g) {
+      var match = (currentMonth === 'all') || g.date.startsWith(currentMonth);
+      return s + (match ? parseInt(g.monto) : 0);
+  }, 0);
+  
   var efectivoToteat = 0;
-
   if (typeof SALES !== 'undefined' && SALES.monthly) {
     if (currentMonth === 'all') {
       efectivoToteat = SALES.monthly.reduce((sum, m) => sum + (m.efectivo || 0), 0);
@@ -2235,6 +2281,7 @@ function renderFlujoCaja(isFilterChange){
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
+  // 4. RENDERIZAR KPIs SIEMPRE
   kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
   kpiDiv.innerHTML = [
     {l:'Abonos Banco', v:formatMoney(tIn), f:'Total Digital', c:'var(--g)'},
@@ -2245,28 +2292,34 @@ function renderFlujoCaja(isFilterChange){
     {l:'Caja Fuerte', v:formatMoney(cajaRealFisica), f:'Billetes Reales', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
   ].map(k => '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>').join('');
 
-  renderTablaFlujo(filteredBank, false);
+  // 5. RENDERIZAR TABLA Y GRÁFICOS (Solo si hay banco en el mes elegido)
+  if (!filteredBank.length) {
+      $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco registrados para esta fecha. Los cálculos de Caja Fuerte siguen activos.</td></tr>';
+      if(panels) panels.style.display = 'none';
+  } else {
+      renderTablaFlujo(filteredBank, false);
+      
+      if(panels) {
+        panels.style.display = 'grid';
+        
+        var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v);
+        var topDisplay = sortedOut.slice(0, 10);
+        
+        document.getElementById('flujo-top-out').innerHTML = topDisplay.length ? topDisplay.map(function(o){
+          var pct = Math.round((o.v / tOut) * 100) || 0;
+          return '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer" title="Clic para ver detalle">'
+            +'<span style="font-size:12px;color:var(--m)">'+o.n+'</span>'
+            +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
+        }).join('') : '<div class="empty">Sin registros</div>';
 
-  if(panels) {
-    panels.style.display = 'grid';
-    
-    var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v);
-    var topDisplay = sortedOut.slice(0, 10);
-    
-    document.getElementById('flujo-top-out').innerHTML = topDisplay.length ? topDisplay.map(function(o){
-      var pct = Math.round((o.v / tOut) * 100) || 0;
-      return '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer" title="Clic para ver detalle">'
-        +'<span style="font-size:12px;color:var(--m)">'+o.n+'</span>'
-        +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
-    }).join('') : '<div class="empty">Sin registros</div>';
-
-    var sortedIn = Object.keys(topInMap).map(k => ({d:k, v:topInMap[k]})).sort((a,b) => b.v-a.v).slice(0, 5);
-    
-    document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(o => {
-      return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-        +'<span style="font-size:12px;color:var(--sub)">' + o.d + '</span>'
-        +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">' + formatMoney(o.v) + '</span></div>';
-    }).join('') : '<div class="empty">Sin ingresos</div>';
+        var sortedIn = Object.keys(topInMap).map(k => ({d:k, v:topInMap[k]})).sort((a,b) => b.v-a.v).slice(0, 5);
+        
+        document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(o => {
+          return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+            +'<span style="font-size:12px;color:var(--sub)">' + o.d + '</span>'
+            +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">' + formatMoney(o.v) + '</span></div>';
+        }).join('') : '<div class="empty">Sin ingresos</div>';
+      }
   }
 }
 // ════ SINCRONIZACIÓN CON GOOGLE DRIVE (CLOUD) ════
