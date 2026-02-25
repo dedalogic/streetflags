@@ -969,15 +969,33 @@ tr:last-child td{border-bottom:none}
     <div style="margin-top:12px"><button class="btn btn-sm btn-c" onclick="openAddHist()">+ Agregar pago</button></div>
   </div>
 
-  <div id="gview-flujo" class="gview" style="display:none">
+<div id="gview-flujo" class="gview" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <div style="font-size:12px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Movimientos Banco Itaú</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="font-size:12px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Auditoría Financiera</div>
+        <select class="inp" id="flujo-mes-sel" onchange="renderFlujoCaja(true)" style="width:180px">
+          <option value="all">Todos los meses</option>
+        </select>
+      </div>
       <div>
         <button class="btn btn-sm btn-c" onclick="document.getElementById('bank-file').click()">+ Importar Cartola CSV</button>
         <input type="file" id="bank-file" accept=".csv" style="display:none" onchange="handleBankFile(this)">
       </div>
     </div>
-    <div id="kpi-flujo" class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px"></div>
+
+    <div id="kpi-flujo" class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
+
+    <div class="g2" style="margin-bottom:20px;display:none" id="flujo-panels">
+      <div class="card">
+        <div class="card-hd">🔴 Top 5 Fugas de Capital (Proveedores)</div>
+        <div id="flujo-top-out"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd">🟢 Top Mejores Días de Ingreso</div>
+        <div id="flujo-top-in"></div>
+      </div>
+    </div>
+
     <div class="tbl-shell"><div class="tbl-scroll"><table>
       <thead><tr>
         <th>Fecha</th><th style="text-align:left">Descripción</th><th class="r">Abono (+)</th><th class="r">Cargo (-)</th>
@@ -1076,6 +1094,7 @@ tr:last-child td{border-bottom:none}
 </div>
 </body>
 </html>
+
 
 
 
