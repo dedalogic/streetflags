@@ -864,7 +864,6 @@ tr:last-child td{border-bottom:none}
 </div>
 
 
-<!-- ════ DELIVERY ════ -->
 <div id="p-delivery" class="page">
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap">
     <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
@@ -876,36 +875,42 @@ tr:last-child td{border-bottom:none}
           </select>
         </div>
       </div>
+
       <div style="display:flex;gap:8px">
-        <button class="pill-sel on" id="del-src-all"    onclick="setDelSrc('all',this)">Todo</button>
-        <button class="pill-sel"    id="del-src-intern" onclick="setDelSrc('intern',this)">Delivery interno</button>
+        <button class="pill-sel on" id="del-src-all"    onclick="setDelSrc('all',this)">Resumen</button>
+        <button class="pill-sel"    id="del-src-intern" onclick="setDelSrc('intern',this)">Interno</button>
         <button class="pill-sel"    id="del-src-ya"     onclick="setDelSrc('ya',this)">PedidosYa</button>
+        <button class="pill-sel"    id="del-src-uber"   onclick="setDelSrc('uber',this)">Uber Eats</button>
       </div>
     </div>
   </div>
-  <div id="kpi-del" class="kpis" style="grid-template-columns:repeat(4,1fr)"></div>
+
+  <div id="kpi-del" class="kpis" style="grid-template-columns:repeat(4,1fr); margin-bottom:18px;"></div>
+
   <div class="g2" style="margin-bottom:16px">
     <div class="card">
-      <div class="card-hd" id="del-ch1-title">Pedidos por mes</div>
-      <div class="bars" id="ch-del-mes"></div>
+      <div class="card-hd" id="del-ch1-title">Rendimiento por mes</div>
+      <div class="bars" id="ch-del-mes" style="min-height:160px"></div>
     </div>
     <div class="card">
-      <div class="card-hd" id="del-ch2-title">Venta mensual</div>
-      <div class="bars" id="ch-del-t"></div>
+      <div class="card-hd" id="del-ch2-title">Venta mensual comparativa</div>
+      <div class="bars" id="ch-del-t" style="min-height:160px"></div>
     </div>
   </div>
+
   <div class="card" id="del-dias-wrap" style="display:none;margin-bottom:16px">
-    <div class="card-hd" id="del-dias-title">Desglose por días</div>
-    <div class="bars" id="ch-del-dias"></div>
+    <div class="card-hd" id="del-dias-title">Detalle diario de ventas</div>
+    <div class="bars" id="ch-del-dias" style="min-height:160px"></div>
   </div>
-  <div class="g2">
+
+  <div class="g2" id="panels-pedidosya">
     <div class="card">
-      <div class="card-hd">Heatmap horario — pedidos (PedidosYa)</div>
+      <div class="card-hd">Mapa de calor horario (PedidosYa)</div>
       <div id="del-heatmap" style="margin-top:8px"></div>
     </div>
     <div class="card">
-      <div class="card-hd">Top platos (&#250;ltimos 6 meses · PedidosYa)</div>
-      <div class="bars" id="del-top-platos"></div>
+      <div class="card-hd">Top productos vendidos (PedidosYa)</div>
+      <div class="bars" id="del-top-platos" style="margin-top:8px"></div>
     </div>
   </div>
 </div>
@@ -1094,6 +1099,7 @@ tr:last-child td{border-bottom:none}
 </div>
 </body>
 </html>
+
 
 
 
