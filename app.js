@@ -1182,6 +1182,29 @@ var gTab='resumen';
 var gCatFilter='all';
 var credUnlocked=false;
 
+function setGTab(tab,el){
+  gTab=tab;
+  // 1. Quitar la clase 'on' de todos los botones de Gasto
+  document.querySelectorAll('[id^="gtab-"]').forEach(function(b){b.classList.remove('on');});
+  if(el) el.classList.add('on');
+  
+  // 2. Ocultar todas las vistas usando la clase compartida 'gview'
+  document.querySelectorAll('.gview').forEach(function(v){
+    v.style.display = 'none';
+  });
+  
+  // 3. Mostrar la vista seleccionada
+  var activeView = $('gview-'+tab);
+  if(activeView) activeView.style.display = 'block';
+  
+  // 4. Renderizar contenido dinámico
+  if(tab==='resumen')   renderGastos();
+  if(tab==='historial') renderGHistSel();
+  if(tab==='flujo')     renderFlujoCaja();
+  if(tab==='alertas')   renderAlertas();
+  if(tab==='cred')      {credUnlocked=false;renderCreds();}
+}
+
 // ── FLUJO DE CAJA (BANCO ITAÚ) ──
 function renderFlujoCaja(){
   if(typeof BANK_TX === 'undefined' || !BANK_TX.length){
