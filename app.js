@@ -938,7 +938,6 @@ function parseCSVRow(text, delimiter) {
   return ret;
 }
 
-
 function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFileImp(f);}
 
 function handleFileImp(file){
@@ -986,6 +985,7 @@ function handleFileImp(file){
           $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Inventario detectado</span>';
           $('imp-act').style.display='flex';
       } else {
+          
           var findRow = function(keyword) { 
               return rows.findIndex(function(r){ 
                   return r.some(function(c){ return String(c).toLowerCase().includes(keyword); }); 
@@ -1003,32 +1003,31 @@ function handleFileImp(file){
               return;
           }
 
-          var dayRowIdx = vIdx - 1;
-          while(dayRowIdx >= 0 && !rows[dayRowIdx].some(function(c){ return /\d+/.test(String(c)); })) {
-              dayRowIdx--;
+          // FIX CRÍTICO: BUSCAR LA FILA DE DÍAS POR PALABRAS EXACTAS (evita chocar con Descuentos)
+          var dayRowIdx = -1;
+          for(var r = 0; r < vIdx; r++) {
+              var isDayRow = rows[r].some(function(c) {
+                  var val = String(c).toLowerCase();
+                  return val.includes('lunes') || val.includes('martes') || val.includes('miércoles') || val.includes('miercoles') || val.includes('jueves') || val.includes('viernes') || val.includes('sábado') || val.includes('sabado') || val.includes('domingo');
+              });
+              if(isDayRow) {
+                  dayRowIdx = r;
+                  break;
+              }
           }
+
           var dayRow = dayRowIdx >= 0 ? rows[dayRowIdx] : [];
           
           var rowEfectivo = eIdx >= 0 ? rows[eIdx] : [];
           var rowPy = pyIdx >= 0 ? rows[pyIdx] : [];
           var rowUb = ubIdx >= 0 ? rows[ubIdx] : [];
 
-          var mNames = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+          var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
           var sums = {}; 
           
-          // ── FIX DE CALENDARIO: Forzamos inicio en Enero 2025 ──
+          // INICIO ANCLADO A ENERO 2025 (Punto de partida real de tu archivo)
           var currentYear = 2025;
-          var currentMonthIdx = 0; // 0 = Enero
-          
-          // (Si el nombre del archivo de casualidad dice otro año, lo respetamos)
-          if (window.importFileName) {
-              var fileY = window.importFileName.match(/20\d{2}/);
-              if(fileY) currentYear = parseInt(fileY[0]);
-              
-              var fileM = mNames.findIndex(function(m){ return window.importFileName.includes(m); });
-              if(fileM >= 0) currentMonthIdx = fileM;
-          }
-
+          var currentMonthIdx = 0; 
           var prevDayNum = 0;
           
           for (var i = 0; i < dayRow.length; i++) {
@@ -1041,6 +1040,7 @@ function handleFileImp(file){
               var dayNum = parseInt(dayMatch[0]);
               if (dayNum < 1 || dayNum > 31) continue; 
 
+              // Si cae de fin de mes (ej: 31, 30, 28) a los primeros días (ej: 1 o 2), cambia el mes
               if (dayNum < prevDayNum - 10) {
                   currentMonthIdx++;
                   if (currentMonthIdx > 11) {
@@ -1050,8 +1050,7 @@ function handleFileImp(file){
               }
               prevDayNum = dayNum;
 
-              var MLabel = mNames[currentMonthIdx].charAt(0).toUpperCase() + mNames[currentMonthIdx].slice(1);
-              var label = MLabel + ' ' + currentYear;
+              var label = mNames[currentMonthIdx] + ' ' + currentYear;
               
               if(!sums[label]) sums[label] = { efectivo: 0, py: 0, ub: 0 };
               
@@ -1066,7 +1065,7 @@ function handleFileImp(file){
 
           $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Carga exitosa. Totales detectados:</span>';
           
-          var prevHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">';
+          var prevHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:250px;overflow-y:auto;padding-right:5px">';
           var hasData = false;
           
           for(var k in sums) {
@@ -1133,11 +1132,9 @@ function applyImport(){
     if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
     cm('m-import'); 
     window.pendingSalesSum = null;
-    alert('✓ Datos aplicados exitosamente.');
+    alert('✓ Datos guardados exitosamente.');
   }
 }
-
-
 
 
 
