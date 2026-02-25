@@ -945,31 +945,48 @@ function handleFileImp(file){
           if(cells.some(function(c){return c;})) rows.push(cells);
         });
       } else {
-        // Si es un CSV o TXT (detecta automáticamente tabulaciones, comas o punto y coma)
+        // Si es un CSV o TXT, usamos el motor seguro (parseCSVRow) que creamos antes
         var delimiter = text.indexOf('\t') >= 0 ? '\t' : (text.indexOf(';') >= 0 ? ';' : ',');
         text.split(/\r?\n/).forEach(function(l){
           if(l.trim()){
-            var cells = l.split(delimiter).map(function(c){return c.replace(/^"|"$/g,'').trim();});
+            var cells = parseCSVRow(l, delimiter); // Esto evita que las comas en los números rompan la lectura
             if(cells.some(function(c){return c;})) rows.push(cells);
           }
         });
       }
       
       if(rows.length<2){$('imp-st').textContent='Archivo vacío o sin datos válidos.';return;}
-      importPending=rows.slice(1); // Omitimos el encabezado
-      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; '+importPending.length+' filas detectadas</span>';
+
+      // ── FIX INFALIBLE: ENCONTRAR LA FILA REAL DE LOS DÍAS ──
+      var headerIdx = 0;
+      var maxCols = 0;
+      for (var idx = 0; idx < rows.length; idx++) {
+          if (rows[idx].length > maxCols) {
+              maxCols = rows[idx].length;
+              headerIdx = idx;
+          }
+      }
+
+      var headers = rows[headerIdx];
+      window.importHeaders = headers; 
+      importPending = rows.slice(headerIdx + 1); // Omitimos todos los títulos decorativos que estén arriba
       
-      var cols=importMode==='inv' ? ['Ingrediente','Costo unit','Unidad','Uso/sem'] : ['Producto','Venta','Cantidad'];
+      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; '+maxCols+' columnas detectadas</span>';
+      
+      var cols = importMode==='inv' ? ['Ingrediente','Costo unit','Unidad','Uso/sem'] : headers.slice(0, 5); // Preview dinámico
+      
       $('imp-prev').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11.5px">'
-        +'<tr>'+cols.map(function(c){return'<td style="padding:3px 8px;color:var(--sub);font-weight:700">'+c+'</td>';}).join('')+'</tr>'
+        +'<tr>'+cols.map(function(c){return'<td style="padding:3px 8px;color:var(--sub);font-weight:700;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>'
         +importPending.slice(0,5).map(function(r){
-          return '<tr>'+r.slice(0,cols.length).map(function(c){return'<td style="padding:3px 8px">'+c+'</td>';}).join('')+'</tr>';
+          return '<tr>'+r.slice(0,cols.length).map(function(c){return'<td style="padding:3px 8px;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>';
         }).join('')+'</table>';
+        
       $('imp-act').style.display='flex';
     }catch(err){$('imp-st').textContent='Error al leer el archivo: '+err.message;}
   };
   reader.readAsText(file,'UTF-8');
 }
+
 function applyImport(){
   if(!importPending) return;
   var updated=0, skipped=0;
@@ -991,11 +1008,17 @@ function applyImport(){
     alert('✓ Inventario actualizado: '+updated+' ingredientes.');
 
   } else {
-    // ── LÓGICA DE EFECTIVO (REPARADA Y EXACTA) ──
+    // ── LÓGICA DE EFECTIVO (REPARADA Y BLINDADA) ──
     var headers = window.importHeaders || [];
-    var efectivoRow = importPending.find(function(r){ return r[0] && r[0].trim().toUpperCase() === 'EFECTIVO'; });
+    
+    // Buscamos "Efectivo" en cualquiera de las primeras 3 columnas
+    var efectivoRow = importPending.find(function(r){ 
+        return r.slice(0, 3).some(function(cell){ 
+            return cell && String(cell).toUpperCase().trim().includes('EFECTIVO'); 
+        }); 
+    });
 
-    if (efectivoRow && headers.length > 1) {
+    if (efectivoRow && headers.length > 5) {
         var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
         var sumByMonth = {}; 
         
@@ -1048,18 +1071,16 @@ function applyImport(){
         }
 
         localStorage.setItem('app_sales', JSON.stringify(SALES));
-        alert('✓ Efectivo agrupado mes a mes con éxito:\n' + mesesActualizados.join(' | '));
+        alert('✓ Efectivo extraído mes a mes con éxito:\n' + mesesActualizados.join(' | '));
         
         if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
     } else {
-        alert('No se encontró la fila "Efectivo" o hubo un error con los encabezados.');
+        alert('No se encontró la fila "Efectivo" o hubo un error con los encabezados (Detectadas: ' + headers.length + ' columnas).');
     }
     cm('m-import'); 
   }
   importPending = null;
 }
-
-
 // ════ DELIVERY ════
 var delSrc='all'; // all | intern | ya
 
@@ -2120,38 +2141,53 @@ const REGLAS_PROVEEDORES = {
 
 function formatMoney(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
 
-function parseCSVLine(text) {
+// ─── MOTOR DE LECTURA CSV AVANZADO (Inmune a comas en precios) ───
+function parseCSVRow(text, delimiter) {
   var ret = [], val = '', inQ = false;
   for(var i=0; i<text.length; i++) {
     var c = text[i];
     if(c === '"') inQ = !inQ;
-    else if(c === ',' && !inQ) { ret.push(val); val=''; }
+    else if(c === delimiter && !inQ) { ret.push(val.replace(/^"|"$/g,'').trim()); val=''; }
     else val += c;
   }
-  ret.push(val); return ret;
+  ret.push(val.replace(/^"|"$/g,'').trim()); 
+  return ret;
 }
 
+// ─── LECTOR BANCO ITAÚ ───
 function handleBankFile(input) {
   var file = input.files[0]; if(!file) return;
   var reader = new FileReader();
+  
   reader.onload = function(e) {
     var text = e.target.result;
     var lines = text.split(/\r?\n/).filter(function(x){return x.trim();});
+    
+    // Extracción de año inteligente
     var year = new Date().getFullYear();
-    var pMatch = text.match(/Período.*?(\d{4})/i); 
-    if(pMatch) year = pMatch[1];
+    var pMatch = text.match(/Período.*?(\d{4})/i) || text.match(/20\d{2}/); 
+    if(pMatch) year = pMatch[1] || pMatch[0];
+    
+    // Detección automática del separador del CSV
+    var delimiter = text.indexOf(';') >= 0 ? ';' : ',';
     
     var txs = [];
     lines.forEach(function(l) {
-      var p = parseCSVLine(l); if(p.length < 6) return;
+      // Uso del motor avanzado en vez del split antiguo
+      var p = parseCSVRow(l, delimiter); 
+      if(p.length < 6) return;
+      
       var dateStr = p[0].trim();
       if(/^\d{2}\/\d{2}$/.test(dateStr)) {
         var pts = dateStr.split('/'); var isoDate = year + '-' + pts[1] + '-' + pts[0];
-        var abono = parseInt(p[4].replace(/[^0-9]/g, '')) || 0;
-        var cargo = parseInt(p[5].replace(/[^0-9]/g, '')) || 0;
+        
+        // Limpiamos la basura de los números antes de pasarlos a entero
+        var abono = parseInt(String(p[4]).replace(/[^0-9]/g, '')) || 0;
+        var cargo = parseInt(String(p[5]).replace(/[^0-9]/g, '')) || 0;
         
         var descOriginal = p[3].trim().toUpperCase();
         var etiqueta = "Otros";
+        
         for (var clave in REGLAS_PROVEEDORES) {
           if (descOriginal.includes(clave)) {
             etiqueta = REGLAS_PROVEEDORES[clave];
@@ -2168,14 +2204,20 @@ function handleBankFile(input) {
     if(txs.length > 0) {
       var existing = JSON.parse(localStorage.getItem('bank_tx') || '[]');
       var all = existing.concat(txs);
+      
+      // Filtramos duplicados para que no se sumen dos veces si subes el mismo archivo
       var unique = []; var seen = new Set();
       all.forEach(function(t) {
         var str = t.date + t.desc + t.in + t.out;
         if(!seen.has(str)) { seen.add(str); unique.push(t); }
       });
+      
       unique.sort(function(a,b){return b.date.localeCompare(a.date)});
       localStorage.setItem('bank_tx', JSON.stringify(unique));
       renderFlujoCaja(false);
+      alert('✓ ' + txs.length + ' movimientos bancarios procesados con éxito.');
+    } else {
+      alert('❌ No se detectaron movimientos. Verifica que sea la cartola de Itaú.');
     }
   };
   reader.readAsText(file, 'utf-8');
@@ -2271,7 +2313,7 @@ function renderFlujoCaja(isFilterChange){
   var currentMonth = sel ? sel.value : 'all';
   var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
 
-  // 2. CÁLCULOS DEL BANCO (Si no hay, simplemente quedan en 0)
+  // 2. CÁLCULOS DEL BANCO
   var tIn = 0, tOut = 0;
   var topOutMap = {}, topInMap = {};
 
@@ -2284,7 +2326,7 @@ function renderFlujoCaja(isFilterChange){
     if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
   });
 
-  // 3. CÁLCULO DE EFECTIVO Y GASTOS MANUALES (Garantizado, aunque no haya banco)
+  // 3. CÁLCULO DE EFECTIVO Y GASTOS MANUALES
   var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce(function(s, g) {
       var match = (currentMonth === 'all') || g.date.startsWith(currentMonth);
       return s + (match ? parseInt(g.monto) : 0);
@@ -2308,7 +2350,7 @@ function renderFlujoCaja(isFilterChange){
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
-  // 4. RENDERIZAR KPIs SIEMPRE
+  // 4. RENDERIZAR KPIs
   kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
   kpiDiv.innerHTML = [
     {l:'Abonos Banco', v:formatMoney(tIn), f:'Total Digital', c:'var(--g)'},
@@ -2319,7 +2361,7 @@ function renderFlujoCaja(isFilterChange){
     {l:'Caja Fuerte', v:formatMoney(cajaRealFisica), f:'Billetes Reales', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
   ].map(k => '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>').join('');
 
-  // 5. RENDERIZAR TABLA Y GRÁFICOS (Solo si hay banco en el mes elegido)
+  // 5. RENDERIZAR TABLA Y GRÁFICOS
   if (!filteredBank.length) {
       $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco registrados para esta fecha. Los cálculos de Caja Fuerte siguen activos.</td></tr>';
       if(panels) panels.style.display = 'none';
