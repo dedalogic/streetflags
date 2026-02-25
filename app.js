@@ -2112,10 +2112,17 @@ function renderTablaFlujo(data, esFiltroManual, nombreProv) {
   if(!tbody) return;
 
   var rows = data.map(function(t){
-    var catBadge = t.cat !== "Otros" ? '<br><span style="font-size:9px;color:var(--m);text-transform:uppercase">['+t.cat+']</span>' : '';
+    // Módulo 2: Detectar si tiene categoría guardada en memoria o en el objeto
+    var reglasMemoria = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
+    var categoriaFinal = t.cat !== "Otros" ? t.cat : (reglasMemoria[t.desc.toUpperCase()] || "Otros");
+    
+    var catBadge = categoriaFinal !== "Otros" ? '<br><span style="font-size:9px;color:var(--m);text-transform:uppercase">['+categoriaFinal+']</span>' : '';
+    
     return '<tr>'
       +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
-      +'<td style="text-align:left;font-weight:600;color:var(--t)">'+t.desc + catBadge +'</td>'
+      // Agregamos cursor:pointer y el evento onclick para asociar categorías al presionar
+      +'<td style="text-align:left;font-weight:600;color:var(--t);cursor:pointer" onclick="asociarProveedor(\''+t.desc+'\')" title="Presiona para categorizar">'
+      + t.desc + catBadge +'</td>'
       +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? formatMoney(t.in) : '—')+'</td>'
       +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? formatMoney(t.out) : '—')+'</td>'
       +'</tr>';
@@ -2150,23 +2157,32 @@ function renderFlujoCaja(isFilterChange){
       var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim().toUpperCase();
       topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
     }
+    // Agrupamos ingresos por fecha exacta para el ranking de mejores días
     if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
   });
 
-  // Render KPIs
+  // --- Lógica de Efectivo (Compatible con inicio Enero 2025) ---
   var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce((s,g) => s + (g.date.startsWith(currentMonth) ? parseInt(g.monto) : 0), 0);
   var efectivoToteat = 0;
+
   if (typeof SALES !== 'undefined' && SALES.monthly) {
-    var pts = currentMonth.split('-');
-    var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    var target = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
-    var match = SALES.monthly.find(m => m.month === target);
-    if(match) efectivoToteat = match.efectivo || 0;
+    if (currentMonth === 'all') {
+      efectivoToteat = SALES.monthly.reduce((sum, m) => sum + (m.efectivo || 0), 0);
+    } else {
+      // Traducimos "2025-01" a "Enero 2025" para que coincida con tus headers de Toteat
+      var mArr = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var pts = currentMonth.split('-');
+      var targetLabel = mArr[parseInt(pts[1]) - 1] + ' ' + pts[0];
+      
+      var match = SALES.monthly.find(m => m.month === targetLabel);
+      if(match) efectivoToteat = match.efectivo || 0;
+    }
   }
 
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
+  // Render KPIs (6 cajas, estilo profesional)
   kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
   kpiDiv.innerHTML = [
     {l:'Abonos Banco', v:formatMoney(tIn), f:'Total Digital', c:'var(--g)'},
@@ -2179,17 +2195,52 @@ function renderFlujoCaja(isFilterChange){
 
   renderTablaFlujo(filteredBank, false);
 
-  // Módulo 1: Ranking expandible y clickeable
+  // --- Rankings ---
   if(panels) {
     panels.style.display = 'grid';
+    
+    // Top 10 Egresos (Proveedores)
     var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v);
-    var topDisplay = sortedOut.slice(0, 10); // Mostramos hasta 10
+    var topDisplay = sortedOut.slice(0, 10);
     
     document.getElementById('flujo-top-out').innerHTML = topDisplay.length ? topDisplay.map(function(o){
       var pct = Math.round((o.v / tOut) * 100) || 0;
       return '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer" title="Clic para ver detalle">'
         +'<span style="font-size:12px;color:var(--m)">'+o.n+'</span>'
         +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
-    }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">Sin registros</div>';
+    }).join('') : '<div class="empty">Sin registros</div>';
+
+    // Top 5 Ingresos (Días con más recaudación)
+    var sortedIn = Object.keys(topInMap).map(k => ({d:k, v:topInMap[k]})).sort((a,b) => b.v-a.v).slice(0, 5);
+    
+    document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(o => {
+      return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+        +'<span style="font-size:12px;color:var(--sub)">' + o.d + '</span>'
+        +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">' + formatMoney(o.v) + '</span></div>';
+    }).join('') : '<div class="empty">Sin ingresos</div>';
   }
+}
+
+function asociarProveedor(nombreOriginal) {
+    var nombreLimpio = nombreOriginal.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').trim();
+    var categoria = prompt("¿A qué categoría pertenece '" + nombreLimpio + "'? (Ej: Gas, Agua, Personal, Arriendo)");
+    
+    if (categoria) {
+        // 1. Guardar en memoria permanente
+        var reglasActuales = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
+        reglasActuales[nombreOriginal.toUpperCase()] = categoria;
+        localStorage.setItem('reglas_prov', JSON.stringify(reglasActuales));
+        
+        // 2. Aplicar el cambio a los datos que ya están cargados en la sesión actual
+        var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
+        var dataActualizada = bankData.map(function(t) {
+            if (t.desc === nombreOriginal) t.cat = categoria;
+            return t;
+        });
+        localStorage.setItem('bank_tx', JSON.stringify(dataActualizada));
+
+        // 3. Refrescar la vista de inmediato
+        renderFlujoCaja(true);
+        toast('Regla guardada: ' + categoria);
+    }
 }
