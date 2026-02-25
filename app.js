@@ -1206,16 +1206,88 @@ function setGTab(tab,el){
 }
 
 // ── FLUJO DE CAJA (BANCO ITAÚ) ──
+// ── FLUJO DE CAJA (BANCO ITAÚ DIRECTO EN LA APP) ──
+
+// Herramienta para leer las columnas del CSV del banco
+function parseCSVLine(text) {
+  var ret = [], val = '', inQ = false;
+  for(var i=0; i<text.length; i++) {
+    var c = text[i];
+    if(c === '"') inQ = !inQ;
+    else if(c === ',' && !inQ) { ret.push(val); val=''; }
+    else val += c;
+  }
+  ret.push(val); return ret;
+}
+
+// Procesa el archivo cuando lo seleccionas
+function handleBankFile(input) {
+  var file = input.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var text = e.target.result;
+    var lines = text.split(/\r?\n/).filter(function(x){return x.trim();});
+    var year = new Date().getFullYear();
+    var pMatch = text.match(/Período.*?(\d{4})/i); 
+    if(pMatch) year = pMatch[1];
+    
+    var txs = [];
+    lines.forEach(function(l) {
+      var p = parseCSVLine(l); 
+      if(p.length < 6) return;
+      var dateStr = p[0].trim();
+      if(/^\d{2}\/\d{2}$/.test(dateStr)) {
+        var pts = dateStr.split('/'); 
+        var isoDate = year + '-' + pts[1] + '-' + pts[0];
+        var abono = parseInt(p[4].replace(/[^0-9]/g, '')) || 0;
+        var cargo = parseInt(p[5].replace(/[^0-9]/g, '')) || 0;
+        if(abono > 0 || cargo > 0) txs.push({ date: isoDate, desc: p[3].trim(), in: abono, out: cargo });
+      }
+    });
+    
+    if(txs.length > 0) {
+      // Combina con lo que ya estaba guardado sin duplicar
+      var existing = JSON.parse(localStorage.getItem('bank_tx') || '[]');
+      var all = existing.concat(txs);
+      var unique = []; var seen = new Set();
+      all.forEach(function(t) {
+        var str = t.date + t.desc + t.in + t.out;
+        if(!seen.has(str)) { seen.add(str); unique.push(t); }
+      });
+      // Ordena por fecha (más reciente primero)
+      unique.sort(function(a,b){return b.date.localeCompare(a.date)});
+      
+      // Guarda en la memoria de la app
+      localStorage.setItem('bank_tx', JSON.stringify(unique));
+      alert('Cartola procesada: ' + txs.length + ' movimientos. ¡Recuerda presionar "Subir Nube" para respaldarlo!');
+      renderFlujoCaja();
+    } else {
+      alert('No se encontraron movimientos válidos. ¿Estás seguro que es el CSV del Itaú?');
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+  input.value = ''; // Resetea el botón
+}
+
 function renderFlujoCaja(){
-  if(typeof BANK_TX === 'undefined' || !BANK_TX.length){
-    $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco. Importa tu cartola y pégala en data.js</td></tr>';
+  // Intenta leer de la memoria de la app, si no hay, busca en data.js (por si acaso)
+  var bankData = [];
+  var lsBank = localStorage.getItem('bank_tx');
+  if(lsBank) {
+    bankData = JSON.parse(lsBank);
+  } else if(typeof BANK_TX !== 'undefined') {
+    bankData = BANK_TX; 
+  }
+  
+  if(!bankData || !bankData.length){
+    $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty" style="padding:30px 0">Presiona "+ Importar Cartola CSV" para cargar tus datos del banco.</td></tr>';
     $('kpi-flujo').innerHTML = '';
     return;
   }
 
   var tIn = 0, tOut = 0;
-  
-  var rows = BANK_TX.map(function(t){
+  var rows = bankData.map(function(t){
     tIn += t.in; 
     tOut += t.out;
     return '<tr>'
@@ -1230,8 +1302,8 @@ function renderFlujoCaja(){
   var saldoFormatted = (saldo < 0 ? '-' : '') + fmtM(Math.abs(saldo));
 
   $('kpi-flujo').innerHTML = [
-    {l:'Total Ingresos (Abonos)', v:fmtM(tIn), f:'Transbank, transferencias, etc.', c:'var(--g)'},
-    {l:'Total Egresos (Cargos)', v:fmtM(tOut), f:'Pago proveedores, sueldos, etc.', c:'var(--r)'},
+    {l:'Total Ingresos (Abonos)', v:fmtM(tIn), f:'Transbank, transferencias', c:'var(--g)'},
+    {l:'Total Egresos (Cargos)', v:fmtM(tOut), f:'Pago proveedores, sueldos', c:'var(--r)'},
     {l:'Flujo Neto', v:saldoFormatted, f:'Ingresos vs Egresos', c:saldo>=0?'var(--g)':'var(--r)'}
   ].map(function(k){
     return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div>'
