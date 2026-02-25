@@ -970,6 +970,13 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <div id="gview-flujo" class="gview" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div style="font-size:12px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Movimientos Banco Itaú</div>
+      <div>
+        <button class="btn btn-sm btn-c" onclick="document.getElementById('bank-file').click()">+ Importar Cartola CSV</button>
+        <input type="file" id="bank-file" accept=".csv" style="display:none" onchange="handleBankFile(this)">
+      </div>
+    </div>
     <div id="kpi-flujo" class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px"></div>
     <div class="tbl-shell"><div class="tbl-scroll"><table>
       <thead><tr>
@@ -1069,6 +1076,7 @@ tr:last-child td{border-bottom:none}
 </div>
 </body>
 </html>
+
 
 
 
