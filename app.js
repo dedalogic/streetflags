@@ -24,15 +24,26 @@ function toggleTheme(){
 function go(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
   document.querySelectorAll('.nt').forEach(function(t){t.classList.remove('on')});
-  $('p-'+id).classList.add('on');
-  $('t-'+id).classList.add('on');
-  var tab=$('t-'+id); if(tab) tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  if(id==='ped') renderPed();
-  if(id==='ventas') renderV();
-  if(id==='delivery'){initDeliveryMesSel();initDelivery();}
-  if(id==='gastos'){renderGastos();}
-  if(id==='analisis'){initAnalisis();}
-  if(id==='obj'){renderObjetivos();}
+  
+  if($('p-'+id)) $('p-'+id).classList.add('on');
+  if($('t-'+id)) $('t-'+id).classList.add('on');
+  
+  var tab=$('t-'+id); 
+  if(tab) tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+
+  // Ejecución segura de renders
+  try {
+    if(id==='dash') initDash();
+    if(id==='ped') renderPed();
+    if(id==='ventas') renderV();
+    if(id==='delivery'){ initDeliveryMesSel(); initDelivery(); }
+    if(id==='gastos'){ renderGastos(); }
+    if(id==='analisis'){ initAnalisis(); }
+    if(id==='obj'){ renderObjetivos(); }
+    if(id==='flujo') renderFlujoCaja(); // Nueva pestaña
+  } catch (e) {
+    console.warn("Error cargando la pestaña " + id, e);
+  }
 }
 function cm(id){ $(id).classList.remove('on'); }
 
@@ -264,26 +275,89 @@ function renderV(){
 
 
 // ════ ANÁLISIS INTELIGENTE ════
-function initAnalisis(){
-  var sel=$('an-mes-sel');
-  if(sel&&!sel.options.length){
-    sel.innerHTML='<option value="all">Todo el período</option>'
-      +SALES.monthly.map(function(m){return '<option value="'+m.month+'">'+m.month+'</option>';}).join('');
-    // Reparamos el selector para que reaccione al cambio
-    sel.onchange = initAnalisis; 
-  }
-  var sv=sel?sel.value:'all';
-  var totalVenta=SALES.monthly.reduce(function(s,m){return s+m.venta_neta;},0);
-  var selMo=sv==='all'?null:SALES.monthly.find(function(m){return m.month===sv;});
-  var monthRatio=selMo&&totalVenta>0?selMo.venta_neta/totalVenta:1;
-  var weeksInPeriod=sv==='all'?SALES.monthly.length*4.33:selMo?selMo.days_active/7:4.33;
+function initAnalisis() {
+    var sel = $('an-mes-sel');
+    if (!sel) return;
 
-  var ctx=$('an-context');
-  if(ctx){
-    if(selMo) ctx.textContent=selMo.days_active+' días activos · venta '+fmtM(selMo.venta_neta);
-    else ctx.textContent=SALES.monthly.length+' meses analizados';
-  }
+    // 1. Llenar selector si está vacío
+    if (!sel.options.length) {
+        sel.innerHTML = '<option value="all">Todo el período</option>' +
+            SALES.monthly.map(function(m) {
+                return '<option value="' + m.month + '">' + m.month + '</option>';
+            }).join('');
+        sel.onchange = initAnalisis;
+    }
 
+    var sv = sel.value || 'all';
+    var M = SALES.monthly;
+    var totalVenta = M.reduce(function(s, m) { return s + m.venta_neta; }, 0);
+    var selMo = sv === 'all' ? null : M.find(function(m) { return m.month === sv; });
+    var weeksInPeriod = sv === 'all' ? M.length * 4.33 : (selMo ? selMo.days_active / 7 : 4.33);
+
+    // 2. Contexto de texto
+    var ctx = $('an-context');
+    if (ctx) {
+        if (selMo) ctx.textContent = selMo.days_active + ' días activos · venta ' + fmtM(selMo.venta_neta);
+        else ctx.textContent = M.length + ' meses analizados';
+    }
+
+    // 3. DASHBOARD DE PROGRESO Y PROYECCIÓN
+    var vP = $('ch-vp');
+    if (vP) {
+        var activeM = M.filter(function(m) { return m.days_active > 0; });
+        var targetMonth = sv === 'all' ? activeM[activeM.length - 1] : selMo;
+
+        if (targetMonth) {
+            var currentActual = targetMonth.venta_neta;
+            var dim = 30; // Días promedio
+            var currentProj = Math.round((currentActual / targetMonth.days_active) * dim);
+            var pctMonth = Math.min(100, Math.round((targetMonth.days_active / dim) * 100));
+            var pctVenta = currentProj > 0 ? Math.min(100, Math.round((currentActual / currentProj) * 100)) : 0;
+
+            vP.innerHTML = '<div style="background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:18px;box-shadow:var(--sh)">' +
+                '<div style="display:flex;justify-content:space-between;margin-bottom:12px">' +
+                '<span style="font-size:11px;font-weight:700;color:var(--t);text-transform:uppercase">Progreso ' + targetMonth.month + '</span>' +
+                '<span style="font-size:11px;font-weight:800;color:var(--a)">' + pctMonth + '% del mes</span>' +
+                '</div>' +
+                '<div style="height:12px;background:var(--s3);border-radius:6px;overflow:hidden;margin-bottom:10px">' +
+                '<div style="width:' + pctVenta + '%;background:var(--a);height:100%;border-radius:6px;transition:width .8s ease"></div>' +
+                '</div>' +
+                '<div style="display:flex;justify-content:space-between;font-size:11.5px;font-family:var(--mono)">' +
+                '<span style="color:var(--t)">Real: ' + fmtM(currentActual) + '</span>' +
+                '<span style="color:var(--sub)">Meta est: ' + fmtM(currentProj) + '</span>' +
+                '</div>' +
+                '</div>';
+        }
+    }
+
+    // 4. PLATOS MÁS VENDIDOS (Escalados al período)
+    if ($('ch-platos')) {
+        var topD = PRODUCT_SALES.filter(function(p) { return p.weekly_qty > 0 && !p.is_modifier; })
+            .map(function(p) {
+                return { l: p.name, v: Math.round(p.weekly_qty * weeksInPeriod) };
+            }).sort(function(a, b) { return b.v - a.v; }).slice(0, 10);
+
+        barChart('ch-platos', topD, '#00d4ff', function(v) { return v + ' u'; }, 160);
+    }
+
+    // 5. PATRÓN POR DÍA (Lógica integrada)
+    if ($('day-chart')) {
+        var days = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+        var dayLabels = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+        var dayVals = days.map(function(d){ return DAY_PATTERNS[d] || 0; });
+        var maxDay = Math.max.apply(null, dayVals) || 1;
+        
+        $('day-chart').innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-end;height:120px;padding:20px 10px">' +
+            dayVals.map(function(v, i) {
+                var h = Math.round((v / maxDay) * 80);
+                var c = (i >= 4) ? 'var(--m)' : 'var(--c)'; // Finde vs Semana
+                return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px">' +
+                    '<div style="width:20px;height:'+h+'px;background:'+c+';border-radius:4px;opacity:0.8"></div>' +
+                    '<span style="font-size:10px;color:var(--sub)">'+dayLabels[i]+'</span>' +
+                '</div>';
+            }).join('') + '</div>';
+    }
+}
   // --- NUEVO DASHBOARD DE PROGRESO Y PROYECCIÓN ---
   if ($('ch-vp')) {
     var M = SALES.monthly;
@@ -1207,38 +1281,36 @@ function setGTab(tab,el){
 
 // ── FLUJO DE CAJA (BANCO ITAÚ) ──
 function renderFlujoCaja(){
+  var body = $('flujo-body');
+  var kpi = $('kpi-flujo');
+  if(!body) return;
+
   if(typeof BANK_TX === 'undefined' || !BANK_TX.length){
-    $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco. Importa tu cartola y pégala en data.js</td></tr>';
-    $('kpi-flujo').innerHTML = '';
+    body.innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco registrados.</td></tr>';
+    if(kpi) kpi.innerHTML = '';
     return;
   }
 
   var tIn = 0, tOut = 0;
-  
   var rows = BANK_TX.map(function(t){
-    tIn += t.in; 
-    tOut += t.out;
-    return '<tr>'
-      +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
-      +'<td style="text-align:left;font-weight:600;color:var(--t)">'+t.desc+'</td>'
-      +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? fmt(t.in) : '—')+'</td>'
-      +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? fmt(t.out) : '—')+'</td>'
-      +'</tr>';
+    tIn += (t.in || 0); tOut += (t.out || 0);
+    return '<tr><td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
+      +'<td style="text-align:left;font-weight:600">'+t.desc+'</td>'
+      +'<td class="r mono" style="color:var(--g)">'+(t.in>0 ? fmt(t.in) : '—')+'</td>'
+      +'<td class="r mono" style="color:var(--r)">'+(t.out>0 ? fmt(t.out) : '—')+'</td></tr>';
   }).join('');
 
-  var saldo = tIn - tOut;
-  var saldoFormatted = (saldo < 0 ? '-' : '') + fmtM(Math.abs(saldo));
-
-  $('kpi-flujo').innerHTML = [
-    {l:'Total Ingresos (Abonos)', v:fmtM(tIn), f:'Transbank, transferencias, etc.', c:'var(--g)'},
-    {l:'Total Egresos (Cargos)', v:fmtM(tOut), f:'Pago proveedores, sueldos, etc.', c:'var(--r)'},
-    {l:'Flujo Neto', v:saldoFormatted, f:'Ingresos vs Egresos', c:saldo>=0?'var(--g)':'var(--r)'}
-  ].map(function(k){
-    return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div>'
-      +'<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
-  }).join('');
-  
-  $('flujo-body').innerHTML = rows;
+  if(kpi) {
+    var saldo = tIn - tOut;
+    kpi.innerHTML = [
+      {l:'Ingresos', v:fmtM(tIn), f:'Abonos', c:'var(--g)'},
+      {l:'Egresos', v:fmtM(tOut), f:'Cargos', c:'var(--r)'},
+      {l:'Neto', v:fmtM(saldo), f:'Flujo Real', c:saldo>=0?'var(--g)':'var(--r)'}
+    ].map(function(k){
+      return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
+    }).join('');
+  }
+  body.innerHTML = rows;
 }
 function setGCatFilter(cat,el){
   gCatFilter=cat;
