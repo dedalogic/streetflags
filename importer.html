@@ -186,8 +186,8 @@ function parseCSVLine(text) {
 
 // ─── PROCESADOR TOTEAT (CON CAPTURA DE EFECTIVO) ───
 function runTot() {
-  const file = document.getElementById('fot').files[0];
-  if(!file) return alert('Sube el archivo de Toteat');
+  if (!loadedFiles.length) return alert('Sube el archivo de Toteat');
+  const file = loadedFiles[0]; // Usamos la variable global de archivos cargados
 
   const reader = new FileReader();
   reader.onload = function(e) {
@@ -210,15 +210,15 @@ function runTot() {
     const rowEfectivo = rows.find(r => r[0] === 'Efectivo');
     const headers = rows[0]; // Los días están aquí
 
-    if(!rowVenta || !rowEfectivo) return alert('No se encontró la fila "Venta Neta" o "Efectivo".');
+    if(!rowVenta) return alert('No se encontró la fila "Venta Neta". Verifica el archivo.');
 
     // 3. Procesar columnas y agrupar por mes
     const parsed = {};
     const mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     
-    // Año inicial según tu archivo
-    let currentYear = 2025; 
-    let lastMonthIdx = 0; // Partimos en Enero
+    // Leer el año y mes desde los selectores del HTML
+    let currentYear = parseInt(document.getElementById('sy').value); 
+    let lastMonthIdx = parseInt(document.getElementById('sm').value); 
 
     for(let i = 1; i < headers.length; i++) {
       let diaLabel = headers[i].toLowerCase();
@@ -238,7 +238,7 @@ function runTot() {
 
       // Limpiar y sumar valores
       let vVal = parseFloat(rowVenta[i].replace(/[^0-9,-]/g,'').replace(',','.')) || 0;
-      let eVal = parseFloat(rowEfectivo[i].replace(/[^0-9,-]/g,'').replace(',','.')) || 0;
+      let eVal = rowEfectivo ? (parseFloat(rowEfectivo[i].replace(/[^0-9,-]/g,'').replace(',','.')) || 0) : 0;
 
       if(vVal !== 0) {
         parsed[monthName].venta_neta += Math.round(vVal);
@@ -248,11 +248,15 @@ function runTot() {
     }
 
     // 4. Guardar y mostrar éxito
-    const finalData = { monthly: Object.values(parsed), daily: [] };
-    localStorage.setItem('app_sales', JSON.stringify(finalData));
+    // ATENCIÓN: Extraemos el SALES existente para no borrar 'daily' si existiera
+    let currentSales = {};
+    try { currentSales = JSON.parse(localStorage.getItem('app_sales') || '{"monthly":[],"daily":[]}'); } catch(e){}
+    currentSales.monthly = Object.values(parsed);
     
-    document.getElementById('outel').textContent = '✅ Efectivo y Ventas capturados con éxito desde Enero 2025.';
-    document.getElementById('out-hint').innerHTML = 'Ya puedes cerrar esta ventana y volver a tu App. El efectivo ya se cruzó.';
+    localStorage.setItem('app_sales', JSON.stringify(currentSales));
+    
+    document.getElementById('outel').textContent = '✅ Efectivo y Ventas capturados con éxito desde ' + mNames[document.getElementById('sm').value] + ' ' + document.getElementById('sy').value + '.';
+    document.getElementById('out-hint').innerHTML = 'Ya puedes cerrar esta ventana y volver a tu App Principal y recargar la página. Los datos se han guardado en tu navegador.';
     on('c4','n4');
   };
   reader.readAsText(file, 'UTF-8');
