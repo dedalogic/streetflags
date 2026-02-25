@@ -185,41 +185,77 @@ function parseCSVLine(text) {
 }
 
 // ─── PROCESADOR TOTEAT (CON CAPTURA DE EFECTIVO) ───
-function runTot(){
-  document.getElementById('logel').innerHTML=''; document.getElementById('thead').innerHTML=''; document.getElementById('tbody').innerHTML='';
-  document.getElementById('tbl-w').style.display='block';
-  on('c3','n3');
-  var sy=parseInt(document.getElementById('sy').value), sm2=parseInt(document.getElementById('sm').value);
-  var rows=parseTable(fileText);
-  if(!rows.length){lg('❌ Sin filas encontradas — verifica el archivo','err');return;}
-  
-  // R es el diccionario de posiciones (filas). 10 es la fila 11 del excel (empezando de 0)
-  var R={vb:1,vn:3,siva:5,costo:6,margen:7,efectivo:10,py:13,pyv:14,pyc:15,uber:17,transf:20};
-  
-  var hdr=rows[0], dayCols=[], prev=0;
-  for(var c=1;c<hdr.length;c++){ var m=/\w+\s+(\d+)$/.exec(hdr[c].trim()); if(m) dayCols.push({c:c,d:parseInt(m[1])}); }
-  var mStarts=[dayCols[0].c];
-  dayCols.forEach(function(x){if(x.d<prev)mStarts.push(x.c); prev=x.d;});
-  var totCol=-1;
-  for(var i=hdr.length-1;i>=1;i--){if(hdr[i].trim()==='Total'){totCol=i;break;}}
-  if(totCol<0) totCol=dayCols[dayCols.length-1].c+1;
-  var parsed=[];
-  
-  mStarts.forEach(function(cs,mi){
-    var ce=mi+1<mStarts.length?mStarts[mi+1]:totCol, days=ce-cs, absM=sm2+mi, yr=sy+Math.floor(absM/12), mo=absM%12, name=MN[mo]+' '+yr;
-    function S(ri){var t=0; for(var col=cs;col<ce;col++) if(rows[ri]&&col<rows[ri].length) t+=pn(rows[ri][col]); return Math.round(t);}
+function runTot() {
+  const file = document.getElementById('fot').files[0];
+  if(!file) return alert('Sube el archivo de Toteat');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const rows = [];
     
-    var vn=S(R.vn), siva=S(R.siva), co=S(R.costo), mg=S(R.margen), py=S(R.py)+S(R.pyv)+S(R.pyc), ub=S(R.uber), tr=S(R.transf), ef=S(R.efectivo);
+    // 1. Convertir el archivo (HTML o CSV) en una matriz de celdas
+    if(text.includes('<tr')) {
+      const doc = new DOMParser().parseFromString(text, 'text/html');
+      doc.querySelectorAll('tr').forEach(tr => {
+        rows.push([...tr.querySelectorAll('td,th')].map(td => td.textContent.trim()));
+      });
+    } else {
+      const delimiter = text.includes('\t') ? '\t' : (text.includes(';') ? ';' : ',');
+      text.split(/\r?\n/).forEach(l => { if(l) rows.push(l.split(delimiter).map(c => c.replace(/^"|"$/g,'').trim())); });
+    }
+
+    // 2. Identificar filas clave
+    const rowVenta = rows.find(r => r[0] === 'Venta Neta');
+    const rowEfectivo = rows.find(r => r[0] === 'Efectivo');
+    const headers = rows[0]; // Los días están aquí
+
+    if(!rowVenta || !rowEfectivo) return alert('No se encontró la fila "Venta Neta" o "Efectivo".');
+
+    // 3. Procesar columnas y agrupar por mes
+    const parsed = {};
+    const mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     
-    parsed.push({month:name, venta_bruta:S(R.vb), venta_neta:vn, venta_sin_iva:siva, costo:co, margen_pct:vn>0?Math.round(mg/vn*1000)/10:0, days_active:days, avg_daily:days?Math.round(vn/days):0, avg_daily_sin_iva:days?Math.round(siva/days):0, delivery_ya:py, delivery_uber:ub, delivery_transferencia:tr, efectivo:ef});
-    lg(name+': VN $'+(vn/1e6).toFixed(1)+'M / PY $'+(py/1e6).toFixed(2)+'M / EFECTIVO $'+(ef/1e6).toFixed(2)+'M','ok');
-  });
-  
-  document.getElementById('thead').innerHTML='<tr><th>Mes</th><th>Venta Neta</th><th>PedidosYa</th><th>Efectivo Físico</th><th>Del. Interno</th></tr>';
-  document.getElementById('tbody').innerHTML=parsed.map(function(m){return '<tr><td>'+m.month+'</td><td style="color:var(--m)">'+f(m.venta_neta)+'</td><td style="color:#ff3fa4">'+f(m.delivery_ya)+'</td><td style="color:#ffb420">'+f(m.efectivo)+'</td><td style="color:#00e5a0">'+f(m.delivery_transferencia)+'</td></tr>';}).join('');
-localStorage.setItem('app_sales', JSON.stringify({monthly:parsed, daily:[]}));
-  document.getElementById('outel').textContent='✅ Ventas y Efectivo guardados en la memoria automáticamente.';
-  document.getElementById('out-hint').innerHTML='¡Listo! Ya no tienes que copiar y pegar nada. Abre tu aplicación y recarga la página.';
+    // Año inicial según tu archivo
+    let currentYear = 2025; 
+    let lastMonthIdx = 0; // Partimos en Enero
+
+    for(let i = 1; i < headers.length; i++) {
+      let diaLabel = headers[i].toLowerCase();
+      if(!diaLabel || diaLabel === 'total') continue;
+
+      // Detectar cambio de mes (cuando el número del día vuelve a ser 1)
+      let dayNum = parseInt(diaLabel.split(' ').pop());
+      if(dayNum === 1 && i > 1) {
+        lastMonthIdx++;
+        if(lastMonthIdx > 11) { lastMonthIdx = 0; currentYear++; }
+      }
+
+      let monthName = `${mNames[lastMonthIdx]} ${currentYear}`;
+      if(!parsed[monthName]) {
+        parsed[monthName] = { month: monthName, venta_neta: 0, efectivo: 0, days_active: 0 };
+      }
+
+      // Limpiar y sumar valores
+      let vVal = parseFloat(rowVenta[i].replace(/[^0-9,-]/g,'').replace(',','.')) || 0;
+      let eVal = parseFloat(rowEfectivo[i].replace(/[^0-9,-]/g,'').replace(',','.')) || 0;
+
+      if(vVal !== 0) {
+        parsed[monthName].venta_neta += Math.round(vVal);
+        parsed[monthName].efectivo += Math.round(eVal);
+        parsed[monthName].days_active++;
+      }
+    }
+
+    // 4. Guardar y mostrar éxito
+    const finalData = { monthly: Object.values(parsed), daily: [] };
+    localStorage.setItem('app_sales', JSON.stringify(finalData));
+    
+    document.getElementById('outel').textContent = '✅ Efectivo y Ventas capturados con éxito desde Enero 2025.';
+    document.getElementById('out-hint').innerHTML = 'Ya puedes cerrar esta ventana y volver a tu App. El efectivo ya se cruzó.';
+    on('c4','n4');
+  };
+  reader.readAsText(file, 'UTF-8');
 }
 
 // ─── PROCESADOR PEDIDOS YA ───
