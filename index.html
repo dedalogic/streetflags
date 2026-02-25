@@ -372,7 +372,8 @@ tr:last-child td{border-bottom:none}
   </div>
   <div class="nav-r" style="gap:8px">
     <button class="tog" id="tog" onclick="toggleTheme()">&#9728;&#65039;</button>
-    <button class="btn btn-sm"  onclick="openExport()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
+<button class="btn btn-sm" onclick="loadFromCloud(this)" style="background:var(--s2);color:var(--m);border:1px solid var(--b2)">&#8681; Bajar Nube</button>
+<button class="btn btn-sm" onclick="saveToCloud(this)" style="background:var(--m);color:#000;border:1px solid var(--m);font-weight:700">&#8679; Subir Nube</button>
   </div>
 </nav>
 
@@ -1068,5 +1069,6 @@ tr:last-child td{border-bottom:none}
 </div>
 </body>
 </html>
+
 
 
