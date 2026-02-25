@@ -57,14 +57,76 @@ function barChart(id,items,color,vFmt,lw){
 }
 
 // ════ DASHBOARD ════
-function initDashSel(){
-  var M=SALES.monthly;
-  var now=new Date();
-  var mN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  var cur=mN[now.getMonth()]+' '+now.getFullYear();
-  var html='<option value="all">Todos los meses</option>';
-  M.forEach(function(m){ html+='<option value="'+m.month+'"'+(m.month===cur?' selected':'')+'>'+m.month+'</option>'; });
-  $('dash-mes-sel').innerHTML=html;
+function initDelivery(){
+  var sel=$('del-mes-sel'); var sv=sel?sel.value:'all';
+
+  // 1. Filtrar Data
+  var mNames=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var SM_all=SALES.monthly;
+  var SM=(function(){
+    if(sv==='all') return SM_all;
+    var p2=sv.split('-'); var mName=mNames[parseInt(p2[1])-1]+' '+p2[0];
+    return SM_all.filter(function(m){return m.month===mName;});
+  })();
+
+  // 2. Cálculos Críticos
+  var intern_transf=SM.reduce((s,m)=>s+(m.delivery_transferencia||0),0);
+  var ya_toteat=SM.reduce((s,m)=>s+(m.delivery_ya||0),0);
+  var uber_toteat=SM.reduce((s,m)=>s+(m.delivery_uber||0),0);
+  var vtaTotal=SM.reduce((s,m)=>s+m.venta_neta,0);
+  var local=Math.max(0,vtaTotal-ya_toteat-uber_toteat-intern_transf);
+
+  // 3. Renderizar KPIs según el canal seleccionado
+  var kpis=[];
+  if(delSrc==='ya'){
+    var DM=sv==='all'?DELIVERY_MONTHLY:DELIVERY_MONTHLY.filter(m=>m.mes===sv);
+    var t_vta=DM.reduce((s,m)=>s+m.ventas,0);
+    var t_ped=DM.reduce((s,m)=>s+m.pedidos,0);
+    kpis=[
+      {l:'Pedidos PedidosYa',v:t_ped.toLocaleString(),f:'Datos CSV'},
+      {l:'Venta PedidosYa',v:fmtM(t_vta||ya_toteat),f:'Plataforma',m:1},
+      {l:'Ticket prom.',v:fmt(t_ped>0?t_vta/t_ped:0),f:''},
+      {l:'Tasa rechazo',v:(DM.length?DM.reduce((s,m)=>s+(m.rechazados/Math.max(m.pedidos,1)),0)/DM.length*100:0).toFixed(1)+'%',f:'',m:1}
+    ];
+  } else if(delSrc==='uber'){
+    kpis=[
+      {l:'Venta Uber Eats',v:fmtM(uber_toteat),f:'Vía Toteat',m:1},
+      {l:'Participación',v:(vtaTotal>0?uber_toteat/vtaTotal*100:0).toFixed(1)+'%',f:'Sobre venta neta'},
+      {l:'Local presencial',v:fmtM(local),f:''},
+      {l:'Venta Total',v:fmtM(vtaTotal),f:'',m:1}
+    ];
+  } else if(delSrc==='intern'){
+    kpis=[
+      {l:'Delivery Interno',v:fmtM(intern_transf),f:'Transferencias',m:1},
+      {l:'Pedidos est.',v:Math.round(intern_transf/9500).toLocaleString(),f:'$9.500 ticket prom'},
+      {l:'Venta Local',v:fmtM(local),f:''},
+      {l:'Venta Total',v:fmtM(vtaTotal),f:'',m:1}
+    ];
+  } else {
+    kpis=[
+      {l:'PedidosYa',v:fmtM(ya_toteat),f:''},
+      {l:'Uber Eats',v:fmtM(uber_toteat),f:'',m:1},
+      {l:'Interno',v:fmtM(intern_transf),f:''},
+      {l:'Local',v:fmtM(local),f:'',m:1}
+    ];
+  }
+
+  $('kpi-del').innerHTML=kpis.map(k=>`<div class="kpi${k.m?' m':''}"><div class="kpi-lbl">${k.l}</div><div class="kpi-val" style="color:var(--t)">${k.v}</div><div class="kpi-foot">${k.f}</div></div>`).join('');
+
+  // 4. Gráfico de Tendencia
+  var delColor=delSrc==='ya'?'#ff3fa4':delSrc==='intern'?'#a78bfa':delSrc==='uber'?'#00d4ff':'#00e5a0';
+  var g1Data=SM.map(m=>({
+    l:m.month.split(' ')[0].slice(0,3),
+    v:delSrc==='uber'?m.delivery_uber:delSrc==='intern'?m.delivery_transferencia:delSrc==='ya'?m.delivery_ya:m.venta_neta
+  }));
+  if(g1Data.length===1) g1Data=[{l:'',v:0},g1Data[0],{l:'',v:0}]; // Padding para gráfico de un solo mes
+  lineChart('ch-del-mes', g1Data, delColor, fmtM);
+
+  // 5. Gestión de Paneles Extra (Ocultar si no hay data)
+  var extra1 = $('del-heatmap');
+  var extra2 = $('del-top-platos');
+  if(extra1) extra1.parentElement.style.display = (delSrc === 'ya' ? 'block' : 'none');
+  if(extra2) extra2.parentElement.style.display = (delSrc === 'ya' ? 'block' : 'none');
 }
 
 function initDash(){
