@@ -217,9 +217,9 @@ function runTot(){
   
   document.getElementById('thead').innerHTML='<tr><th>Mes</th><th>Venta Neta</th><th>PedidosYa</th><th>Efectivo Físico</th><th>Del. Interno</th></tr>';
   document.getElementById('tbody').innerHTML=parsed.map(function(m){return '<tr><td>'+m.month+'</td><td style="color:var(--m)">'+f(m.venta_neta)+'</td><td style="color:#ff3fa4">'+f(m.delivery_ya)+'</td><td style="color:#ffb420">'+f(m.efectivo)+'</td><td style="color:#00e5a0">'+f(m.delivery_transferencia)+'</td></tr>';}).join('');
-  document.getElementById('outel').textContent='const SALES='+JSON.stringify({monthly:parsed,daily:[]},null,2)+';';
-  document.getElementById('out-hint').innerHTML='Copia y reemplaza el bloque <code>const SALES = {...};</code> en data.js:';
-  on('c4','n4');
+localStorage.setItem('app_sales', JSON.stringify({monthly:parsed, daily:[]}));
+  document.getElementById('outel').textContent='✅ Ventas y Efectivo guardados en la memoria automáticamente.';
+  document.getElementById('out-hint').innerHTML='¡Listo! Ya no tienes que copiar y pegar nada. Abre tu aplicación y recarga la página.';
 }
 
 // ─── PROCESADOR PEDIDOS YA ───
