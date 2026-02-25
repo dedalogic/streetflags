@@ -925,7 +925,7 @@ function openImport(mode){
   $('m-import').classList.add('on');
 }
 
-// ─── MOTOR DE LECTURA CSV AVANZADO ───
+// ─── MOTOR DE LECTURA CSV ───
 function parseCSVRow(text, delimiter) {
   var ret = [], val = '', inQ = false;
   for(var i=0; i<text.length; i++) {
@@ -943,6 +943,10 @@ function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag'
 function handleFileImp(file){
   if(!file) return;
   $('imp-st').textContent='Procesando: '+file.name+'...';
+  
+  // Guardamos el nombre del archivo para que la app sepa de qué mes es
+  window.importFileName = file.name.toLowerCase(); 
+  
   var reader=new FileReader();
   reader.onload=function(e){
     try{
@@ -957,12 +961,10 @@ function handleFileImp(file){
           if(cells.some(function(c){return c;})) rows.push(cells);
         });
       } else {
-        // DETECTOR INTELIGENTE DE SEPARADOR (Cuenta cuál se usa más en tu archivo)
         var tabs = (text.match(/\t/g) || []).length;
         var semis = (text.match(/;/g) || []).length;
         var commas = (text.match(/,/g) || []).length;
-        
-        var delimiter = ','; // default
+        var delimiter = ','; 
         if (tabs > semis && tabs > commas) delimiter = '\t';
         else if (semis > commas && semis > tabs) delimiter = ';';
 
@@ -975,34 +977,127 @@ function handleFileImp(file){
         });
       }
       
-      if(rows.length<2){$('imp-st').textContent='Archivo vacío o formato no válido.';return;}
+      if(rows.length<2){$('imp-st').textContent='Archivo vacío.';return;}
 
       window.toteatRows = rows; 
       importPending = rows; 
-      
-      var maxCols = 0;
-      rows.forEach(function(r){ if(r.length > maxCols) maxCols = r.length; });
 
-      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Archivo leído: '+rows.length+' filas y '+maxCols+' columnas</span>';
-      
-      // Vista previa visual CON BORDES para confirmar que se cortó bien
-      var previewRows = rows.slice(0, 6);
-      $('imp-prev').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'
-        +previewRows.map(function(r){
-          return '<tr>'+r.slice(0,8).map(function(c){return'<td style="padding:4px; border:1px solid var(--b2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;">'+(String(c)||'')+'</td>';}).join('')+'</tr>';
-        }).join('')+'</table>';
+      if(typeof importMode !== 'undefined' && importMode === 'inv') {
+          // --- VISTA PREVIA INVENTARIO ---
+          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Inventario detectado</span>';
+          $('imp-act').style.display='flex';
+      } else {
+          // --- VISTA PREVIA DE VENTAS COMPLETAS (INTELIGENTE) ---
+          
+          var findRow = function(keyword) { 
+              return rows.findIndex(function(r){ 
+                  return r.some(function(c){ return String(c).toLowerCase().includes(keyword); }); 
+              }); 
+          };
 
-      $('imp-act').style.display='flex';
-    }catch(err){$('imp-st').textContent='Error al leer el archivo: '+err.message;}
+          var vIdx = findRow('venta neta');
+          var eIdx = findRow('efectivo');
+          var pyIdx = findRow('pedidosya') === -1 ? findRow('pedidos ya') : findRow('pedidosya');
+          var ubIdx = findRow('uber');
+
+          if(vIdx === -1) {
+              $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró la palabra "Venta Neta"</span>';
+              $('imp-act').style.display='none';
+              return;
+          }
+
+          var dayRowIdx = vIdx - 1;
+          while(dayRowIdx >= 0 && !rows[dayRowIdx].some(function(c){ return /\d+/.test(String(c)); })) {
+              dayRowIdx--;
+          }
+          var dayRow = dayRowIdx >= 0 ? rows[dayRowIdx] : [];
+          
+          var rowEfectivo = eIdx >= 0 ? rows[eIdx] : [];
+          var rowPy = pyIdx >= 0 ? rows[pyIdx] : [];
+          var rowUb = ubIdx >= 0 ? rows[ubIdx] : [];
+
+          var mNames = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+          var sums = {}; 
+          
+          var currentYear = new Date().getFullYear();
+          var currentMonthIdx = new Date().getMonth();
+          
+          var fileY = window.importFileName.match(/20\d{2}/);
+          if(fileY) currentYear = parseInt(fileY[0]);
+          
+          var fileM = mNames.findIndex(function(m){ return window.importFileName.includes(m); });
+          if(fileM >= 0) currentMonthIdx = fileM;
+
+          var prevDayNum = 0;
+          
+          for (var i = 0; i < dayRow.length; i++) {
+              var dCell = String(dayRow[i]).toLowerCase().trim();
+              if (!dCell || dCell.includes('total') || dCell.includes('sem')) continue;
+
+              var dayMatch = dCell.match(/\d+/);
+              if (!dayMatch) continue; 
+              
+              var dayNum = parseInt(dayMatch[0]);
+              if (dayNum < 1 || dayNum > 31) continue; 
+
+              if (dayNum < prevDayNum - 10) {
+                  currentMonthIdx++;
+                  if (currentMonthIdx > 11) {
+                      currentMonthIdx = 0;
+                      currentYear++;
+                  }
+              }
+              prevDayNum = dayNum;
+
+              var MLabel = mNames[currentMonthIdx].charAt(0).toUpperCase() + mNames[currentMonthIdx].slice(1);
+              var label = MLabel + ' ' + currentYear;
+              
+              if(!sums[label]) sums[label] = { efectivo: 0, py: 0, ub: 0 };
+              
+              var extractNum = function(arr, index) { return parseInt(String(arr[index] || '0').replace(/[^0-9]/g, '')) || 0; };
+
+              sums[label].efectivo += extractNum(rowEfectivo, i);
+              sums[label].py += extractNum(rowPy, i);
+              sums[label].ub += extractNum(rowUb, i);
+          }
+
+          window.pendingSalesSum = sums;
+
+          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Carga exitosa. Totales detectados:</span>';
+          
+          var prevHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">';
+          var hasData = false;
+          
+          for(var k in sums) {
+              var data = sums[k];
+              if(data.efectivo > 0 || data.py > 0 || data.ub > 0) { 
+                  prevHtml += '<div style="padding:12px;background:var(--s2);border:1px solid var(--b2);border-left:3px solid var(--g);border-radius:6px;">'
+                            +'<div style="font-weight:800;color:var(--t);margin-bottom:6px;font-size:13px">'+k+'</div>'
+                            +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px"><span>Efectivo:</span><span style="color:var(--g);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.efectivo):'$'+data.efectivo)+'</span></div>'
+                            +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px"><span>PedidosYa:</span><span style="color:var(--m);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.py):'$'+data.py)+'</span></div>'
+                            +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub)"><span>Uber Eats:</span><span style="color:var(--c);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.ub):'$'+data.ub)+'</span></div>'
+                            +'</div>';
+                  hasData = true;
+              }
+          }
+          prevHtml += '</div>';
+          
+          if(!hasData) {
+              prevHtml = '<div class="notice warn">No se encontró dinero en las filas de Efectivo o Delivery.</div>';
+          }
+          
+          $('imp-prev').innerHTML = prevHtml;
+          $('imp-act').style.display='flex';
+      }
+    }catch(err){$('imp-st').textContent='Error crítico al procesar: '+err.message;}
   };
   reader.readAsText(file,'UTF-8');
 }
 
 function applyImport(){
-  if(!importPending) return;
-  var updated=0, skipped=0;
-
   if(importMode === 'inv'){
+    if(!importPending) return;
+    var updated=0, skipped=0;
     importPending.forEach(function(r){
       if(r.length<2) return;
       var name=r[0]; var cost=parseFloat((r[1]||'').replace(/[^0-9.]/g,''))||0;
@@ -1017,101 +1112,28 @@ function applyImport(){
     });
     cm('m-import'); renderIngr(); initDash();
     alert('✓ Inventario actualizado: '+updated+' ingredientes.');
-
+    importPending = null;
+    
   } else {
-    // ── LÓGICA DE EFECTIVO (BÚSQUEDA Y SUMA EXACTA) ──
-    var rows = window.toteatRows || [];
+    if(!window.pendingSalesSum) return;
     
-    var vIdx = rows.findIndex(function(r){ return r.some(function(c){ return String(c).trim().toLowerCase() === 'venta neta'; }); });
-    var eIdx = rows.findIndex(function(r){ return r.some(function(c){ return String(c).trim().toLowerCase() === 'efectivo'; }); });
-
-    if(vIdx === -1 || eIdx === -1) {
-        alert('❌ No se encontró la fila "Venta Neta" o "Efectivo" en el archivo.');
-        return;
-    }
-
-    var dayRowIdx = vIdx - 1;
-    while(dayRowIdx >= 0 && !rows[dayRowIdx].some(function(c){ return /\d+/.test(String(c)); })) {
-        dayRowIdx--;
-    }
-    var dayRow = rows[dayRowIdx] || [];
-    var monthRow = rows[dayRowIdx - 1] || [];
-    var rowEfectivo = rows[eIdx];
-
-    var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    var sumByMonth = {}; 
-    
-    var currentMonthIdx = 0;
-    var currentYear = new Date().getFullYear();
-    var foundStart = false;
-    
-    for(var r=0; r<=dayRowIdx; r++) {
-        for(var c=0; c<rows[r].length; c++) {
-            var cell = String(rows[r][c]).toLowerCase();
-            var matchY = cell.match(/20\d{2}/);
-            var matchM = mNames.findIndex(function(m){ return cell.includes(m.toLowerCase()); });
-            if(matchY && matchM >= 0) {
-                currentMonthIdx = matchM;
-                currentYear = parseInt(matchY[0]);
-                foundStart = true;
-                break;
-            }
-        }
-        if(foundStart) break;
-    }
-
-    var prevDayNum = 0;
-
-    for (var i = 0; i < dayRow.length; i++) {
-        var dCell = String(dayRow[i]).toLowerCase().trim();
-        if (!dCell || dCell.includes('total') || dCell.includes('sem')) continue;
-
-        var dayMatch = dCell.match(/\d+/);
-        if (!dayMatch) continue; 
-        
-        var dayNum = parseInt(dayMatch[0]);
-        if (dayNum < 1 || dayNum > 31) continue; 
-
-        var mCell = String(monthRow[i] || '').trim();
-        if (mCell && /[a-zA-Z]/.test(mCell)) {
-            var overrideM = mNames.findIndex(function(m){ return mCell.toLowerCase().includes(m.toLowerCase()); });
-            var overrideY = mCell.match(/20\d{2}/);
-            if (overrideM >= 0) currentMonthIdx = overrideM;
-            if (overrideY) currentYear = parseInt(overrideY[0]);
-        } else {
-            if (dayNum === 1 && prevDayNum >= 28) {
-                currentMonthIdx++;
-                if (currentMonthIdx > 11) {
-                    currentMonthIdx = 0;
-                    currentYear++;
-                }
-            }
-        }
-        prevDayNum = dayNum;
-
-        var label = mNames[currentMonthIdx] + ' ' + currentYear;
-        var eStr = String(rowEfectivo[i] || '0').replace(/[^0-9]/g, '');
-        var eVal = parseInt(eStr) || 0;
-        
-        sumByMonth[label] = (sumByMonth[label] || 0) + eVal;
-    }
-
-    var mesesActualizados = [];
-    for (var monthLabel in sumByMonth) {
+    var sums = window.pendingSalesSum;
+    var count = 0;
+    for (var monthLabel in sums) {
         var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
         if (targetMonth) {
-            targetMonth.efectivo = sumByMonth[monthLabel];
-            mesesActualizados.push(monthLabel);
+            if(sums[monthLabel].efectivo > 0) targetMonth.efectivo = sums[monthLabel].efectivo;
+            count++;
         }
     }
 
     localStorage.setItem('app_sales', JSON.stringify(SALES));
-    alert('✓ Efectivo calculado y distribuido:\n' + mesesActualizados.join(' | '));
     
     if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
     cm('m-import'); 
+    window.pendingSalesSum = null;
+    alert('✓ Datos de ' + count + ' mes(es) aplicados exitosamente.');
   }
-  importPending = null;
 }
 // ════ DELIVERY ════
 var delSrc='all'; // all | intern | ya
