@@ -541,7 +541,7 @@ function saveIngr(){
   if(!obj.name){alert('Ingresa un nombre.');return}
   var idx=INGR.findIndex(function(x){return x.code===code});
   if(idx>=0) INGR[idx]=obj; else INGR.push(obj);
-  cm('m-ingr');renderIngr();initDash();
+  cm('m-ingr');renderIngr();initDash();syncRecetasCost();
 }
 function delIngr(){
   if(!confirm('¿Eliminar?')) return;
@@ -1110,8 +1110,13 @@ function applyImport(){
         updated++;
       } else { skipped++; }
     });
+    
+    // ── MAGIA: Guardar inventario y sincronizar recetas automáticamente ──
+    localStorage.setItem('app_ingr', JSON.stringify(INGR));
+    if(typeof syncRecetasCost === 'function') syncRecetasCost();
+
     cm('m-import'); renderIngr(); initDash();
-    alert('✓ Inventario actualizado: '+updated+' ingredientes.');
+    alert('✓ Inventario actualizado: '+updated+' ingredientes. Costo de recetas sincronizado.');
     importPending = null;
     
   } else {
@@ -1135,9 +1140,6 @@ function applyImport(){
     alert('✓ Datos guardados exitosamente.');
   }
 }
-
-
-
 
 
 
@@ -2337,6 +2339,47 @@ function renderTablaFlujo(data, esFiltroManual, nombreProv) {
     tbody.innerHTML = rows;
   }
 }
+
+
+
+
+// ─── SINCRONIZADOR AUTOMÁTICO DE RECETAS ───
+function syncRecetasCost() {
+  if (typeof REC === 'undefined' || !REC || typeof INGR === 'undefined') return;
+  
+  REC.forEach(function(receta) {
+    var nuevoCosto = 0;
+    if (receta.ings && receta.ings.length > 0) {
+      receta.ings.forEach(function(item) {
+        // Busca el ingrediente en el inventario
+        var ingDB = INGR.find(function(i) { return i.code === item.code || i.name === item.name; });
+        if (ingDB) {
+          // Calcula el costo considerando si tiene factor de conversión (rinde) o es directo
+          var costoUnidad = ingDB.cost || 0;
+          if (ingDB.conv && ingDB.conv > 0) {
+            costoUnidad = ingDB.cost / ingDB.conv;
+          }
+          nuevoCosto += (costoUnidad * (item.qty || 0));
+        }
+      });
+    }
+    receta.cost = Math.round(nuevoCosto); // Guarda el nuevo precio exacto
+  });
+  
+  // Guardamos las recetas actualizadas
+  localStorage.setItem('app_rec', JSON.stringify(REC));
+  
+  // Si estás en la pestaña de recetas, se refresca la pantalla sola
+  if (typeof renderRec === 'function') renderRec();
+}
+
+
+
+
+
+
+
+
 
 function renderFlujoCaja(isFilterChange){
   var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
