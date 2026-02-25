@@ -36,7 +36,7 @@ body{
 ::-webkit-scrollbar-track{background:var(--s2)}
 ::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
 
-/* ─── NAV ─── */
+/* ─── NAV & HEADER ─── */
 .nav{
   position:sticky;top:0;z-index:300;
   height:52px;
@@ -46,11 +46,8 @@ body{
   display:flex;align-items:center;
   padding:0 20px;
 }
-.nav-brand{font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:-.4px;margin-right:20px;flex-shrink:0;white-space:nowrap}
 .nav-brand-sm{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.05em;color:var(--t);white-space:nowrap;padding:0 6px;opacity:.7}
 .nav-brand-sm .sf{color:var(--c)}
-.nav-brand .sf{color:var(--m)} .nav-brand .fl{color:var(--c)}
-.nav-div{width:1px;height:20px;background:var(--b2);margin:0 8px;flex-shrink:0}
 .nav-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;flex:1}
 .nav-tabs::-webkit-scrollbar{display:none}
 .nt{
@@ -64,67 +61,73 @@ body{
 .nt.on{color:var(--c);border-bottom-color:var(--c)}
 .nav-r{margin-left:auto;flex-shrink:0;padding-left:12px;display:flex;gap:8px;align-items:center}
 .tog{
-  height:36px;padding:0 13px;border-radius:var(--rad-s);
+  height:36px;width:36px;border-radius:var(--rad-s);
   border:1px solid var(--b2);background:var(--s3);
-  color:var(--sub);font-family:var(--sans);font-size:12px;font-weight:600;
+  color:var(--sub);display:inline-flex;align-items:center;justify-content:center;
   cursor:pointer;transition:all .15s
 }
 .tog:hover{color:var(--t);border-color:var(--c)}
+
+/* ─── MENÚ MÓVIL ─── */
+.hamburger {
+  display:none; background:none; border:none; color:var(--t); cursor:pointer; 
+  padding:6px; margin-left:auto; transition:color 0.2s;
+}
+.hamburger:hover { color:var(--c); }
+.mob-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:900; 
+  backdrop-filter:blur(3px); opacity:0; transition:opacity .3s;
+}
+.mob-overlay.on { display:block; opacity:1; }
+.mob-menu {
+  position:fixed; top:0; right:-280px; width:280px; bottom:0; background:var(--s1); 
+  z-index:901; box-shadow:-4px 0 24px rgba(0,0,0,.5); transition:right .3s cubic-bezier(0.4, 0, 0.2, 1); 
+  display:flex; flex-direction:column; padding:24px 0; overflow-y:auto; border-left:1px solid var(--b);
+}
+.mob-menu.on { right:0; }
+.mm-close {
+  position:absolute; top:12px; right:16px; background:none; border:none; 
+  color:var(--sub); font-size:28px; cursor:pointer; transition:color 0.2s;
+}
+.mm-close:hover { color:var(--t); }
+.mm-sec { padding:16px 24px; border-bottom:1px solid var(--b); }
+.mm-sec:last-child { border-bottom:none; }
+.mm-title {
+  font-size:10px; font-weight:800; text-transform:uppercase; 
+  letter-spacing:.1em; color:var(--sub); margin-bottom:14px;
+}
+.mm-item {
+  display:flex; align-items:center; gap:12px; padding:10px 0; color:var(--t); 
+  font-size:13.5px; font-weight:600; cursor:pointer; transition:color .2s;
+}
+.mm-item svg { color:var(--sub); transition:color .2s; }
+.mm-item:hover, .mm-item.on { color:var(--c); }
+.mm-item:hover svg, .mm-item.on svg { color:var(--c); }
+
+@media(max-width:860px){
+  .nav-r { display:none!important; }
+  .hamburger { display:block; }
+}
 
 /* ─── PAGE ─── */
 .page{display:none;padding:24px 20px 60px;max-width:1380px;margin:0 auto}
 .page.on{display:block}
 
 /* ─── KPI ROW ─── */
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:12px;margin-bottom:28px
-}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px}
 @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:640px){.kpis{grid-template-columns:1fr 1fr}}
-.kpi{
-  background:var(--s1);
-  border:1px solid var(--b);
-  border-radius:var(--rad);
-  padding:18px 20px;
-  box-shadow:var(--sh);
-  position:relative;overflow:hidden
-}
-.kpi::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--c)
-}
+.kpi{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad);padding:18px 20px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--c)}
 .kpi.m::after{background:var(--m)}
-.kpi-lbl{
-  font-size:10px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--sub);margin-bottom:9px
-}
-.kpi-val{
-  font-family:var(--mono);
-  font-size:22px;
-  font-weight:500;
-  color:var(--c);
-  line-height:1;
-}
+.kpi-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:9px}
+.kpi-val{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--c);line-height:1;}
 .kpi.m .kpi-val{color:var(--m)}
 .kpi-foot{font-size:11px;color:var(--sub);margin-top:7px}
 
 /* ─── CARD ─── */
-.card{
-  background:var(--s1);
-  border:1px solid var(--b);
-  border-radius:var(--rad);
-  padding:22px 24px;
-  box-shadow:var(--sh)
-}
-.card-hd{
-  font-size:11px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.1em;
-  color:var(--sub);
-  margin-bottom:18px
-}
+.card{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad);padding:22px 24px;box-shadow:var(--sh)}
+.card-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:18px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
 @media(max-width:860px){.g2,.g3{grid-template-columns:1fr}}
@@ -132,97 +135,41 @@ body{
 /* ─── BARS ─── */
 .bars{display:flex;flex-direction:column;gap:8px}
 .br{display:flex;align-items:center;gap:10px;min-width:0}
-.br-lbl{
-  font-size:11.5px;color:var(--sub);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  flex-shrink:0;text-align:right
-}
+.br-lbl{font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;text-align:right}
 .br-track{flex:1;height:13px;background:var(--s3);border-radius:3px;overflow:hidden}
 .br-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
 .br-val{font-family:var(--mono);font-size:11px;color:var(--sub);flex-shrink:0;width:84px}
 
-/* ─── SELECT DROPDOWN (replaces button groups) ─── */
-.inp{
-  height:44px;padding:0 14px;background:var(--s2);
-  border:1px solid var(--b2);color:var(--t);
-  border-radius:var(--rad-s);
-  font-family:var(--sans);font-size:13px;
-  outline:none;transition:border-color .15s;
-  appearance:none;-webkit-appearance:none;cursor:pointer
-}
+/* ─── SELECT DROPDOWN ─── */
+.inp{height:44px;padding:0 14px;background:var(--s2);border:1px solid var(--b2);color:var(--t);border-radius:var(--rad-s);font-family:var(--sans);font-size:13px;outline:none;transition:border-color .15s;appearance:none;-webkit-appearance:none;cursor:pointer}
 .inp:focus{border-color:var(--c)}
 .inp-wrap{position:relative;display:inline-block}
-.inp-wrap::after{
-  content:'↓';position:absolute;right:12px;top:50%;
-  transform:translateY(-50%);
-  font-size:10px;color:var(--sub);pointer-events:none
-}
-.inp-lg{width:100%}
-.w280{width:280px}
-.w200{width:200px}
-.w160{width:160px}
-@media(max-width:600px){.w280,.w200,.w160{width:100%}}
+.inp-wrap::after{content:'↓';position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--sub);pointer-events:none}
+.w280{width:280px}.w200{width:200px}.w160{width:160px}.w180{width:180px}
+@media(max-width:600px){.w280,.w200,.w160,.w180{width:100%}}
 .ctrls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
 .cnt-lbl{font-size:11.5px;color:var(--sub)}
 
 /* ─── BUTTONS ─── */
-.btn{
-  height:44px;padding:0 18px;border-radius:var(--rad-s);
-  border:1px solid var(--b2);background:var(--s2);
-  color:var(--t);font-family:var(--sans);font-size:13px;font-weight:600;
-  cursor:pointer;transition:all .15s;
-  display:inline-flex;align-items:center;justify-content:center;
-  gap:6px;white-space:nowrap
-}
+.btn{height:44px;padding:0 18px;border-radius:var(--rad-s);border:1px solid var(--b2);background:var(--s2);color:var(--t);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
 .btn:hover{border-color:var(--c);color:var(--c)}
 .btn-c{background:var(--c);color:#000;border-color:var(--c)}
 .btn-c:hover{opacity:.88;color:#000}
 .btn-m{background:var(--m);color:#fff;border-color:var(--m)}
 .btn-m:hover{opacity:.88;color:#fff}
-.btn-ghost{background:transparent;border-color:transparent;color:var(--sub)}
-.btn-ghost:hover{color:var(--t);border-color:var(--b2)}
 .btn-sm{height:36px;padding:0 12px;font-size:12px}
-.btn-tbl{
-  height:36px;min-width:44px;padding:0 10px;border-radius:var(--rad-s);
-  font-size:11.5px;font-weight:600;cursor:pointer;
-  border:1px solid var(--b2);background:var(--s3);color:var(--sub);
-  font-family:var(--sans);transition:all .15s;
-  display:inline-flex;align-items:center;justify-content:center
-}
-.btn-tbl:hover{border-color:var(--c);color:var(--c)}
-
-/* ─── PILLS (ventas mes selector) ─── */
 .pill-row{display:flex;gap:8px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
-.pill-sel{
-  height:38px;padding:0 16px;border-radius:20px;
-  font-size:12.5px;font-weight:600;cursor:pointer;
-  border:1px solid var(--b2);color:var(--sub);background:var(--s2);
-  transition:all .15s;white-space:nowrap
-}
+.pill-sel{height:38px;padding:0 16px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--b2);color:var(--sub);background:var(--s2);transition:all .15s;white-space:nowrap}
 .pill-sel:hover{color:var(--t);border-color:var(--c)}
 .pill-sel.on{background:var(--c);color:#000;border-color:var(--c)}
 [data-theme="light"] .pill-sel.on{color:#fff}
-
-/* ─── TAGS ─── */
-.tag{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10.5px;font-weight:700;font-family:var(--mono);white-space:nowrap}
-.t-g{background:rgba(0,229,160,.1);color:var(--g);border:1px solid rgba(0,229,160,.2)}
-.t-a{background:rgba(255,176,32,.1);color:var(--a);border:1px solid rgba(255,176,32,.2)}
-.t-r{background:rgba(255,68,85,.1);color:var(--r);border:1px solid rgba(255,68,85,.2)}
-.t-c{background:var(--c2);color:var(--c);border:1px solid rgba(0,212,255,.2)}
-.t-m{background:var(--m2);color:var(--m);border:1px solid rgba(255,63,164,.2)}
-.t-n{background:var(--s3);color:var(--sub);border:1px solid var(--b2)}
 
 /* ─── TABLES ─── */
 .tbl-shell{border:1px solid var(--b);border-radius:var(--rad);overflow:hidden;box-shadow:var(--sh)}
 .tbl-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead{background:var(--s2)}
-th{
-  padding:11px 15px;text-align:left;font-size:10px;font-weight:700;
-  text-transform:uppercase;letter-spacing:.1em;color:var(--sub);
-  border-bottom:1px solid var(--b2);white-space:nowrap;
-  cursor:pointer;user-select:none;transition:color .12s
-}
+th{padding:11px 15px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);border-bottom:1px solid var(--b2);white-space:nowrap;cursor:pointer;user-select:none;transition:color .12s}
 th:hover{color:var(--t)}
 th.r,td.r{text-align:right}
 td{padding:11px 15px;border-bottom:1px solid var(--b)}
@@ -232,153 +179,119 @@ tr:last-child td{border-bottom:none}
 [data-theme="light"] tbody tr:hover td{background:rgba(0,0,0,.02)}
 @media(max-width:768px){.hide-sm{display:none}td,th{padding:10px 10px}}
 @media(max-width:480px){.hide-xs{display:none}}
-
-/* ─── PAGINATION ─── */
 .pag{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-top:1px solid var(--b);background:var(--s2);flex-wrap:wrap;gap:8px}
 .pag-info{font-size:12px;color:var(--sub)}
 .pag-btns{display:flex;gap:5px}
-.pag-btn{
-  height:34px;min-width:34px;padding:0 8px;border-radius:var(--rad-s);
-  border:1px solid var(--b2);background:var(--s3);color:var(--sub);
-  font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .12s;
-  display:inline-flex;align-items:center;justify-content:center
-}
+.pag-btn{height:34px;min-width:34px;padding:0 8px;border-radius:var(--rad-s);border:1px solid var(--b2);background:var(--s3);color:var(--sub);font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;justify-content:center}
 .pag-btn:hover{border-color:var(--c);color:var(--c)}
 .pag-btn.on{background:var(--c);color:#000;border-color:var(--c)}
-.pag-btn:disabled{opacity:.3;cursor:not-allowed}
 
 /* ─── MODAL ─── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;backdrop-filter:blur(3px)}
 .overlay.on{display:flex}
-.modal{
-  background:var(--s1);
-  border:1px solid var(--b2);
-  border-radius:12px;
-  width:100%;max-width:520px;
-  padding:28px;position:relative;
-  box-shadow:var(--sh-l)
-}
-.mx{
-  position:absolute;top:16px;right:16px;width:32px;height:32px;
-  border-radius:var(--rad-s);background:var(--s3);border:1px solid var(--b2);
-  color:var(--sub);cursor:pointer;font-size:16px;
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--sans);transition:all .12s
-}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:12px;width:100%;max-width:520px;padding:28px;position:relative;box-shadow:var(--sh-l)}
+.mx{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:var(--rad-s);background:var(--s3);border:1px solid var(--b2);color:var(--sub);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .12s}
 .mx:hover{color:var(--t)}
 .m-title{font-family:var(--disp);font-weight:800;font-size:18px;margin-bottom:4px}
 .m-sub{font-size:12px;color:var(--sub);margin-bottom:24px}
 .f-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);margin-bottom:5px;display:block}
-.f-inp{
-  width:100%;height:44px;padding:0 14px;background:var(--s2);
-  border:1px solid var(--b2);color:var(--t);
-  border-radius:var(--rad-s);font-family:var(--sans);font-size:13.5px;
-  outline:none;margin-bottom:14px;transition:border-color .12s
-}
+.f-inp{width:100%;height:44px;padding:0 14px;background:var(--s2);border:1px solid var(--b2);color:var(--t);border-radius:var(--rad-s);font-family:var(--sans);font-size:13.5px;outline:none;margin-bottom:14px;transition:border-color .12s}
 .f-inp:focus{border-color:var(--c)}
-.f-ta{
-  width:100%;padding:10px 14px;background:var(--s2);
-  border:1px solid var(--b2);color:var(--t);
-  border-radius:var(--rad-s);font-family:var(--sans);font-size:13px;
-  outline:none;margin-bottom:14px;resize:vertical;min-height:80px
-}
+.f-ta{width:100%;padding:10px 14px;background:var(--s2);border:1px solid var(--b2);color:var(--t);border-radius:var(--rad-s);font-family:var(--sans);font-size:13px;outline:none;margin-bottom:14px;resize:vertical;min-height:80px}
 .f-ta:focus{border-color:var(--c)}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .f-act{display:flex;gap:8px;justify-content:flex-end;padding-top:18px;margin-top:4px;border-top:1px solid var(--b)}
-.ing-item{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--b);gap:14px}
-.ing-item:last-child{border-bottom:none}
-.cost-bar{height:2px;background:var(--c);border-radius:2px;margin-top:5px;transition:width .5s}
 
-/* ─── UPLOAD ─── */
+/* ─── UPLOAD & MISC ─── */
 .dz{border:2px dashed var(--b2);border-radius:var(--rad);padding:32px 24px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:16px}
 .dz:hover,.dz.drag{border-color:var(--c);background:var(--c3)}
 .dz input{display:none}
-
-/* ─── NOTICE ─── */
 .notice{border:1px solid var(--b2);border-left:3px solid var(--c);border-radius:var(--rad-s);padding:12px 16px;font-size:12.5px;color:var(--sub);background:var(--s2);margin-bottom:18px;line-height:1.6}
 .notice strong{color:var(--t)}
-.notice.warn{border-left-color:var(--a)}
-.notice.info{border-left-color:var(--m)}
-
-/* ─── PEDIDO ─── */
-.ped-sec{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad);margin-bottom:10px;overflow:hidden;box-shadow:var(--sh)}
-.ped-hd{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;background:var(--s2);border-bottom:1px solid var(--b)}
-.ped-hl{font-size:13.5px;font-weight:700}
-.ped-hr{display:flex;align-items:center;gap:10px}
-.ped-body{padding:0 18px}
-.ped-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--b);gap:12px}
-.ped-row:last-child{border-bottom:none}
-.ped-nm{font-size:13.5px;font-weight:600}
-.ped-meta{font-size:11px;color:var(--sub);margin-top:2px}
-.ped-qty{font-family:var(--mono);font-size:14px;font-weight:500;text-align:right;color:var(--c)}
-.ped-c{font-size:11px;color:var(--sub);text-align:right;margin-top:2px}
-
-/* ─── CONTEO ─── */
-.cnt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
-.cnt-card{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad-s);padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh)}
-.cnt-nm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cnt-su{font-size:10.5px;color:var(--sub);margin-top:2px}
-.q-inp{width:72px;height:44px;text-align:center;font-family:var(--mono);font-size:15px;background:var(--s2);border:1px solid var(--b2);color:var(--t);border-radius:var(--rad-s);outline:none;flex-shrink:0}
-.q-inp:focus{border-color:var(--c)}
-
-/* ─── ANÁLISIS SMART ─── */
-.insight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:16px}
-.insight-card{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad);padding:18px 20px;box-shadow:var(--sh)}
-.insight-rank{font-family:var(--mono);font-size:11px;color:var(--sub);margin-bottom:8px}
-.insight-name{font-size:14px;font-weight:700;margin-bottom:4px}
-.insight-stat{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--c);margin-bottom:4px}
-.insight-stat.mag{color:var(--m)}
-.insight-foot{font-size:11.5px;color:var(--sub)}
-.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
-.day-col{text-align:center}
-.day-nm{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--sub);margin-bottom:5px}
-.day-bar{border-radius:3px;margin:0 auto;transition:height .5s ease}
-.day-val{font-family:var(--mono);font-size:9.5px;color:var(--sub);margin-top:4px}
-
-/* ─── MISC ─── */
-.ped-inp:focus{border-color:var(--c)!important;box-shadow:0 0 0 2px rgba(0,212,255,.15)}
-.btn-icon{
-  height:36px;min-width:36px;padding:0 10px;border-radius:var(--rad-s);
-  border:1px solid var(--b2);background:var(--s2);color:var(--sub);
-  font-size:13px;font-family:var(--sans);font-weight:600;
-  cursor:pointer;transition:all .15s;
-  display:inline-flex;align-items:center;gap:4px
-}
+.btn-icon{height:36px;min-width:36px;padding:0 10px;border-radius:var(--rad-s);border:1px solid var(--b2);background:var(--s2);color:var(--sub);font-size:13px;font-family:var(--sans);font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
 .btn-icon:hover{border-color:var(--c);color:var(--c)}
-.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0;vertical-align:middle}
-.sep{height:1px;background:var(--b);margin:20px 0}
 .empty{padding:48px;text-align:center;color:var(--sub);font-size:13px}
 .ph{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:24px}
 .ph-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ─── COMPONENTES EXTRA (PEDIDO, CONTEO, SMART) ─── */
+.ped-sec{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad);margin-bottom:10px;overflow:hidden;box-shadow:var(--sh)}
+.ped-hd{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;background:var(--s2);border-bottom:1px solid var(--b)}
+.ped-body{padding:0 18px}
+.ped-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--b);gap:12px}
+.ped-row:last-child{border-bottom:none}
+.ped-qty{font-family:var(--mono);font-size:14px;font-weight:500;text-align:right;color:var(--c)}
+.cnt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.cnt-card{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad-s);padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh)}
+.q-inp{width:72px;height:44px;text-align:center;font-family:var(--mono);font-size:15px;background:var(--s2);border:1px solid var(--b2);color:var(--t);border-radius:var(--rad-s);outline:none;flex-shrink:0}
+.insight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:16px}
+.insight-card{background:var(--s1);border:1px solid var(--b);border-radius:var(--rad);padding:18px 20px;box-shadow:var(--sh)}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="nav">
   <span class="nav-brand-sm"><span class="sf">SF</span></span>
+  
   <div class="nav-tabs">
     <div class="nt on" id="t-dash"     onclick="go('dash')">Dashboard</div>
     <div class="nt"    id="t-ventas"   onclick="go('ventas')">Ventas</div>
-    <div class="nt"    id="t-analisis" onclick="go('analisis')">An&#225;lisis</div>
+    <div class="nt"    id="t-analisis" onclick="go('analisis')">Análisis</div>
     <div class="nt"    id="t-delivery" onclick="go('delivery')">Delivery</div>
-    <div class="nt"    id="t-inv"      onclick="go('inv')">Inventario</div>
+    <div class="nt"    id="t-stock"    onclick="go('stock')">Stock</div>
     <div class="nt"    id="t-rec"      onclick="go('rec')">Recetas</div>
-    <div class="nt"    id="t-ped"      onclick="go('ped')">Pedido</div>
     <div class="nt"    id="t-gastos"   onclick="go('gastos')">Gastos</div>
     <div class="nt"    id="t-obj"      onclick="go('obj')">Objetivos</div>
-    <div class="nt"    id="t-cnt"      onclick="go('cnt')">Conteo</div>
   </div>
-  <div class="nav-r" style="gap:8px">
-    <button class="tog" id="tog" onclick="toggleTheme()">&#9728;&#65039;</button>
-<button class="btn btn-sm" onclick="loadFromCloud(this)" style="background:var(--s2);color:var(--m);border:1px solid var(--b2)">&#8681; Bajar Nube</button>
-<button class="btn btn-sm" onclick="saveToCloud(this)" style="background:var(--m);color:#000;border:1px solid var(--m);font-weight:700">&#8679; Subir Nube</button>
+
+  <div class="nav-r" id="desktop-actions">
+    <button class="tog" id="tog" onclick="toggleTheme()" title="Cambiar Tema">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+    <button class="btn btn-sm" onclick="loadFromCloud(this)" style="background:var(--s2);color:var(--m);border:1px solid var(--b2)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Bajar Nube
+    </button>
+    <button class="btn btn-sm" onclick="saveToCloud(this)" style="background:var(--m);color:#000;border:1px solid var(--m);font-weight:700">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir Nube
+    </button>
   </div>
+
+  <button class="hamburger" id="btn-hamburger" onclick="toggleMenu()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
 </nav>
 
+<div class="mob-overlay" id="mob-overlay" onclick="toggleMenu()"></div>
+<div class="mob-menu" id="mob-menu">
+  <button class="mm-close" onclick="toggleMenu()">&times;</button>
+  
+  <div class="mm-sec">
+    <div class="mm-title">Sistema</div>
+    <div class="mm-item" onclick="toggleTheme(); toggleMenu()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> Cambiar Tema
+    </div>
+    <div class="mm-item" onclick="loadFromCloud(this); toggleMenu()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Bajar Datos
+    </div>
+    <div class="mm-item" onclick="saveToCloud(this); toggleMenu()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir a la Nube
+    </div>
+  </div>
 
-<!-- ════ DASHBOARD ════ -->
+  <div class="mm-sec">
+    <div class="mm-title">Navegación Rápida</div>
+    <div class="mm-item" onclick="go('dash'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</div>
+    <div class="mm-item" onclick="go('ventas'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Ventas</div>
+    <div class="mm-item" onclick="go('analisis'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Análisis</div>
+    <div class="mm-item" onclick="go('delivery'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1 .4-1 1v10c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg> Delivery</div>
+    <div class="mm-item" onclick="go('stock'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Stock</div>
+    <div class="mm-item" onclick="go('rec'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Recetas</div>
+    <div class="mm-item" onclick="go('gastos'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Gastos</div>
+    <div class="mm-item" onclick="go('obj'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Objetivos</div>
+  </div>
+</div>
+
 <div id="p-dash" class="page on">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
     <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Período</span>
@@ -397,9 +310,7 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ════ VENTAS ════ -->
 <div id="p-ventas" class="page">
-  <!-- Selector de mes + canal -->
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap">
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:10px">
@@ -410,13 +321,13 @@ tr:last-child td{border-bottom:none}
       </div>
       <div style="display:flex;gap:6px;align-items:center">
         <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Canal</span>
-        <div style="display:flex;gap:5px">
-          <button class="pill-sel on"  id="vch-all"    onclick="setVCanal('all',this)">Todo</button>
-          <button class="pill-sel"     id="vch-local"  onclick="setVCanal('local',this)">Local</button>
-          <button class="pill-sel"     id="vch-intern" onclick="setVCanal('intern',this)">Del. interno</button>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="pill-sel on"  id="vch-all"      onclick="setVCanal('all',this)">Todo</button>
+          <button class="pill-sel"     id="vch-local"    onclick="setVCanal('local',this)">Local</button>
+          <button class="pill-sel"     id="vch-intern"   onclick="setVCanal('intern',this)">Del. interno</button>
           <button class="pill-sel"     id="vch-platforms" onclick="setVCanal('platforms',this)">Plataformas</button>
-          <button class="pill-sel"     id="vch-ya"     onclick="setVCanal('ya',this)">PedidosYa</button>
-          <button class="pill-sel"     id="vch-uber"   onclick="setVCanal('uber',this)">Uber</button>
+          <button class="pill-sel"     id="vch-ya"       onclick="setVCanal('ya',this)">PedidosYa</button>
+          <button class="pill-sel"     id="vch-uber"     onclick="setVCanal('uber',this)">Uber</button>
         </div>
       </div>
     </div>
@@ -439,7 +350,6 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ════ ANÁLISIS INTELIGENTE ════ -->
 <div id="p-analisis" class="page">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
     <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Ver datos de</span>
@@ -473,64 +383,138 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ════ INVENTARIO ════ -->
-<div id="p-inv" class="page">
-  <div class="ph">
-    <div class="ph-acts">
-      <button style="display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--b2);border-radius:var(--rad-s);padding:6px 12px;cursor:pointer;color:var(--sub);font-size:11px;font-weight:600" onclick="openImport('inv')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Subir Excel</button>
-      <!-- BOTÓN ARREGLADO: se había colado el style dentro del onclick -->
-      <button class="btn btn-sm" onclick="openUpload()" style="display:inline-flex;align-items:center;gap:6px">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        Subir Excel (Toteat)
-      </button>
-      <button class="btn btn-c btn-sm" onclick="openAddIngr()">+ Nuevo</button>
+<div id="p-stock" class="page">
+  
+  <div style="display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap">
+    <button class="pill-sel on" id="stab-inv" onclick="setStockTab('inv',this)">Inventario</button>
+    <button class="pill-sel"    id="stab-ped" onclick="setStockTab('ped',this)">Pedido Semanal</button>
+    <button class="pill-sel"    id="stab-cnt" onclick="setStockTab('cnt',this)">Control de Conteo</button>
+  </div>
+
+  <div id="sview-inv" class="sview">
+    <div class="ph">
+      <div class="ph-acts">
+        <button style="display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--b2);border-radius:var(--rad-s);padding:6px 12px;cursor:pointer;color:var(--sub);font-size:11px;font-weight:600" onclick="openImport('inv')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Subir Excel</button>
+        <button class="btn btn-sm" onclick="openUpload()" style="display:inline-flex;align-items:center;gap:6px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Subir Excel (Toteat)
+        </button>
+        <button class="btn btn-c btn-sm" onclick="openAddIngr()">+ Nuevo</button>
+      </div>
+    </div>
+    <div class="ctrls">
+      <input class="inp w280" type="text" id="iq" placeholder="Buscar ingrediente o marca..." oninput="filterI()">
+      <div class="inp-wrap">
+        <select class="inp w200" id="ic" onchange="filterI()">
+          <option value="">Todas las categorías</option>
+          <option value="IC.020">Carnes</option>
+          <option value="IC.030">Frutas y Verduras</option>
+          <option value="IC.010">Abarrotes</option>
+          <option value="IC.060">Congelados</option>
+          <option value="IC.040">Bebidas</option>
+          <option value="IC.070">Descartables</option>
+        </select>
+      </div>
+      <div class="inp-wrap">
+        <select class="inp w160" id="iu" onchange="filterI()">
+          <option value="">Todo uso</option>
+          <option value="hi">Alto (&gt;20/sem)</option>
+          <option value="md">Medio (1–20)</option>
+          <option value="lo">Bajo</option>
+        </select>
+      </div>
+      <span class="cnt-lbl" id="i-cnt"></span>
+    </div>
+    <div class="tbl-shell">
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr>
+            <th onclick="sI('name')">Ingrediente ↕</th>
+            <th class="hide-sm" onclick="sI('brand')">Marca</th>
+            <th class="hide-sm">Proveedor</th>
+            <th class="r" onclick="sI('cost')">Costo unit. ↕</th>
+            <th class="hide-xs">Unidad</th>
+            <th class="r" onclick="sI('weekly_avg')">Uso/sem ↕</th>
+            <th class="r hide-sm" onclick="sI('total_cost')">Total hist. ↕</th>
+            <th class="r hide-xs">Crítico 2sem</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="i-body"></tbody>
+        </table>
+      </div>
+      <div class="pag" id="i-pag"></div>
     </div>
   </div>
-  <div class="ctrls">
-    <input class="inp w280" type="text" id="iq" placeholder="Buscar ingrediente o marca..." oninput="filterI()">
-    <div class="inp-wrap">
-      <select class="inp w200" id="ic" onchange="filterI()">
-        <option value="">Todas las categorías</option>
-        <option value="IC.020">Carnes</option>
-        <option value="IC.030">Frutas y Verduras</option>
-        <option value="IC.010">Abarrotes</option>
-        <option value="IC.060">Congelados</option>
-        <option value="IC.040">Bebidas</option>
-        <option value="IC.070">Descartables</option>
-      </select>
+
+  <div id="sview-ped" class="sview" style="display:none">
+    <div class="ph">
+      <div class="ph-acts">
+        <div style="display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--b2);padding:0 16px;border-radius:var(--rad-s);height:44px">
+          <span style="font-size:12px;color:var(--sub);font-weight:600">Semanas:</span>
+          <input type="number" id="psem" value="2" min="1" max="8"
+            style="width:40px;text-align:center;background:none;border:none;color:var(--c);font-family:var(--mono);font-size:20px;font-weight:500;outline:none"
+            oninput="renderPed()">
+        </div>
+        <div class="inp-wrap">
+          <select class="inp w200" id="pcat-sel" onchange="renderPed()">
+            <option value="all">Todas las categorías</option>
+            <option value="IC.020">Carnes</option>
+            <option value="IC.030">Frutas/Verduras</option>
+            <option value="IC.010">Abarrotes</option>
+            <option value="IC.060">Congelados</option>
+            <option value="IC.040">Bebidas</option>
+            <option value="IC.070">Descartables</option>
+          </select>
+        </div>
+        <button class="btn btn-m" onclick="copyPed()" style="display:inline-flex;align-items:center;gap:6px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a4.6 4.6 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><circle cx="12" cy="12" r="10"/></svg>
+          Copiar WhatsApp
+        </button>
+      </div>
     </div>
-    <div class="inp-wrap">
-      <select class="inp w160" id="iu" onchange="filterI()">
-        <option value="">Todo uso</option>
-        <option value="hi">Alto (&gt;20/sem)</option>
-        <option value="md">Medio (1–20)</option>
-        <option value="lo">Bajo</option>
-      </select>
+    <div class="g3" style="margin-bottom:24px">
+      <div class="kpi"><div class="kpi-lbl">Costo estimado</div><div class="kpi-val" id="p-cost">—</div><div class="kpi-foot">Total insumos proyectados</div></div>
+      <div class="kpi m"><div class="kpi-lbl">Items a pedir</div><div class="kpi-val" id="p-items">—</div><div class="kpi-foot">Con historial registrado</div></div>
+      <div class="kpi"><div class="kpi-lbl">Cobertura</div><div class="kpi-val" id="p-seml">2 sem.</div><div class="kpi-foot">Semanas proyectadas</div></div>
     </div>
-    <span class="cnt-lbl" id="i-cnt"></span>
+    <div id="p-secs"></div>
   </div>
-  <div class="tbl-shell">
-    <div class="tbl-scroll">
-      <table>
-        <thead><tr>
-          <th onclick="sI('name')">Ingrediente ↕</th>
-          <th class="hide-sm" onclick="sI('brand')">Marca</th>
-          <th class="hide-sm">Proveedor</th>
-          <th class="r" onclick="sI('cost')">Costo unit. ↕</th>
-          <th class="hide-xs">Unidad</th>
-          <th class="r" onclick="sI('weekly_avg')">Uso/sem ↕</th>
-          <th class="r hide-sm" onclick="sI('total_cost')">Total hist. ↕</th>
-          <th class="r hide-xs">Crítico 2sem</th>
-          <th></th>
-        </tr></thead>
-        <tbody id="i-body"></tbody>
-      </table>
+
+  <div id="sview-cnt" class="sview" style="display:none">
+    <div class="ph">
+      <div class="ph-acts">
+        <button class="btn btn-sm" onclick="clearCnt()">Limpiar</button>
+        <div class="inp-wrap">
+          <select class="inp w200" id="c-cat" onchange="renderCnt()">
+            <option value="">Todas las categorías</option>
+            <option value="IC.020">Carnes</option>
+            <option value="IC.030">Verduras</option>
+            <option value="IC.010">Abarrotes</option>
+            <option value="IC.060">Congelados</option>
+            <option value="IC.040">Bebidas</option>
+            <option value="IC.070">Descartables</option>
+          </select>
+        </div>
+        <button class="btn btn-m" onclick="exportCnt()" style="display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.14-1.087A9.953 9.953 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg> Copiar WhatsApp</button>
+      </div>
     </div>
-    <div class="pag" id="i-pag"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
+      <div class="card" style="padding:13px 17px;flex:0 0 auto">
+        <div class="f-lbl" style="margin-bottom:5px">Fecha</div>
+        <input type="date" id="c-fecha" style="background:none;border:none;color:var(--t);font-size:15px;font-weight:700;font-family:var(--sans);outline:none">
+      </div>
+      <div class="card" style="padding:13px 17px;flex:0 0 auto">
+        <div class="f-lbl" style="margin-bottom:5px">Responsable</div>
+        <input type="text" id="c-resp" placeholder="Nombre" style="background:none;border:none;color:var(--t);font-size:15px;font-weight:700;font-family:var(--sans);outline:none;width:140px">
+      </div>
+      <div class="card" style="padding:13px 17px;flex:0 0 auto">
+        <div class="f-lbl" style="margin-bottom:5px">Turno</div>
+        <select id="c-turno" style="background:none;border:none;color:var(--t);font-size:15px;font-weight:700;font-family:var(--sans);outline:none"><option>Apertura</option><option>Cierre</option></select>
+      </div>
+    </div>
+    <div class="cnt-grid" id="c-grid"></div>
   </div>
 </div>
 
-<!-- ════ RECETAS ════ -->
 <div id="p-rec" class="page">
   <div class="ctrls">
     <input class="inp w280" type="text" id="rq" placeholder="Buscar receta..." oninput="filterR()">
@@ -573,90 +557,195 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ════ PEDIDO ════ -->
-<div id="p-ped" class="page">
-  <div class="ph">
-    <div class="ph-acts">
-      <div style="display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--b2);padding:0 16px;border-radius:var(--rad-s);height:44px">
-        <span style="font-size:12px;color:var(--sub);font-weight:600">Semanas:</span>
-        <input type="number" id="psem" value="2" min="1" max="8"
-          style="width:40px;text-align:center;background:none;border:none;color:var(--c);font-family:var(--mono);font-size:20px;font-weight:500;outline:none"
-          oninput="renderPed()">
-      </div>
-      <div class="inp-wrap">
-        <select class="inp w200" id="pcat-sel" onchange="renderPed()">
-          <option value="all">Todas las categorías</option>
-          <option value="IC.020">Carnes</option>
-          <option value="IC.030">Frutas/Verduras</option>
-          <option value="IC.010">Abarrotes</option>
-          <option value="IC.060">Congelados</option>
-          <option value="IC.040">Bebidas</option>
-          <option value="IC.070">Descartables</option>
-        </select>
-      </div>
-      <button class="btn btn-m" onclick="copyPed()" style="display:inline-flex;align-items:center;gap:6px">
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a4.6 4.6 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><circle cx="12" cy="12" r="10"/></svg>
-  Copiar WhatsApp
-</button>
-    </div>
-  </div>
-  <div class="g3" style="margin-bottom:24px">
-    <div class="kpi"><div class="kpi-lbl">Costo estimado</div><div class="kpi-val" id="p-cost">—</div><div class="kpi-foot">Total insumos proyectados</div></div>
-    <div class="kpi m"><div class="kpi-lbl">Items a pedir</div><div class="kpi-val" id="p-items">—</div><div class="kpi-foot">Con historial registrado</div></div>
-    <div class="kpi"><div class="kpi-lbl">Cobertura</div><div class="kpi-val" id="p-seml">2 sem.</div><div class="kpi-foot">Semanas proyectadas</div></div>
-  </div>
-  <div id="p-secs"></div>
-</div>
-
-<!-- ════ OBJETIVOS ════ -->
 <div id="p-obj" class="page">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
     <div>
       <h2 style="margin:0;font-size:16px;font-weight:700">Objetivos semanales</h2>
       <div style="font-size:11px;color:var(--sub);margin-top:4px">Configura y sigue tus metas de venta y control de gastos</div>
     </div>
-    
   </div>
   <div id="obj-body"></div>
 </div>
 
-<!-- ════ CONTEO ════ -->
-<div id="p-cnt" class="page">
-  <div class="ph">
-    <div class="ph-acts">
-      <button class="btn btn-sm" onclick="clearCnt()">Limpiar</button>
-      <div class="inp-wrap">
-        <select class="inp w200" id="c-cat" onchange="renderCnt()">
-          <option value="">Todas las categorías</option>
-          <option value="IC.020">Carnes</option>
-          <option value="IC.030">Verduras</option>
-          <option value="IC.010">Abarrotes</option>
-          <option value="IC.060">Congelados</option>
-          <option value="IC.040">Bebidas</option>
-          <option value="IC.070">Descartables</option>
-        </select>
+<div id="p-delivery" class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Mes</span>
+        <div class="inp-wrap">
+          <select class="inp w180" id="del-mes-sel" onchange="initDelivery()">
+            <option value="all">Todos los meses</option>
+          </select>
+        </div>
       </div>
-      <button class="btn btn-m" onclick="exportCnt()" style="display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.14-1.087A9.953 9.953 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg> Copiar WhatsApp</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="pill-sel on" id="del-src-all"    onclick="setDelSrc('all',this)">Resumen</button>
+        <button class="pill-sel"    id="del-src-intern" onclick="setDelSrc('intern',this)">Interno</button>
+        <button class="pill-sel"    id="del-src-ya"     onclick="setDelSrc('ya',this)">PedidosYa</button>
+        <button class="pill-sel"    id="del-src-uber"   onclick="setDelSrc('uber',this)">Uber Eats</button>
+      </div>
     </div>
   </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
-    <div class="card" style="padding:13px 17px;flex:0 0 auto">
-      <div class="f-lbl" style="margin-bottom:5px">Fecha</div>
-      <input type="date" id="c-fecha" style="background:none;border:none;color:var(--t);font-size:15px;font-weight:700;font-family:var(--sans);outline:none">
+  <div id="kpi-del" class="kpis" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-hd" id="del-ch1-title">Pedidos por mes</div>
+      <div class="bars" id="ch-del-mes"></div>
     </div>
-    <div class="card" style="padding:13px 17px;flex:0 0 auto">
-      <div class="f-lbl" style="margin-bottom:5px">Responsable</div>
-      <input type="text" id="c-resp" placeholder="Nombre" style="background:none;border:none;color:var(--t);font-size:15px;font-weight:700;font-family:var(--sans);outline:none;width:140px">
-    </div>
-    <div class="card" style="padding:13px 17px;flex:0 0 auto">
-      <div class="f-lbl" style="margin-bottom:5px">Turno</div>
-      <select id="c-turno" style="background:none;border:none;color:var(--t);font-size:15px;font-weight:700;font-family:var(--sans);outline:none"><option>Apertura</option><option>Cierre</option></select>
+    <div class="card">
+      <div class="card-hd" id="del-ch2-title">Venta mensual</div>
+      <div class="bars" id="ch-del-t"></div>
     </div>
   </div>
-  <div class="cnt-grid" id="c-grid"></div>
+  <div class="card" id="del-dias-wrap" style="display:none;margin-bottom:16px">
+    <div class="card-hd" id="del-dias-title">Desglose por días</div>
+    <div class="bars" id="ch-del-dias"></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hd">Heatmap horario — pedidos (PedidosYa)</div>
+      <div id="del-heatmap" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd">Top platos (últimos 6 meses · PedidosYa)</div>
+      <div class="bars" id="del-top-platos"></div>
+    </div>
+  </div>
 </div>
 
-<!-- MODAL: INGR EDIT -->
+<div id="p-gastos" class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="pill-sel on" id="gtab-resumen"   onclick="setGTab('resumen',this)">Resumen</button>
+      <button class="pill-sel"    id="gtab-historial" onclick="setGTab('historial',this)">Historial</button>
+      <button class="pill-sel"    id="gtab-flujo"     onclick="setGTab('flujo',this)">Flujo de Caja</button>
+      <button class="pill-sel"    id="gtab-alertas"   onclick="setGTab('alertas',this)">Alertas</button>
+      <button class="pill-sel"    id="gtab-cred"      onclick="setGTab('cred',this)">Accesos</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-c btn-sm" onclick="exportGastosPDF()" style="background:var(--s2);border:1px solid var(--b2);color:var(--sub)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        PDF
+      </button>
+      <button class="btn btn-c btn-sm" onclick="openAddGasto()">+ Nuevo gasto</button>
+    </div>
+  </div>
+
+  <div id="gview-resumen" class="gview">
+    <div id="kpi-gastos" class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
+    <div class="g2" style="margin-bottom:20px">
+      <div class="card"><div class="card-hd">Por categoría (mensual)</div><div class="bars" id="ch-gcat"></div></div>
+      <div class="card"><div class="card-hd">Impacto sobre venta mensual prom.</div><div id="gasto-impact" style="padding:12px 0"></div></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="gcat-filters">
+      <button class="pill-sel on" id="gcf-all"          onclick="setGCatFilter('all',this)">Todos</button>
+      <button class="pill-sel"    id="gcf-servicios"    onclick="setGCatFilter('servicios',this)">Servicios</button>
+      <button class="pill-sel"    id="gcf-gas"          onclick="setGCatFilter('gas',this)">Gas</button>
+      <button class="pill-sel"    id="gcf-insumos"      onclick="setGCatFilter('insumos',this)">Insumos</button>
+      <button class="pill-sel"    id="gcf-arriendo"     onclick="setGCatFilter('arriendo',this)">Arriendo</button>
+      <button class="pill-sel"    id="gcf-personal"     onclick="setGCatFilter('personal',this)">Personal</button>
+      <button class="pill-sel"    id="gcf-otros"        onclick="setGCatFilter('otros',this)">Otros</button>
+    </div>
+    <div class="tbl-shell"><div class="tbl-scroll"><table>
+      <thead><tr>
+        <th>Gasto</th><th class="hide-sm">Categoría</th><th class="hide-sm">Proveedor / Contacto</th>
+        <th class="r">Sem</th><th class="r hide-xs">Mes</th><th class="r hide-xs">Año</th>
+        <th class="hide-xs">Vencimiento</th><th></th>
+      </tr></thead>
+      <tbody id="g-body"></tbody>
+    </table></div>
+    <div id="g-totrow" style="padding:10px 16px;background:var(--s2);border-top:1px solid var(--b);font-size:12px;color:var(--sub)"></div></div>
+  </div>
+
+  <div id="gview-historial" class="gview" style="display:none">
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+      <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sub)">Gasto</label>
+      <select class="inp" id="ghist-sel" onchange="renderGHistorial()" style="width:220px"></select>
+    </div>
+    <div id="ghist-kpis" class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px"></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-hd" id="ghist-title">Historial</div><div class="bars" id="ch-ghist"></div></div>
+    <div class="tbl-shell"><div class="tbl-scroll"><table>
+      <thead><tr><th>Mes</th><th class="r">Monto</th><th class="hide-sm">Estado</th><th></th></tr></thead>
+      <tbody id="ghist-body"></tbody>
+    </table></div></div>
+    <div style="margin-top:12px"><button class="btn btn-sm btn-c" onclick="openAddHist()">+ Agregar pago</button></div>
+  </div>
+
+  <div id="gview-flujo" class="gview" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="font-size:12px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Auditoría Financiera</div>
+        <select class="inp" id="flujo-mes-sel" onchange="renderFlujoCaja(true)" style="width:180px">
+          <option value="all">Todos los meses</option>
+        </select>
+      </div>
+      <div>
+        <button class="btn btn-sm btn-c" onclick="document.getElementById('bank-file').click()">+ Importar Cartola CSV</button>
+        <input type="file" id="bank-file" accept=".csv" style="display:none" onchange="handleBankFile(this)">
+      </div>
+    </div>
+
+    <div id="kpi-flujo" class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
+
+    <div class="g2" style="margin-bottom:20px;display:none" id="flujo-panels">
+      <div class="card">
+        <div class="card-hd">🔴 Top 5 Fugas de Capital (Proveedores)</div>
+        <div id="flujo-top-out"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd">🟢 Top Mejores Días de Ingreso</div>
+        <div id="flujo-top-in"></div>
+      </div>
+    </div>
+
+    <div class="tbl-shell"><div class="tbl-scroll"><table>
+      <thead><tr>
+        <th>Fecha</th><th style="text-align:left">Descripción</th><th class="r">Abono (+)</th><th class="r">Cargo (-)</th>
+      </tr></thead>
+      <tbody id="flujo-body"></tbody>
+    </table></div></div>
+  </div>
+
+  <div id="gview-alertas" class="gview" style="display:none">
+    <div id="alertas-body" style="display:flex;flex-direction:column;gap:12px;max-width:700px"></div>
+  </div>
+
+  <div id="gview-cred" class="gview" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-sm btn-c" onclick="openAddCred()">+ Nueva credencial</button>
+    </div>
+    <div id="cred-body" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+<script>
+  /* Función para el menú lateral en móviles */
+  function toggleMenu() {
+    var overlay = document.getElementById('mob-overlay');
+    var menu = document.getElementById('mob-menu');
+    if(menu.classList.contains('on')) {
+      menu.classList.remove('on');
+      overlay.classList.remove('on');
+    } else {
+      menu.classList.add('on');
+      overlay.classList.add('on');
+    }
+  }
+
+  /* Función para navegar entre Inventario, Pedido y Conteo dentro de "Stock" */
+  function setStockTab(tab, btn) {
+    document.querySelectorAll('[id^="stab-"]').forEach(function(b){ b.classList.remove('on'); });
+    if(btn) btn.classList.add('on');
+    else document.getElementById('stab-' + tab).classList.add('on');
+    
+    document.querySelectorAll('.sview').forEach(function(v){ v.style.display = 'none'; });
+    document.getElementById('sview-' + tab).style.display = 'block';
+  }
+</script>
+
 <div class="overlay" id="m-ingr">
   <div class="modal">
     <button class="mx" onclick="cm('m-ingr')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -728,16 +817,13 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- MODAL: RECETA EDITOR -->
 <div class="overlay" id="m-rec">
   <div class="modal" style="max-width:580px">
     <button class="mx" onclick="cm('m-rec')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div class="m-title" id="mr-t"></div>
     <div class="m-sub" id="mr-s" style="margin-bottom:16px"></div>
-    <!-- Nombre editable -->
     <label class="f-lbl">Nombre de la receta</label>
     <input class="f-inp" type="text" id="mr-name" placeholder="Nombre">
-    <!-- Ingredientes editables -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span class="f-lbl" style="margin-bottom:0">Ingredientes</span>
       <button class="btn btn-sm" onclick="addRecIng()" style="height:32px;font-size:11px">+ Agregar ingrediente</button>
@@ -754,7 +840,6 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- MODAL: GASTO FIJO -->
 <div class="overlay" id="m-gasto">
   <div class="modal">
     <button class="mx" onclick="cm('m-gasto')">&#x2715;</button>
@@ -765,18 +850,17 @@ tr:last-child td{border-bottom:none}
     <input class="f-inp" type="text" id="mg-name" placeholder="Ej: Arriendo local">
     <div class="f2">
       <div>
-        <label class="f-lbl">Categor&#237;a</label>
+        <label class="f-lbl">Categoría</label>
         <select class="f-inp" id="mg-cat">
-          <option value="arriendo">&#127968; Arriendo</option>
-          <option value="servicios">&#9889; Servicios b&#225;sicos</option>
-          <option value="gas">&#128293; Gas</option>
-          <option value="personal">&#128104;&#8205;&#127859; Personal</option>
-          <option value="marketing">&#128227; Marketing</option>
-          <option value="mantencion">&#128296; Mantenci&#243;n</option>
-          <option value="software">&#128187; Software/Sistemas</option>
-          <option value="insumos">&#127859; Insumos</option>
-          <option value="insumos">&#127859; Insumos</option>
-          <option value="otros">&#128230; Otros</option>
+          <option value="arriendo">🏢 Arriendo</option>
+          <option value="servicios">⚡ Servicios básicos</option>
+          <option value="gas">🔥 Gas</option>
+          <option value="personal">👨‍🍳 Personal</option>
+          <option value="marketing">📢 Marketing</option>
+          <option value="mantencion">🔧 Mantencion</option>
+          <option value="software">💻 Software/Sistemas</option>
+          <option value="insumos">🍽️ Insumos</option>
+          <option value="otros">📦 Otros</option>
         </select>
       </div>
       <div>
@@ -809,7 +893,6 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- MODAL: UPLOAD -->
 <div class="overlay" id="m-up">
   <div class="modal">
     <button class="mx" onclick="cm('m-up')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -838,7 +921,6 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- MODAL: IMPORTAR EXCEL -->
 <div class="overlay" id="m-import">
   <div class="modal">
     <button class="mx" onclick="cm('m-import')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -863,165 +945,6 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-
-<!-- ════ DELIVERY ════ -->
-<div id="p-delivery" class="page">
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Mes</span>
-        <div class="inp-wrap">
-          <select class="inp w180" id="del-mes-sel" onchange="initDelivery()">
-            <option value="all">Todos los meses</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="pill-sel on" id="del-src-all"    onclick="setDelSrc('all',this)">Resumen</button>
-        <button class="pill-sel"    id="del-src-intern" onclick="setDelSrc('intern',this)">Interno</button>
-        <button class="pill-sel"    id="del-src-ya"     onclick="setDelSrc('ya',this)">PedidosYa</button>
-        <button class="pill-sel"    id="del-src-uber"   onclick="setDelSrc('uber',this)">Uber Eats</button>
-      </div>
-    </div>
-  </div>
-  <div id="kpi-del" class="kpis" style="grid-template-columns:repeat(4,1fr)"></div>
-  <div class="g2" style="margin-bottom:16px">
-    <div class="card">
-      <div class="card-hd" id="del-ch1-title">Pedidos por mes</div>
-      <div class="bars" id="ch-del-mes"></div>
-    </div>
-    <div class="card">
-      <div class="card-hd" id="del-ch2-title">Venta mensual</div>
-      <div class="bars" id="ch-del-t"></div>
-    </div>
-  </div>
-  <div class="card" id="del-dias-wrap" style="display:none;margin-bottom:16px">
-    <div class="card-hd" id="del-dias-title">Desglose por días</div>
-    <div class="bars" id="ch-del-dias"></div>
-  </div>
-  <div class="g2">
-    <div class="card">
-      <div class="card-hd">Heatmap horario — pedidos (PedidosYa)</div>
-      <div id="del-heatmap" style="margin-top:8px"></div>
-    </div>
-    <div class="card">
-      <div class="card-hd">Top platos (&#250;ltimos 6 meses · PedidosYa)</div>
-      <div class="bars" id="del-top-platos"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ════ GASTOS FIJOS ════ -->
-<div id="p-gastos" class="page">
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="pill-sel on" id="gtab-resumen"   onclick="setGTab('resumen',this)">Resumen</button>
-      <button class="pill-sel"    id="gtab-historial" onclick="setGTab('historial',this)">Historial</button>
-      <button class="pill-sel"    id="gtab-flujo"     onclick="setGTab('flujo',this)">&#127974; Flujo de Caja</button>
-      <button class="pill-sel"    id="gtab-alertas"   onclick="setGTab('alertas',this)">&#128276; Alertas</button>
-      <button class="pill-sel"    id="gtab-cred"      onclick="setGTab('cred',this)">&#128272; Accesos</button>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-c btn-sm" onclick="exportGastosPDF()" style="background:var(--s2);border:1px solid var(--b2);color:var(--sub)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        PDF
-      </button>
-      <button class="btn btn-c btn-sm" onclick="openAddGasto()">+ Nuevo gasto</button>
-    </div>
-  </div>
-
-  <div id="gview-resumen" class="gview">
-    <div id="kpi-gastos" class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
-    <div class="g2" style="margin-bottom:20px">
-      <div class="card"><div class="card-hd">Por categor&#237;a (mensual)</div><div class="bars" id="ch-gcat"></div></div>
-      <div class="card"><div class="card-hd">Impacto sobre venta mensual prom.</div><div id="gasto-impact" style="padding:12px 0"></div></div>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="gcat-filters">
-      <button class="pill-sel on" id="gcf-all"          onclick="setGCatFilter('all',this)">Todos</button>
-      <button class="pill-sel"    id="gcf-servicios"    onclick="setGCatFilter('servicios',this)">&#9889; Servicios</button>
-      <button class="pill-sel"    id="gcf-gas"          onclick="setGCatFilter('gas',this)">&#128293; Gas</button>
-      <button class="pill-sel"    id="gcf-insumos"      onclick="setGCatFilter('insumos',this)">&#127859; Insumos</button>
-      <button class="pill-sel"    id="gcf-arriendo"     onclick="setGCatFilter('arriendo',this)">&#127968; Arriendo</button>
-      <button class="pill-sel"    id="gcf-personal"     onclick="setGCatFilter('personal',this)">&#128104;&#8205;&#127859; Personal</button>
-      <button class="pill-sel"    id="gcf-otros"        onclick="setGCatFilter('otros',this)">&#128230; Otros</button>
-    </div>
-    <div class="tbl-shell"><div class="tbl-scroll"><table>
-      <thead><tr>
-        <th>Gasto</th><th class="hide-sm">Categor&#237;a</th><th class="hide-sm">Proveedor / Contacto</th>
-        <th class="r">Sem</th><th class="r hide-xs">Mes</th><th class="r hide-xs">A&#241;o</th>
-        <th class="hide-xs">Vencimiento</th><th></th>
-      </tr></thead>
-      <tbody id="g-body"></tbody>
-    </table></div>
-    <div id="g-totrow" style="padding:10px 16px;background:var(--s2);border-top:1px solid var(--b);font-size:12px;color:var(--sub)"></div></div>
-  </div>
-
-  <div id="gview-historial" class="gview" style="display:none">
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
-      <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sub)">Gasto</label>
-      <select class="inp" id="ghist-sel" onchange="renderGHistorial()" style="width:220px"></select>
-    </div>
-    <div id="ghist-kpis" class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px"></div>
-    <div class="card" style="margin-bottom:16px"><div class="card-hd" id="ghist-title">Historial</div><div class="bars" id="ch-ghist"></div></div>
-    <div class="tbl-shell"><div class="tbl-scroll"><table>
-      <thead><tr><th>Mes</th><th class="r">Monto</th><th class="hide-sm">Estado</th><th></th></tr></thead>
-      <tbody id="ghist-body"></tbody>
-    </table></div></div>
-    <div style="margin-top:12px"><button class="btn btn-sm btn-c" onclick="openAddHist()">+ Agregar pago</button></div>
-  </div>
-
-<div id="gview-flujo" class="gview" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div style="font-size:12px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Auditoría Financiera</div>
-        <select class="inp" id="flujo-mes-sel" onchange="renderFlujoCaja(true)" style="width:180px">
-          <option value="all">Todos los meses</option>
-        </select>
-      </div>
-      <div>
-        <button class="btn btn-sm btn-c" onclick="document.getElementById('bank-file').click()">+ Importar Cartola CSV</button>
-        <input type="file" id="bank-file" accept=".csv" style="display:none" onchange="handleBankFile(this)">
-      </div>
-    </div>
-
-    <div id="kpi-flujo" class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
-
-    <div class="g2" style="margin-bottom:20px;display:none" id="flujo-panels">
-      <div class="card">
-        <div class="card-hd">🔴 Top 5 Fugas de Capital (Proveedores)</div>
-        <div id="flujo-top-out"></div>
-      </div>
-      <div class="card">
-        <div class="card-hd">🟢 Top Mejores Días de Ingreso</div>
-        <div id="flujo-top-in"></div>
-      </div>
-    </div>
-
-    <div class="tbl-shell"><div class="tbl-scroll"><table>
-      <thead><tr>
-        <th>Fecha</th><th style="text-align:left">Descripción</th><th class="r">Abono (+)</th><th class="r">Cargo (-)</th>
-      </tr></thead>
-      <tbody id="flujo-body"></tbody>
-    </table></div></div>
-  </div>
-
-  <div id="gview-alertas" class="gview" style="display:none">
-    <div id="alertas-body" style="display:flex;flex-direction:column;gap:12px;max-width:700px"></div>
-  </div>
-
-  <div id="gview-cred" class="gview" style="display:none">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-      <button class="btn btn-sm btn-c" onclick="openAddCred()">+ Nueva credencial</button>
-    </div>
-    <div id="cred-body" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
-  </div>
-</div>
-
-<script src="data.js"></script>
-<script src="app.js"></script>
-
-
-<!-- MODAL: EXPORT -->
 <div class="overlay" id="m-export">
   <div class="modal" style="max-width:400px">
     <div class="modal-hd"><span style="font-weight:700;font-size:14px">Exportar datos</span>
@@ -1043,7 +966,6 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- MODAL: HISTORIAL PAGO -->
 <div class="overlay" id="m-histpago">
   <div class="modal" style="max-width:380px">
     <div class="modal-hd"><span id="mhp-title" style="font-weight:700;font-size:14px">Registrar pago</span>
@@ -1068,7 +990,6 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- MODAL: CREDENCIALES -->
 <div class="overlay" id="m-cred">
   <div class="modal" style="max-width:380px">
     <div class="modal-hd"><span id="mcred-title" style="font-weight:700;font-size:14px">Credencial</span>
@@ -1095,8 +1016,3 @@ tr:last-child td{border-bottom:none}
 </div>
 </body>
 </html>
-
-
-
-
-
