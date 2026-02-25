@@ -1182,17 +1182,40 @@ var gTab='resumen';
 var gCatFilter='all';
 var credUnlocked=false;
 
-function setGTab(tab,el){
-  gTab=tab;
-  document.querySelectorAll('[id^="gtab-"]').forEach(function(b){b.classList.remove('on');});
-  if(el) el.classList.add('on');
-  ['resumen','historial','alertas','cred'].forEach(function(t){
-    var v=$('gview-'+t); if(v) v.style.display=(t===tab)?'':'none';
-  });
-  if(tab==='resumen')   renderGastos();
-  if(tab==='historial') renderGHistSel();
-  if(tab==='alertas')   renderAlertas();
-  if(tab==='cred')      {credUnlocked=false;renderCreds();}
+// ── FLUJO DE CAJA (BANCO ITAÚ) ──
+function renderFlujoCaja(){
+  if(typeof BANK_TX === 'undefined' || !BANK_TX.length){
+    $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco. Importa tu cartola y pégala en data.js</td></tr>';
+    $('kpi-flujo').innerHTML = '';
+    return;
+  }
+
+  var tIn = 0, tOut = 0;
+  
+  var rows = BANK_TX.map(function(t){
+    tIn += t.in; 
+    tOut += t.out;
+    return '<tr>'
+      +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
+      +'<td style="text-align:left;font-weight:600;color:var(--t)">'+t.desc+'</td>'
+      +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? fmt(t.in) : '—')+'</td>'
+      +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? fmt(t.out) : '—')+'</td>'
+      +'</tr>';
+  }).join('');
+
+  var saldo = tIn - tOut;
+  var saldoFormatted = (saldo < 0 ? '-' : '') + fmtM(Math.abs(saldo));
+
+  $('kpi-flujo').innerHTML = [
+    {l:'Total Ingresos (Abonos)', v:fmtM(tIn), f:'Transbank, transferencias, etc.', c:'var(--g)'},
+    {l:'Total Egresos (Cargos)', v:fmtM(tOut), f:'Pago proveedores, sueldos, etc.', c:'var(--r)'},
+    {l:'Flujo Neto', v:saldoFormatted, f:'Ingresos vs Egresos', c:saldo>=0?'var(--g)':'var(--r)'}
+  ].map(function(k){
+    return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div>'
+      +'<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
+  }).join('');
+  
+  $('flujo-body').innerHTML = rows;
 }
 function setGCatFilter(cat,el){
   gCatFilter=cat;
@@ -2004,4 +2027,39 @@ function exportGastosPDF(){
   w.document.write(html2);
   w.document.close();
   setTimeout(function(){w.print();},400);
+}
+// ── FLUJO DE CAJA (BANCO ITAÚ) ──
+function renderFlujoCaja(){
+  if(typeof BANK_TX === 'undefined' || !BANK_TX.length){
+    $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco. Importa tu cartola y pégala en data.js</td></tr>';
+    $('kpi-flujo').innerHTML = '';
+    return;
+  }
+
+  var tIn = 0, tOut = 0;
+  
+  var rows = BANK_TX.map(function(t){
+    tIn += t.in; 
+    tOut += t.out;
+    return '<tr>'
+      +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
+      +'<td style="text-align:left;font-weight:600;color:var(--t)">'+t.desc+'</td>'
+      +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? fmt(t.in) : '—')+'</td>'
+      +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? fmt(t.out) : '—')+'</td>'
+      +'</tr>';
+  }).join('');
+
+  var saldo = tIn - tOut;
+  var saldoFormatted = (saldo < 0 ? '-' : '') + fmtM(Math.abs(saldo));
+
+  $('kpi-flujo').innerHTML = [
+    {l:'Total Ingresos (Abonos)', v:fmtM(tIn), f:'Transbank, transferencias, etc.', c:'var(--g)'},
+    {l:'Total Egresos (Cargos)', v:fmtM(tOut), f:'Pago proveedores, sueldos, etc.', c:'var(--r)'},
+    {l:'Flujo Neto', v:saldoFormatted, f:'Ingresos vs Egresos', c:saldo>=0?'var(--g)':'var(--r)'}
+  ].map(function(k){
+    return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div>'
+      +'<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
+  }).join('');
+  
+  $('flujo-body').innerHTML = rows;
 }
