@@ -2112,31 +2112,33 @@ function renderTablaFlujo(data, esFiltroManual, nombreProv) {
   if(!tbody) return;
 
   var rows = data.map(function(t){
-    // Módulo 2: Detectar si tiene categoría guardada en memoria o en el objeto
     var reglasMemoria = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
-    var categoriaFinal = t.cat !== "Otros" ? t.cat : (reglasMemoria[t.desc.toUpperCase()] || "Otros");
+    var categoriaFinal = t.cat !== "Otros" ? t.cat : (reglasMemoria[t.desc.toUpperCase()] || null);
     
-    var catBadge = categoriaFinal !== "Otros" ? '<br><span style="font-size:9px;color:var(--m);text-transform:uppercase">['+categoriaFinal+']</span>' : '';
+    // Iconos de estado: ● Verificado, ○ Pendiente
+    var statusIcon = categoriaFinal 
+      ? '<span style="color:var(--g); margin-right:8px; font-size:12px;">●</span>' 
+      : '<span style="color:#444; margin-right:8px; font-size:12px;">○</span>';
+
+    var catBadge = categoriaFinal 
+      ? '<br><span style="font-size:9px;color:var(--m);text-transform:uppercase;font-weight:700;">['+categoriaFinal+']</span>' 
+      : '';
     
     return '<tr>'
       +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
-      // Agregamos cursor:pointer y el evento onclick para asociar categorías al presionar
-      +'<td style="text-align:left;font-weight:600;color:var(--t);cursor:pointer" onclick="asociarProveedor(\''+t.desc+'\')" title="Presiona para categorizar">'
-      + t.desc + catBadge +'</td>'
+      +'<td style="text-align:left;font-weight:600;color:var(--t);cursor:pointer" onclick="asociarProveedor(\''+t.desc+'\')">'
+      + statusIcon + t.desc + catBadge +'</td>'
       +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? formatMoney(t.in) : '—')+'</td>'
       +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? formatMoney(t.out) : '—')+'</td>'
       +'</tr>';
   }).join('');
 
-  if(esFiltroManual) {
-    tbody.innerHTML = '<tr><td colspan="4" style="background:rgba(0,212,255,0.05);padding:10px;text-align:center;font-size:12px">'
-      +'Mostrando movimientos de: <strong>'+nombreProv+'</strong> '
-      +'<button onclick="renderFlujoCaja(true)" style="background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;margin-left:10px">Ver todos</button></td></tr>' + rows;
-  } else {
-    tbody.innerHTML = rows;
-  }
+  tbody.innerHTML = esFiltroManual ? 
+    '<tr><td colspan="4" style="background:rgba(0,212,255,0.05);padding:10px;text-align:center;font-size:12px">'
+    +'Filtrado por: <strong>'+nombreProv+'</strong> '
+    +'<button onclick="renderFlujoCaja(true)" style="background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;margin-left:10px">Ver todos</button></td></tr>' + rows 
+    : rows;
 }
-
 function renderFlujoCaja(isFilterChange){
   var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
   var kpiDiv = document.getElementById('kpi-flujo');
@@ -2149,7 +2151,7 @@ function renderFlujoCaja(isFilterChange){
   var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
 
   var tIn = 0, tOut = 0;
-  var topOutMap = {}, topInMap = {};
+  var topOutMap = {}, topInNames = {};
 
   filteredBank.forEach(function(t){
     tIn += t.in; tOut += t.out;
@@ -2157,38 +2159,45 @@ function renderFlujoCaja(isFilterChange){
       var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim().toUpperCase();
       topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
     }
-    // Agrupamos ingresos por fecha exacta para el ranking de mejores días
-    if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
+    // Ranking de quién transfiere más dinero (Ingresos)
+    if(t.in > 0) {
+      var cleanIn = t.desc.replace(/Transferencia De /i, '').substring(0,20).trim().toUpperCase();
+      topInNames[cleanIn] = (topInNames[cleanIn] || 0) + t.in;
+    }
   });
 
-  // --- Lógica de Efectivo (Compatible con inicio Enero 2025) ---
+  // --- Lógica de Efectivo (Fila 11 de tu Excel) ---
   var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce((s,g) => s + (g.date.startsWith(currentMonth) ? parseInt(g.monto) : 0), 0);
   var efectivoToteat = 0;
+  
+  // Datos extraídos directamente de la fila 11 de tu archivo "export (5).xls"
+  var manualData = {
+    "Enero 2025": 443643, "Febrero 2025": 378919, "Marzo 2025": 358191, 
+    "Abril 2025": 351906, "Mayo 2025": 380423, "Junio 2025": 319154, 
+    "Julio 2025": 406936, "Agosto 2025": 298306, "Septiembre 2025": 338485, 
+    "Octubre 2025": 301387, "Noviembre 2025": 339813, "Diciembre 2025": 380700, 
+    "Enero 2026": 312498, "Febrero 2026": 148965
+  };
 
-  if (typeof SALES !== 'undefined' && SALES.monthly) {
-    if (currentMonth === 'all') {
-      efectivoToteat = SALES.monthly.reduce((sum, m) => sum + (m.efectivo || 0), 0);
-    } else {
-      // Traducimos "2025-01" a "Enero 2025" para que coincida con tus headers de Toteat
-      var mArr = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      var pts = currentMonth.split('-');
-      var targetLabel = mArr[parseInt(pts[1]) - 1] + ' ' + pts[0];
-      
-      var match = SALES.monthly.find(m => m.month === targetLabel);
-      if(match) efectivoToteat = match.efectivo || 0;
-    }
+  if (currentMonth === 'all') {
+    efectivoToteat = Object.values(manualData).reduce((a, b) => a + b, 0);
+  } else {
+    var mArr = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var pts = currentMonth.split('-');
+    var label = mArr[parseInt(pts[1]) - 1] + ' ' + pts[0];
+    efectivoToteat = manualData[label] || 0;
   }
 
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
-  // Render KPIs (6 cajas, estilo profesional)
+  // Render KPIs (6 cajas, estilo profesional sin emojis)
   kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
   kpiDiv.innerHTML = [
     {l:'Abonos Banco', v:formatMoney(tIn), f:'Total Digital', c:'var(--g)'},
     {l:'Cargos Banco', v:formatMoney(tOut), f:'Egresos Digitales', c:'var(--r)'},
     {l:'Saldo Banco', v:formatMoney(saldoBanco), f:'Neto Banco', c:saldoBanco>=0?'var(--g)':'var(--r)'},
-    {l:'Efectivo Entrante', v:formatMoney(efectivoToteat), f:'Ventas Toteat', c:'var(--g)'},
+    {l:'Efectivo Entrante', v:formatMoney(efectivoToteat), f:'Fila 11 Toteat', c:'var(--g)'},
     {l:'Gastos Efectivo', v:formatMoney(totalManual), f:'Caja Chica', c:'var(--y)'},
     {l:'Caja Fuerte', v:formatMoney(cajaRealFisica), f:'Billetes Reales', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
   ].map(k => '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>').join('');
@@ -2200,38 +2209,35 @@ function renderFlujoCaja(isFilterChange){
     panels.style.display = 'grid';
     
     // Top 10 Egresos (Proveedores)
-    var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v);
-    var topDisplay = sortedOut.slice(0, 10);
-    
-    document.getElementById('flujo-top-out').innerHTML = topDisplay.length ? topDisplay.map(function(o){
-      var pct = Math.round((o.v / tOut) * 100) || 0;
-      return '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer" title="Clic para ver detalle">'
-        +'<span style="font-size:12px;color:var(--m)">'+o.n+'</span>'
-        +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
-    }).join('') : '<div class="empty">Sin registros</div>';
+    var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v).slice(0, 10);
+    document.getElementById('flujo-top-out').innerHTML = sortedOut.map(o => 
+      '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer">'
+      +'<span style="font-size:11px;color:var(--m)">'+o.n+'</span>'
+      +'<span style="font-size:11px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+'</span></div>'
+    ).join('');
 
-    // Top 5 Ingresos (Días con más recaudación)
-    var sortedIn = Object.keys(topInMap).map(k => ({d:k, v:topInMap[k]})).sort((a,b) => b.v-a.v).slice(0, 5);
-    
-    document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(o => {
-      return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-        +'<span style="font-size:12px;color:var(--sub)">' + o.d + '</span>'
-        +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">' + formatMoney(o.v) + '</span></div>';
-    }).join('') : '<div class="empty">Sin ingresos</div>';
+    // Top 5 Clientes (Quién transfiere más)
+    var sortedIn = Object.keys(topInNames).map(k => ({n:k, v:topInNames[k]})).sort((a,b) => b.v-a.v).slice(0, 5);
+    document.getElementById('flujo-top-in').innerHTML = sortedIn.map(o => 
+      '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+      +'<span style="font-size:11px;color:var(--sub)">' + o.n + '</span>'
+      +'<span style="font-size:11px;color:var(--g);font-family:var(--mono)">' + formatMoney(o.v) + '</span></div>'
+    ).join('');
   }
 }
 
+// Función para asociar y categorizar transferencias al presionar
 function asociarProveedor(nombreOriginal) {
     var nombreLimpio = nombreOriginal.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').trim();
     var categoria = prompt("¿A qué categoría pertenece '" + nombreLimpio + "'? (Ej: Gas, Agua, Personal, Arriendo)");
     
     if (categoria) {
-        // 1. Guardar en memoria permanente
+        // 1. Guardar regla en memoria
         var reglasActuales = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
         reglasActuales[nombreOriginal.toUpperCase()] = categoria;
         localStorage.setItem('reglas_prov', JSON.stringify(reglasActuales));
         
-        // 2. Aplicar el cambio a los datos que ya están cargados en la sesión actual
+        // 2. Aplicar cambio a los datos cargados para que el icono cambie de inmediato
         var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
         var dataActualizada = bankData.map(function(t) {
             if (t.desc === nombreOriginal) t.cat = categoria;
@@ -2239,8 +2245,7 @@ function asociarProveedor(nombreOriginal) {
         });
         localStorage.setItem('bank_tx', JSON.stringify(dataActualizada));
 
-        // 3. Refrescar la vista de inmediato
         renderFlujoCaja(true);
-        toast('Regla guardada: ' + categoria);
+        if(typeof toast === 'function') toast('Regla guardada: ' + categoria);
     }
 }
