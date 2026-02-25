@@ -46,7 +46,7 @@ body{
   display:flex;align-items:center;
   padding:0 20px;
 }
-.nav-brand-sm{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.05em;color:var(--t);white-space:nowrap;padding:0 6px;opacity:.7}
+.nav-brand-sm{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.05em;color:var(--t);white-space:nowrap;padding:0 6px;opacity:.7;margin-right:10px}
 .nav-brand-sm .sf{color:var(--c)}
 .nav-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;flex:1}
 .nav-tabs::-webkit-scrollbar{display:none}
@@ -59,21 +59,13 @@ body{
 }
 .nt:hover{color:var(--t)}
 .nt.on{color:var(--c);border-bottom-color:var(--c)}
-.nav-r{margin-left:auto;flex-shrink:0;padding-left:12px;display:flex;gap:8px;align-items:center}
-.tog{
-  height:36px;width:36px;border-radius:var(--rad-s);
-  border:1px solid var(--b2);background:var(--s3);
-  color:var(--sub);display:inline-flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:all .15s
-}
-.tog:hover{color:var(--t);border-color:var(--c)}
 
-/* ─── MENÚ MÓVIL ─── */
+/* ─── MENÚ LATERAL MINIMALISTA ─── */
 .hamburger {
-  display:none; background:none; border:none; color:var(--t); cursor:pointer; 
-  padding:6px; margin-left:auto; transition:color 0.2s;
+  background:none; border:none; color:var(--sub); cursor:pointer; 
+  padding:6px; margin-left:auto; transition:color 0.2s; display:flex; align-items:center; justify-content:center;
 }
-.hamburger:hover { color:var(--c); }
+.hamburger:hover { color:var(--t); }
 .mob-overlay {
   display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:900; 
   backdrop-filter:blur(3px); opacity:0; transition:opacity .3s;
@@ -103,11 +95,6 @@ body{
 .mm-item svg { color:var(--sub); transition:color .2s; }
 .mm-item:hover, .mm-item.on { color:var(--c); }
 .mm-item:hover svg, .mm-item.on svg { color:var(--c); }
-
-@media(max-width:860px){
-  .nav-r { display:none!important; }
-  .hamburger { display:block; }
-}
 
 /* ─── PAGE ─── */
 .page{display:none;padding:24px 20px 60px;max-width:1380px;margin:0 auto}
@@ -245,20 +232,8 @@ tr:last-child td{border-bottom:none}
     <div class="nt"    id="t-obj"      onclick="go('obj')">Objetivos</div>
   </div>
 
-  <div class="nav-r" id="desktop-actions">
-    <button class="tog" id="tog" onclick="toggleTheme()" title="Cambiar Tema">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-    </button>
-    <button class="btn btn-sm" onclick="loadFromCloud(this)" style="background:var(--s2);color:var(--m);border:1px solid var(--b2)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Bajar Nube
-    </button>
-    <button class="btn btn-sm" onclick="saveToCloud(this)" style="background:var(--m);color:#000;border:1px solid var(--m);font-weight:700">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir Nube
-    </button>
-  </div>
-
-  <button class="hamburger" id="btn-hamburger" onclick="toggleMenu()">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  <button class="hamburger" onclick="toggleMenu()" title="Menú del Sistema">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
 </nav>
 
@@ -267,20 +242,23 @@ tr:last-child td{border-bottom:none}
   <button class="mm-close" onclick="toggleMenu()">&times;</button>
   
   <div class="mm-sec">
-    <div class="mm-title">Sistema</div>
+    <div class="mm-title">Controles del Sistema</div>
     <div class="mm-item" onclick="toggleTheme(); toggleMenu()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> Cambiar Tema
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> 
+      Cambiar Tema
     </div>
     <div class="mm-item" onclick="loadFromCloud(this); toggleMenu()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Bajar Datos
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 
+      Bajar Nube
     </div>
-    <div class="mm-item" onclick="saveToCloud(this); toggleMenu()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir a la Nube
+    <div class="mm-item" onclick="saveToCloud(this); toggleMenu()" style="color:var(--m)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> 
+      Subir Nube
     </div>
   </div>
 
-  <div class="mm-sec">
-    <div class="mm-title">Navegación Rápida</div>
+  <div class="mm-sec" style="border-bottom:none">
+    <div class="mm-title">Navegación Rápida (Móvil)</div>
     <div class="mm-item" onclick="go('dash'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</div>
     <div class="mm-item" onclick="go('ventas'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Ventas</div>
     <div class="mm-item" onclick="go('analisis'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Análisis</div>
@@ -291,7 +269,6 @@ tr:last-child td{border-bottom:none}
     <div class="mm-item" onclick="go('obj'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Objetivos</div>
   </div>
 </div>
-
 
 <div id="p-dash" class="page on">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
@@ -323,12 +300,12 @@ tr:last-child td{border-bottom:none}
       <div style="display:flex;gap:6px;align-items:center">
         <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Canal</span>
         <div style="display:flex;gap:5px;flex-wrap:wrap">
-          <button class="pill-sel on"  id="vch-all"      onclick="setVCanal('all',this)">Todo</button>
-          <button class="pill-sel"     id="vch-local"    onclick="setVCanal('local',this)">Local</button>
-          <button class="pill-sel"     id="vch-intern"   onclick="setVCanal('intern',this)">Del. interno</button>
+          <button class="pill-sel on"  id="vch-all"       onclick="setVCanal('all',this)">Todo</button>
+          <button class="pill-sel"     id="vch-local"     onclick="setVCanal('local',this)">Local</button>
+          <button class="pill-sel"     id="vch-intern"    onclick="setVCanal('intern',this)">Del. interno</button>
           <button class="pill-sel"     id="vch-platforms" onclick="setVCanal('platforms',this)">Plataformas</button>
-          <button class="pill-sel"     id="vch-ya"       onclick="setVCanal('ya',this)">PedidosYa</button>
-          <button class="pill-sel"     id="vch-uber"     onclick="setVCanal('uber',this)">Uber</button>
+          <button class="pill-sel"     id="vch-ya"        onclick="setVCanal('ya',this)">PedidosYa</button>
+          <button class="pill-sel"     id="vch-uber"      onclick="setVCanal('uber',this)">Uber</button>
         </div>
       </div>
     </div>
@@ -384,9 +361,7 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-
 <div id="p-stock" class="page">
-  
   <div style="display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap">
     <button class="pill-sel on" id="stab-inv" onclick="setStockTab('inv',this)">Inventario</button>
     <button class="pill-sel"    id="stab-ped" onclick="setStockTab('ped',this)">Pedido Semanal</button>
@@ -516,6 +491,7 @@ tr:last-child td{border-bottom:none}
     <div class="cnt-grid" id="c-grid"></div>
   </div>
 </div>
+
 <div id="p-rec" class="page">
   <div class="ctrls">
     <input class="inp w280" type="text" id="rq" placeholder="Buscar receta..." oninput="filterR()">
