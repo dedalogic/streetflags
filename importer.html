@@ -184,7 +184,7 @@ function parseCSVLine(text) {
   ret.push(val); return ret;
 }
 
-// ─── PROCESADOR TOTEAT ───
+// ─── PROCESADOR TOTEAT (CON CAPTURA DE EFECTIVO) ───
 function runTot(){
   document.getElementById('logel').innerHTML=''; document.getElementById('thead').innerHTML=''; document.getElementById('tbody').innerHTML='';
   document.getElementById('tbl-w').style.display='block';
@@ -192,7 +192,10 @@ function runTot(){
   var sy=parseInt(document.getElementById('sy').value), sm2=parseInt(document.getElementById('sm').value);
   var rows=parseTable(fileText);
   if(!rows.length){lg('❌ Sin filas encontradas — verifica el archivo','err');return;}
-  var R={vb:1,vn:3,siva:5,costo:6,margen:7,py:13,pyv:14,pyc:15,uber:17,transf:20};
+  
+  // R es el diccionario de posiciones (filas). 10 es la fila 11 del excel (empezando de 0)
+  var R={vb:1,vn:3,siva:5,costo:6,margen:7,efectivo:10,py:13,pyv:14,pyc:15,uber:17,transf:20};
+  
   var hdr=rows[0], dayCols=[], prev=0;
   for(var c=1;c<hdr.length;c++){ var m=/\w+\s+(\d+)$/.exec(hdr[c].trim()); if(m) dayCols.push({c:c,d:parseInt(m[1])}); }
   var mStarts=[dayCols[0].c];
@@ -201,15 +204,19 @@ function runTot(){
   for(var i=hdr.length-1;i>=1;i--){if(hdr[i].trim()==='Total'){totCol=i;break;}}
   if(totCol<0) totCol=dayCols[dayCols.length-1].c+1;
   var parsed=[];
+  
   mStarts.forEach(function(cs,mi){
     var ce=mi+1<mStarts.length?mStarts[mi+1]:totCol, days=ce-cs, absM=sm2+mi, yr=sy+Math.floor(absM/12), mo=absM%12, name=MN[mo]+' '+yr;
     function S(ri){var t=0; for(var col=cs;col<ce;col++) if(rows[ri]&&col<rows[ri].length) t+=pn(rows[ri][col]); return Math.round(t);}
-    var vn=S(R.vn), siva=S(R.siva), co=S(R.costo), mg=S(R.margen), py=S(R.py)+S(R.pyv)+S(R.pyc), ub=S(R.uber), tr=S(R.transf);
-    parsed.push({month:name, venta_bruta:S(R.vb), venta_neta:vn, venta_sin_iva:siva, costo:co, margen_pct:vn>0?Math.round(mg/vn*1000)/10:0, days_active:days, avg_daily:days?Math.round(vn/days):0, avg_daily_sin_iva:days?Math.round(siva/days):0, delivery_ya:py, delivery_uber:ub, delivery_transferencia:tr});
-    lg(name+': VN $'+(vn/1e6).toFixed(1)+'M / PY $'+(py/1e6).toFixed(2)+'M ('+days+'d)','ok');
+    
+    var vn=S(R.vn), siva=S(R.siva), co=S(R.costo), mg=S(R.margen), py=S(R.py)+S(R.pyv)+S(R.pyc), ub=S(R.uber), tr=S(R.transf), ef=S(R.efectivo);
+    
+    parsed.push({month:name, venta_bruta:S(R.vb), venta_neta:vn, venta_sin_iva:siva, costo:co, margen_pct:vn>0?Math.round(mg/vn*1000)/10:0, days_active:days, avg_daily:days?Math.round(vn/days):0, avg_daily_sin_iva:days?Math.round(siva/days):0, delivery_ya:py, delivery_uber:ub, delivery_transferencia:tr, efectivo:ef});
+    lg(name+': VN $'+(vn/1e6).toFixed(1)+'M / PY $'+(py/1e6).toFixed(2)+'M / EFECTIVO $'+(ef/1e6).toFixed(2)+'M','ok');
   });
-  document.getElementById('thead').innerHTML='<tr><th>Mes</th><th>Venta Neta</th><th>PedidosYa</th><th>Uber Eats</th><th>Del. Interno</th></tr>';
-  document.getElementById('tbody').innerHTML=parsed.map(function(m){return '<tr><td>'+m.month+'</td><td style="color:var(--m)">'+f(m.venta_neta)+'</td><td style="color:#ff3fa4">'+f(m.delivery_ya)+'</td><td style="color:#a78bfa">'+f(m.delivery_uber)+'</td><td style="color:#00e5a0">'+f(m.delivery_transferencia)+'</td></tr>';}).join('');
+  
+  document.getElementById('thead').innerHTML='<tr><th>Mes</th><th>Venta Neta</th><th>PedidosYa</th><th>Efectivo Físico</th><th>Del. Interno</th></tr>';
+  document.getElementById('tbody').innerHTML=parsed.map(function(m){return '<tr><td>'+m.month+'</td><td style="color:var(--m)">'+f(m.venta_neta)+'</td><td style="color:#ff3fa4">'+f(m.delivery_ya)+'</td><td style="color:#ffb420">'+f(m.efectivo)+'</td><td style="color:#00e5a0">'+f(m.delivery_transferencia)+'</td></tr>';}).join('');
   document.getElementById('outel').textContent='const SALES='+JSON.stringify({monthly:parsed,daily:[]},null,2)+';';
   document.getElementById('out-hint').innerHTML='Copia y reemplaza el bloque <code>const SALES = {...};</code> en data.js:';
   on('c4','n4');
