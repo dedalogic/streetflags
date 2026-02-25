@@ -945,8 +945,10 @@ function handleFileImp(file){
 }
 function applyImport(){
   if(!importPending) return;
-  var updated=0,skipped=0;
-  if(importMode==='inv'){
+  var updated=0, skipped=0;
+
+  if(importMode === 'inv'){
+    // Lógica de importación de Inventario
     importPending.forEach(function(r){
       if(r.length<2) return;
       var name=r[0]; var cost=parseFloat((r[1]||'').replace(/[^0-9.]/g,''))||0;
@@ -961,13 +963,50 @@ function applyImport(){
     });
     cm('m-import'); renderIngr(); initDash();
     alert('✓ Inventario actualizado: '+updated+' ingredientes. '+skipped+' no encontrados.');
+
   } else {
-    // Ventas import — rebuild PRODUCT_SALES equivalent in memory
-    // For now just show confirmation; full rebuild would need page reload
-    cm('m-import');
-    alert('✓ '+importPending.length+' filas recibidas. Recarga la página con los datos ya guardados para ver el nuevo ranking.');
+    // ─── LÓGICA DE EXTRACCIÓN DE EFECTIVO (VENTAS TOTEAT) ───
+    
+    // 1. Buscamos la fila que en su primera columna diga exactamente "Efectivo"
+    var efectivoRow = importPending.find(function(r){ 
+        return r[0] && r[0].trim().toUpperCase() === 'EFECTIVO'; 
+    });
+
+    if (efectivoRow) {
+        var mesIndex = 0;
+        
+        // 2. Recorremos las columnas de izq a derecha (saltando la celda 0 que es el título "Efectivo")
+        for (var i = 1; i < efectivoRow.length; i++) {
+            // Limpiamos el texto para dejar solo los números (ej: de "$ 443.643" a "443643")
+            var rawVal = efectivoRow[i].replace(/[^0-9]/g, ''); 
+            
+            if (rawVal !== '') {
+                var val = parseInt(rawVal) || 0;
+                
+                // 3. Asignamos al mes correspondiente. 
+                if (mesIndex < SALES.monthly.length) {
+                    SALES.monthly[mesIndex].efectivo = val;
+                    mesIndex++;
+                }
+            }
+        }
+        
+        // 4. Guardamos el objeto SALES modificado en localStorage para que no se borre
+        localStorage.setItem('app_sales', JSON.stringify(SALES));
+        
+        alert('✓ Se extrajo el Efectivo de ' + mesIndex + ' meses correctamente. Se reflejará en el Flujo de Caja.');
+        
+        // Refrescamos el flujo de caja inmediatamente
+        if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
+        
+    } else {
+        alert('No se encontró la fila "Efectivo" en este archivo. Asegúrate de subir el consolidado de Toteat correcto.');
+    }
+    
+    cm('m-import'); // Cierra el modal
   }
-  importPending=null;
+  
+  importPending = null;
 }
 
 
@@ -2019,7 +2058,7 @@ function exportGastosPDF(){
   w.document.close();
   setTimeout(function(){w.print();},400);
 }
-// ── FLUJO DE CAJA PRO: TRADUCTOR, TOP 10 Y DETALLE POR CLIC ──
+// ── FLUJO DE CAJA PRO (CON TICKETS Y MEMORIA) ──
 
 const REGLAS_PROVEEDORES = {
   "HECTOR SALAS": "Gas",
@@ -2093,7 +2132,6 @@ function handleBankFile(input) {
   input.value = ''; 
 }
 
-// Módulo 1: Función para filtrar la tabla por proveedor al hacer clic
 function filtrarPorProveedor(nombre) {
   var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
   var sel = document.getElementById('flujo-mes-sel');
@@ -2112,17 +2150,27 @@ function renderTablaFlujo(data, esFiltroManual, nombreProv) {
   if(!tbody) return;
 
   var rows = data.map(function(t){
-    // Módulo 2: Detectar si tiene categoría guardada en memoria o en el objeto
     var reglasMemoria = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
-    var categoriaFinal = t.cat !== "Otros" ? t.cat : (reglasMemoria[t.desc.toUpperCase()] || "Otros");
+    var catAprendida = reglasMemoria[t.desc.toUpperCase()];
     
-    var catBadge = categoriaFinal !== "Otros" ? '<br><span style="font-size:9px;color:var(--m);text-transform:uppercase">['+categoriaFinal+']</span>' : '';
+    if(!catAprendida) {
+       for(var clave in REGLAS_PROVEEDORES) {
+          if(t.desc.toUpperCase().includes(clave)) catAprendida = REGLAS_PROVEEDORES[clave];
+       }
+    }
+    var categoriaFinal = (t.cat && t.cat !== "Otros") ? t.cat : (catAprendida || null);
     
+    // Ticket visual: Verde ● si está registrado, gris ○ si no lo está
+    var statusIcon = categoriaFinal
+      ? '<span style="color:var(--g); margin-right:8px; font-size:12px;">●</span>' 
+      : '<span style="color:var(--sub2); margin-right:8px; font-size:12px;">○</span>';
+
+    var catBadge = categoriaFinal ? '<br><span style="font-size:9.5px;color:var(--m);text-transform:uppercase;font-weight:700;">['+categoriaFinal+']</span>' : '';
+
     return '<tr>'
       +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
-      // Agregamos cursor:pointer y el evento onclick para asociar categorías al presionar
-      +'<td style="text-align:left;font-weight:600;color:var(--t);cursor:pointer" onclick="asociarProveedor(\''+t.desc+'\')" title="Presiona para categorizar">'
-      + t.desc + catBadge +'</td>'
+      +'<td style="text-align:left;font-weight:600;color:var(--t);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color=\'var(--c)\'" onmouseout="this.style.color=\'var(--t)\'" onclick="asociarProveedor(\''+t.desc+'\')" title="Clic para categorizar">'
+      + statusIcon + t.desc + catBadge +'</td>'
       +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? formatMoney(t.in) : '—')+'</td>'
       +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? formatMoney(t.out) : '—')+'</td>'
       +'</tr>';
@@ -2145,6 +2193,13 @@ function renderFlujoCaja(isFilterChange){
   
   if(!kpiDiv) return;
 
+  if(!bankData.length){
+    $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco. Importa tu cartola.</td></tr>';
+    kpiDiv.innerHTML = '';
+    if(panels) panels.style.display = 'none';
+    return;
+  }
+
   var currentMonth = sel ? sel.value : 'all';
   var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
 
@@ -2157,11 +2212,9 @@ function renderFlujoCaja(isFilterChange){
       var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim().toUpperCase();
       topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
     }
-    // Agrupamos ingresos por fecha exacta para el ranking de mejores días
     if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
   });
 
-  // --- Lógica de Efectivo (Compatible con inicio Enero 2025) ---
   var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce((s,g) => s + (g.date.startsWith(currentMonth) ? parseInt(g.monto) : 0), 0);
   var efectivoToteat = 0;
 
@@ -2169,20 +2222,19 @@ function renderFlujoCaja(isFilterChange){
     if (currentMonth === 'all') {
       efectivoToteat = SALES.monthly.reduce((sum, m) => sum + (m.efectivo || 0), 0);
     } else {
-      // Traducimos "2025-01" a "Enero 2025" para que coincida con tus headers de Toteat
       var mArr = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
       var pts = currentMonth.split('-');
-      var targetLabel = mArr[parseInt(pts[1]) - 1] + ' ' + pts[0];
-      
-      var match = SALES.monthly.find(m => m.month === targetLabel);
-      if(match) efectivoToteat = match.efectivo || 0;
+      if(pts.length === 2) {
+          var targetLabel = mArr[parseInt(pts[1]) - 1] + ' ' + pts[0];
+          var match = SALES.monthly.find(m => m.month === targetLabel);
+          if(match) efectivoToteat = match.efectivo || 0;
+      }
     }
   }
 
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
-  // Render KPIs (6 cajas, estilo profesional)
   kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
   kpiDiv.innerHTML = [
     {l:'Abonos Banco', v:formatMoney(tIn), f:'Total Digital', c:'var(--g)'},
@@ -2195,11 +2247,9 @@ function renderFlujoCaja(isFilterChange){
 
   renderTablaFlujo(filteredBank, false);
 
-  // --- Rankings ---
   if(panels) {
     panels.style.display = 'grid';
     
-    // Top 10 Egresos (Proveedores)
     var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v);
     var topDisplay = sortedOut.slice(0, 10);
     
@@ -2210,7 +2260,6 @@ function renderFlujoCaja(isFilterChange){
         +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
     }).join('') : '<div class="empty">Sin registros</div>';
 
-    // Top 5 Ingresos (Días con más recaudación)
     var sortedIn = Object.keys(topInMap).map(k => ({d:k, v:topInMap[k]})).sort((a,b) => b.v-a.v).slice(0, 5);
     
     document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(o => {
@@ -2220,27 +2269,91 @@ function renderFlujoCaja(isFilterChange){
     }).join('') : '<div class="empty">Sin ingresos</div>';
   }
 }
+// ════ SINCRONIZACIÓN CON GOOGLE DRIVE (CLOUD) ════
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzQeVRcatdllVHgoDHccnmqigBtLZpYM_K7uz0Vf2QJtYySwhIjGEUf1zNCT3bdmqRdnw/exec";
 
+async function saveToCloud(btn) {
+  if(!confirm('¿Guardar todos tus registros actuales (gastos manuales, reglas, conteos) en Google Drive?')) return;
+  
+  var ogText = btn.innerHTML;
+  btn.innerHTML = '⏳ Subiendo...';
+  
+  // Recopilamos todo lo que está en la memoria del navegador
+  var dataToSave = {};
+  for(var i=0; i<localStorage.length; i++){
+    var key = localStorage.key(i);
+    dataToSave[key] = localStorage.getItem(key);
+  }
+  
+  try {
+    var res = await fetch(CLOUD_URL, {
+      method: 'POST',
+      body: JSON.stringify(dataToSave),
+      headers: {'Content-Type': 'text/plain'} // Text plain evita bloqueos de seguridad del navegador
+    });
+    var json = await res.json();
+    
+    if(json.status === 'ok') {
+      btn.innerHTML = '✅ Guardado';
+      setTimeout(function(){ btn.innerHTML = ogText; }, 2500);
+    } else {
+      alert('Error en el servidor: ' + json.message);
+      btn.innerHTML = ogText;
+    }
+  } catch(e) {
+    alert('Error de conexión. Verifica tu internet.');
+    btn.innerHTML = ogText;
+  }
+}
+
+async function loadFromCloud(btn) {
+  if(!confirm('ALERTA: ¿Sobrescribir tu memoria actual con los datos de la nube? (La página se recargará)')) return;
+  
+  var ogText = btn.innerHTML;
+  btn.innerHTML = '⏳ Descargando...';
+  
+  try {
+    var res = await fetch(CLOUD_URL);
+    var data = await res.json();
+    
+    if(data.status === "empty") {
+      alert('Aún no hay ningún archivo de respaldo guardado en tu Drive.');
+      btn.innerHTML = ogText;
+      return;
+    }
+    
+    // Limpiamos la memoria actual y volcamos lo descargado
+    localStorage.clear();
+    for(var key in data) {
+      if(data.hasOwnProperty(key)) {
+        localStorage.setItem(key, data[key]);
+      }
+    }
+    
+    btn.innerHTML = '✅ Listo';
+    setTimeout(function(){ location.reload(); }, 800);
+    
+  } catch(e) {
+    alert('Error al descargar desde la nube.');
+    btn.innerHTML = ogText;
+  }
+}
 function asociarProveedor(nombreOriginal) {
     var nombreLimpio = nombreOriginal.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').trim();
     var categoria = prompt("¿A qué categoría pertenece '" + nombreLimpio + "'? (Ej: Gas, Agua, Personal, Arriendo)");
     
-    if (categoria) {
-        // 1. Guardar en memoria permanente
+    if (categoria && categoria.trim() !== "") {
         var reglasActuales = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
-        reglasActuales[nombreOriginal.toUpperCase()] = categoria;
+        reglasActuales[nombreOriginal.toUpperCase()] = categoria.trim();
         localStorage.setItem('reglas_prov', JSON.stringify(reglasActuales));
         
-        // 2. Aplicar el cambio a los datos que ya están cargados en la sesión actual
         var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
         var dataActualizada = bankData.map(function(t) {
-            if (t.desc === nombreOriginal) t.cat = categoria;
+            if (t.desc === nombreOriginal) t.cat = categoria.trim();
             return t;
         });
         localStorage.setItem('bank_tx', JSON.stringify(dataActualizada));
 
-        // 3. Refrescar la vista de inmediato
         renderFlujoCaja(true);
-        toast('Regla guardada: ' + categoria);
     }
 }
