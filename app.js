@@ -2297,21 +2297,36 @@ function renderFlujoCaja(isFilterChange){
       +'</tr>';
   }).join('');
 
-  // Caja Chica
+  // 3. Cruzar con la "Caja Chica" (Gastos Manuales de la app)
   var manualGastos = JSON.parse(localStorage.getItem('app_gastos') || '[]');
   var totalManual = 0;
   manualGastos.forEach(function(g) {
     if(currentMonth === 'all' || g.date.startsWith(currentMonth)) totalManual += parseInt(g.monto) || 0;
   });
 
+  // 4. Buscar el Efectivo físico guardado desde Toteat
+  var efectivoToteat = 0;
+  if (typeof SALES !== 'undefined' && SALES.monthly) {
+    if (currentMonth === 'all') {
+      efectivoToteat = SALES.monthly.reduce(function(sum, m) { return sum + (m.efectivo || 0); }, 0);
+    } else {
+      var pts = currentMonth.split('-');
+      var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var targetName = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
+      var match = SALES.monthly.find(function(m) { return m.month === targetName; });
+      if(match) efectivoToteat = match.efectivo || 0;
+    }
+  }
+
+  // 5. Calcular la Cuadratura Total
   var saldoBanco = tIn - tOut;
-  var cajaReal = saldoBanco - totalManual;
+  var cajaRealFisica = efectivoToteat - totalManual;
 
   kpiDiv.innerHTML = [
-    {l:'Abonos Banco', v:formatMoney(tIn), f:'Transbank, transferencias', c:'var(--g)'},
-    {l:'Cargos Banco', v:formatMoney(tOut), f:'Pago a proveedores', c:'var(--r)'},
-    {l:'Gastos Hormiga (Caja)', v:formatMoney(totalManual), f:'Efectivo / Manuales', c:'var(--y)'},
-    {l:'Caja Real Restante', v:(cajaReal<0?'-':'')+formatMoney(Math.abs(cajaReal)), f:'Banco menos Caja Chica', c:cajaReal>=0?'var(--g)':'var(--r)'}
+    {l:'🏦 Flujo Banco Neto', v:(saldoBanco<0?'-':'')+formatMoney(Math.abs(saldoBanco)), f:'Abonos menos Cargos', c:saldoBanco>=0?'var(--g)':'var(--r)'},
+    {l:'💵 Entró en Efectivo', v:formatMoney(efectivoToteat), f:'Según Toteat', c:'var(--g)'},
+    {l:'💸 Gastos de Caja', v:formatMoney(totalManual), f:'Hormiga / Manuales', c:'var(--y)'},
+    {l:'💰 Caja Física (Billetes)', v:(cajaRealFisica<0?'-':'')+formatMoney(Math.abs(cajaRealFisica)), f:'Efectivo menos Gastos', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
   ].map(function(k){
     return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div>'
       +'<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
@@ -2338,7 +2353,6 @@ function renderFlujoCaja(isFilterChange){
     }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">No hay ingresos este mes</div>';
   }
 }
-
 
 
 
