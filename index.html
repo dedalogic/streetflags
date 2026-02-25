@@ -915,7 +915,7 @@ tr:last-child td{border-bottom:none}
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="pill-sel on" id="gtab-resumen"   onclick="setGTab('resumen',this)">Resumen</button>
       <button class="pill-sel"    id="gtab-historial" onclick="setGTab('historial',this)">Historial</button>
-      <button class="pill-sel"    id="gtab-flujo"     onclick="setGTab('flujo',this)">🏦 Flujo de Caja</button>
+      <button class="pill-sel"    id="gtab-flujo"     onclick="setGTab('flujo',this)">&#127974; Flujo de Caja</button>
       <button class="pill-sel"    id="gtab-alertas"   onclick="setGTab('alertas',this)">&#128276; Alertas</button>
       <button class="pill-sel"    id="gtab-cred"      onclick="setGTab('cred',this)">&#128272; Accesos</button>
     </div>
@@ -927,7 +927,8 @@ tr:last-child td{border-bottom:none}
       <button class="btn btn-c btn-sm" onclick="openAddGasto()">+ Nuevo gasto</button>
     </div>
   </div>
-  <div id="gview-resumen">
+
+  <div id="gview-resumen" class="gview">
     <div id="kpi-gastos" class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
     <div class="g2" style="margin-bottom:20px">
       <div class="card"><div class="card-hd">Por categor&#237;a (mensual)</div><div class="bars" id="ch-gcat"></div></div>
@@ -952,7 +953,14 @@ tr:last-child td{border-bottom:none}
     </table></div>
     <div id="g-totrow" style="padding:10px 16px;background:var(--s2);border-top:1px solid var(--b);font-size:12px;color:var(--sub)"></div></div>
   </div>
-<div id="gview-historial" style="display:none">
+
+  <div id="gview-historial" class="gview" style="display:none">
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+      <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sub)">Gasto</label>
+      <select class="inp" id="ghist-sel" onchange="renderGHistorial()" style="width:220px"></select>
+    </div>
+    <div id="ghist-kpis" class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px"></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-hd" id="ghist-title">Historial</div><div class="bars" id="ch-ghist"></div></div>
     <div class="tbl-shell"><div class="tbl-scroll"><table>
       <thead><tr><th>Mes</th><th class="r">Monto</th><th class="hide-sm">Estado</th><th></th></tr></thead>
       <tbody id="ghist-body"></tbody>
@@ -960,7 +968,7 @@ tr:last-child td{border-bottom:none}
     <div style="margin-top:12px"><button class="btn btn-sm btn-c" onclick="openAddHist()">+ Agregar pago</button></div>
   </div>
 
-  <div id="gview-flujo" style="display:none">
+  <div id="gview-flujo" class="gview" style="display:none">
     <div id="kpi-flujo" class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px"></div>
     <div class="tbl-shell"><div class="tbl-scroll"><table>
       <thead><tr>
@@ -969,10 +977,12 @@ tr:last-child td{border-bottom:none}
       <tbody id="flujo-body"></tbody>
     </table></div></div>
   </div>
-  <div id="gview-alertas" style="display:none">
+
+  <div id="gview-alertas" class="gview" style="display:none">
     <div id="alertas-body" style="display:flex;flex-direction:column;gap:12px;max-width:700px"></div>
   </div>
-  <div id="gview-cred" style="display:none">
+
+  <div id="gview-cred" class="gview" style="display:none">
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
       <button class="btn btn-sm btn-c" onclick="openAddCred()">+ Nueva credencial</button>
     </div>
@@ -1058,4 +1068,5 @@ tr:last-child td{border-bottom:none}
 </div>
 </body>
 </html>
+
 
