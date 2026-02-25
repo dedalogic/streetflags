@@ -2019,7 +2019,15 @@ function exportGastosPDF(){
   w.document.close();
   setTimeout(function(){w.print();},400);
 }
-// ── FLUJO DE CAJA Y AUDITORÍA (BANCO ITAÚ + CAJA CHICA) ──
+// ── FLUJO DE CAJA PRO: TRADUCTOR, TOP 10 Y DETALLE POR CLIC ──
+
+const REGLAS_PROVEEDORES = {
+  "HECTOR SALAS": "Gas",
+  "AGUAS DEL ALTIPLANO": "Agua",
+  "CGE": "Electricidad",
+  "TRANSBANK": "Ingreso Web",
+  "PEDIDOSYA": "Ingreso Delivery"
+};
 
 function formatMoney(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
 
@@ -2052,7 +2060,19 @@ function handleBankFile(input) {
         var pts = dateStr.split('/'); var isoDate = year + '-' + pts[1] + '-' + pts[0];
         var abono = parseInt(p[4].replace(/[^0-9]/g, '')) || 0;
         var cargo = parseInt(p[5].replace(/[^0-9]/g, '')) || 0;
-        if(abono > 0 || cargo > 0) txs.push({ date: isoDate, desc: p[3].trim(), in: abono, out: cargo });
+        
+        var descOriginal = p[3].trim().toUpperCase();
+        var etiqueta = "Otros";
+        for (var clave in REGLAS_PROVEEDORES) {
+          if (descOriginal.includes(clave)) {
+            etiqueta = REGLAS_PROVEEDORES[clave];
+            break;
+          }
+        }
+        
+        if(abono > 0 || cargo > 0) txs.push({ 
+          date: isoDate, desc: p[3].trim(), cat: etiqueta, in: abono, out: cargo 
+        });
       }
     });
     
@@ -2066,383 +2086,110 @@ function handleBankFile(input) {
       });
       unique.sort(function(a,b){return b.date.localeCompare(a.date)});
       localStorage.setItem('bank_tx', JSON.stringify(unique));
-      
-      alert('Cartola procesada: ' + txs.length + ' movimientos. ¡Presiona "Subir Nube" para respaldar!');
-      
-      var sel = document.getElementById('flujo-mes-sel');
-      if(sel) sel.innerHTML = '<option value="all">Todos los meses</option>';
       renderFlujoCaja(false);
-    } else {
-      alert('No se encontraron movimientos válidos.');
     }
   };
   reader.readAsText(file, 'utf-8');
   input.value = ''; 
 }
 
-function renderFlujoCaja(isFilterChange){
-  var bankData = [];
-  var lsBank = localStorage.getItem('bank_tx');
-  if(lsBank) bankData = JSON.parse(lsBank);
-  else if(typeof BANK_TX !== 'undefined') bankData = BANK_TX; 
-  
-  var tbody = document.getElementById('flujo-body');
-  var kpiDiv = document.getElementById('kpi-flujo');
+// Módulo 1: Función para filtrar la tabla por proveedor al hacer clic
+function filtrarPorProveedor(nombre) {
+  var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
   var sel = document.getElementById('flujo-mes-sel');
-  var panels = document.getElementById('flujo-panels');
-  
-  if(!tbody || !kpiDiv) return;
-
-  if(!bankData || !bankData.length){
-    tbody.innerHTML = '<tr><td colspan="4" class="empty" style="padding:30px 0;text-align:center;color:#666">Presiona "+ Importar Cartola CSV" para cargar tus datos del banco.</td></tr>';
-    kpiDiv.innerHTML = ''; 
-    if(panels) panels.style.display = 'none'; 
-    return;
-  }
-
-  // Extraer meses únicos
-  if(sel && sel.options.length <= 1 && !isFilterChange) {
-    var months = new Set();
-    bankData.forEach(function(t){ months.add(t.date.substring(0,7)); });
-    var mArr = Array.from(months).sort().reverse(); 
-    mArr.forEach(function(m){
-      var opt = document.createElement('option');
-      opt.value = m;
-      var pts = m.split('-');
-      var mNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-      opt.text = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
-      sel.appendChild(opt);
-    });
-    if(mArr.length > 0) sel.value = mArr[0]; 
-  }
-
   var currentMonth = sel ? sel.value : 'all';
-  var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
+  
+  var filtrados = bankData.filter(function(t) {
+    var coincideMes = currentMonth === 'all' || t.date.startsWith(currentMonth);
+    return coincideMes && t.desc.toUpperCase().includes(nombre.toUpperCase());
+  });
 
-  // Calcular KPIs
-  var tIn = 0, tOut = 0;
-  var topOutMap = {}, topInMap = {};
+  renderTablaFlujo(filtrados, true, nombre);
+}
 
-  var rows = filteredBank.map(function(t){
-    tIn += t.in; tOut += t.out;
-    if(t.out > 0) {
-      var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim();
-      topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
-    }
-    if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
+function renderTablaFlujo(data, esFiltroManual, nombreProv) {
+  var tbody = document.getElementById('flujo-body');
+  if(!tbody) return;
 
+  var rows = data.map(function(t){
+    var catBadge = t.cat !== "Otros" ? '<br><span style="font-size:9px;color:var(--m);text-transform:uppercase">['+t.cat+']</span>' : '';
     return '<tr>'
       +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
-      +'<td style="text-align:left;font-weight:600;color:var(--t)">'+t.desc+'</td>'
+      +'<td style="text-align:left;font-weight:600;color:var(--t)">'+t.desc + catBadge +'</td>'
       +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? formatMoney(t.in) : '—')+'</td>'
       +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? formatMoney(t.out) : '—')+'</td>'
       +'</tr>';
   }).join('');
 
-  // Caja Chica (Gastos Manuales)
-  var manualGastos = JSON.parse(localStorage.getItem('app_gastos') || '[]');
-  var totalManual = 0;
-  manualGastos.forEach(function(g) {
-    if(currentMonth === 'all' || g.date.startsWith(currentMonth)) totalManual += parseInt(g.monto) || 0;
+  if(esFiltroManual) {
+    tbody.innerHTML = '<tr><td colspan="4" style="background:rgba(0,212,255,0.05);padding:10px;text-align:center;font-size:12px">'
+      +'Mostrando movimientos de: <strong>'+nombreProv+'</strong> '
+      +'<button onclick="renderFlujoCaja(true)" style="background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;margin-left:10px">Ver todos</button></td></tr>' + rows;
+  } else {
+    tbody.innerHTML = rows;
+  }
+}
+
+function renderFlujoCaja(isFilterChange){
+  var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
+  var kpiDiv = document.getElementById('kpi-flujo');
+  var sel = document.getElementById('flujo-mes-sel');
+  var panels = document.getElementById('flujo-panels');
+  
+  if(!kpiDiv) return;
+
+  var currentMonth = sel ? sel.value : 'all';
+  var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
+
+  var tIn = 0, tOut = 0;
+  var topOutMap = {}, topInMap = {};
+
+  filteredBank.forEach(function(t){
+    tIn += t.in; tOut += t.out;
+    if(t.out > 0) {
+      var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim().toUpperCase();
+      topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
+    }
+    if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
   });
 
-  // Buscar el Efectivo físico guardado desde Toteat
+  // Render KPIs
+  var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce((s,g) => s + (g.date.startsWith(currentMonth) ? parseInt(g.monto) : 0), 0);
   var efectivoToteat = 0;
   if (typeof SALES !== 'undefined' && SALES.monthly) {
-    if (currentMonth === 'all') {
-      efectivoToteat = SALES.monthly.reduce(function(sum, m) { return sum + (m.efectivo || 0); }, 0);
-    } else {
-      var pts = currentMonth.split('-');
-      var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      var targetName = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
-      var match = SALES.monthly.find(function(m) { return m.month === targetName; });
-      if(match) efectivoToteat = match.efectivo || 0;
-    }
+    var pts = currentMonth.split('-');
+    var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var target = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
+    var match = SALES.monthly.find(m => m.month === target);
+    if(match) efectivoToteat = match.efectivo || 0;
   }
 
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
-  // Renderizar 6 KPIs a 3 columnas sin emojis
   kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
   kpiDiv.innerHTML = [
-    {l:'Abonos Banco', v:formatMoney(tIn), f:'Transbank y Transferencias', c:'var(--g)'},
-    {l:'Cargos Banco', v:formatMoney(tOut), f:'Pago a Proveedores', c:'var(--r)'},
-    {l:'Saldo Banco', v:(saldoBanco<0?'-':'')+formatMoney(Math.abs(saldoBanco)), f:'Neto en la cuenta', c:saldoBanco>=0?'var(--g)':'var(--r)'},
-    {l:'Efectivo Entrante', v:formatMoney(efectivoToteat), f:'Según sistema Toteat', c:'var(--g)'},
-    {l:'Gastos en Efectivo', v:formatMoney(totalManual), f:'Caja Chica y manuales', c:'var(--y)'},
-    {l:'Caja Fuerte', v:(cajaRealFisica<0?'-':'')+formatMoney(Math.abs(cajaRealFisica)), f:'Efectivo Neto Real', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
-  ].map(function(k){
-    return '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div>'
-      +'<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
-  }).join('');
-  
-  tbody.innerHTML = rows;
+    {l:'Abonos Banco', v:formatMoney(tIn), f:'Total Digital', c:'var(--g)'},
+    {l:'Cargos Banco', v:formatMoney(tOut), f:'Egresos Digitales', c:'var(--r)'},
+    {l:'Saldo Banco', v:formatMoney(saldoBanco), f:'Neto Banco', c:saldoBanco>=0?'var(--g)':'var(--r)'},
+    {l:'Efectivo Entrante', v:formatMoney(efectivoToteat), f:'Ventas Toteat', c:'var(--g)'},
+    {l:'Gastos Efectivo', v:formatMoney(totalManual), f:'Caja Chica', c:'var(--y)'},
+    {l:'Caja Fuerte', v:formatMoney(cajaRealFisica), f:'Billetes Reales', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
+  ].map(k => '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>').join('');
 
-  // Rankings
+  renderTablaFlujo(filteredBank, false);
+
+  // Módulo 1: Ranking expandible y clickeable
   if(panels) {
     panels.style.display = 'grid';
-    var sortedOut = Object.keys(topOutMap).map(function(k){return {n:k, v:topOutMap[k]}}).sort(function(a,b){return b.v-a.v}).slice(0,5);
-    document.getElementById('flujo-top-out').innerHTML = sortedOut.length ? sortedOut.map(function(o){
+    var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v);
+    var topDisplay = sortedOut.slice(0, 10); // Mostramos hasta 10
+    
+    document.getElementById('flujo-top-out').innerHTML = topDisplay.length ? topDisplay.map(function(o){
       var pct = Math.round((o.v / tOut) * 100) || 0;
-      return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-        +'<span style="font-size:12px;color:#aaa">'+o.n+'</span>'
+      return '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer" title="Clic para ver detalle">'
+        +'<span style="font-size:12px;color:var(--m)">'+o.n+'</span>'
         +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
-    }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">No hay egresos este mes</div>';
-
-    var sortedIn = Object.keys(topInMap).map(function(k){return {n:k, v:topInMap[k]}}).sort(function(a,b){return b.v-a.v}).slice(0,4);
-    document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(function(o){
-      return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-        +'<span style="font-size:12px;color:#aaa">Día '+o.n+'</span>'
-        +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">'+formatMoney(o.v)+'</span></div>';
-    }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">No hay ingresos este mes</div>';
-  }
-}
-// ── FLUJO DE CAJA Y AUDITORÍA (BANCO ITAÚ + CAJA CHICA) ──
-
-function formatMoney(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
-
-function parseCSVLine(text) {
-  var ret = [], val = '', inQ = false;
-  for(var i=0; i<text.length; i++) {
-    var c = text[i];
-    if(c === '"') inQ = !inQ;
-    else if(c === ',' && !inQ) { ret.push(val); val=''; }
-    else val += c;
-  }
-  ret.push(val); return ret;
-}
-
-function handleBankFile(input) {
-  var file = input.files[0]; if(!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var text = e.target.result;
-    var lines = text.split(/\r?\n/).filter(function(x){return x.trim();});
-    var year = new Date().getFullYear();
-    var pMatch = text.match(/Período.*?(\d{4})/i); 
-    if(pMatch) year = pMatch[1];
-    
-    var txs = [];
-    lines.forEach(function(l) {
-      var p = parseCSVLine(l); if(p.length < 6) return;
-      var dateStr = p[0].trim();
-      if(/^\d{2}\/\d{2}$/.test(dateStr)) {
-        var pts = dateStr.split('/'); var isoDate = year + '-' + pts[1] + '-' + pts[0];
-        var abono = parseInt(p[4].replace(/[^0-9]/g, '')) || 0;
-        var cargo = parseInt(p[5].replace(/[^0-9]/g, '')) || 0;
-        if(abono > 0 || cargo > 0) txs.push({ date: isoDate, desc: p[3].trim(), in: abono, out: cargo });
-      }
-    });
-    
-    if(txs.length > 0) {
-      var existing = JSON.parse(localStorage.getItem('bank_tx') || '[]');
-      var all = existing.concat(txs);
-      var unique = []; var seen = new Set();
-      all.forEach(function(t) {
-        var str = t.date + t.desc + t.in + t.out;
-        if(!seen.has(str)) { seen.add(str); unique.push(t); }
-      });
-      unique.sort(function(a,b){return b.date.localeCompare(a.date)});
-      localStorage.setItem('bank_tx', JSON.stringify(unique));
-      
-      alert('Cartola procesada: ' + txs.length + ' movimientos. ¡Presiona "Subir Nube" para respaldar!');
-      
-      var sel = document.getElementById('flujo-mes-sel');
-      if(sel) sel.innerHTML = '<option value="all">Todos los meses</option>';
-      renderFlujoCaja(false);
-    } else {
-      alert('No se encontraron movimientos válidos.');
-    }
-  };
-  reader.readAsText(file, 'utf-8');
-  input.value = ''; 
-}
-
-function renderFlujoCaja(isFilterChange){
-  var bankData = [];
-  var lsBank = localStorage.getItem('bank_tx');
-  if(lsBank) bankData = JSON.parse(lsBank);
-  else if(typeof BANK_TX !== 'undefined') bankData = BANK_TX; 
-  
-  var tbody = document.getElementById('flujo-body');
-  var kpiDiv = document.getElementById('kpi-flujo');
-  var sel = document.getElementById('flujo-mes-sel');
-  var panels = document.getElementById('flujo-panels');
-  
-  if(!tbody || !kpiDiv) return;
-
-  if(!bankData || !bankData.length){
-    tbody.innerHTML = '<tr><td colspan="4" class="empty" style="padding:30px 0;text-align:center;color:#666">Presiona "+ Importar Cartola CSV" para cargar tus datos del banco.</td></tr>';
-    kpiDiv.innerHTML = ''; 
-    if(panels) panels.style.display = 'none'; 
-    return;
-  }
-
-  // Extraer meses únicos
-  if(sel && sel.options.length <= 1 && !isFilterChange) {
-    var months = new Set();
-    bankData.forEach(function(t){ months.add(t.date.substring(0,7)); });
-    var mArr = Array.from(months).sort().reverse(); 
-    mArr.forEach(function(m){
-      var opt = document.createElement('option');
-      opt.value = m;
-      var pts = m.split('-');
-      var mNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-      opt.text = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
-      sel.appendChild(opt);
-    });
-    if(mArr.length > 0) sel.value = mArr[0]; 
-  }
-
-  var currentMonth = sel ? sel.value : 'all';
-  var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
-
-  // Calcular KPIs
-  var tIn = 0, tOut = 0;
-  var topOutMap = {}, topInMap = {};
-
-  var rows = filteredBank.map(function(t){
-    tIn += t.in; tOut += t.out;
-    if(t.out > 0) {
-      var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim();
-      topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
-    }
-    if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
-
-    return '<tr>'
-      +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
-      +'<td style="text-align:left;font-weight:600;color:var(--t)">'+t.desc+'</td>'
-      +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? formatMoney(t.in) : '—')+'</td>'
-      +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? formatMoney(t.out) : '—')+'</td>'
-      +'</tr>';
-  }).join('');
-
-  // 3. Cruzar con la "Caja Chica" (Gastos Manuales de la app)
-  var manualGastos = JSON.parse(localStorage.getItem('app_gastos') || '[]');
-  var totalManual = 0;
-  manualGastos.forEach(function(g) {
-    if(currentMonth === 'all' || g.date.startsWith(currentMonth)) totalManual += parseInt(g.monto) || 0;
-  });
-
-  // 4. Buscar el Efectivo físico guardado desde Toteat
-  var efectivoToteat = 0;
-  if (typeof SALES !== 'undefined' && SALES.monthly) {
-    if (currentMonth === 'all') {
-      efectivoToteat = SALES.monthly.reduce(function(sum, m) { return sum + (m.efectivo || 0); }, 0);
-    } else {
-      var pts = currentMonth.split('-');
-      var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      var targetName = mNames[parseInt(pts[1])-1] + ' ' + pts[0];
-      var match = SALES.monthly.find(function(m) { return m.month === targetName; });
-      if(match) efectivoToteat = match.efectivo || 0;
-    }
-  }
-
-  // 5. Calcular la Cuadratura Total
-  var saldoBanco = tIn - tOut;
-  var cajaRealFisica = efectivoToteat - totalManual;
-
-  kpiDiv.innerHTML = [
-    {l:'🏦 Flujo Banco Neto', v:(saldoBanco<0?'-':'')+formatMoney(Math.abs(saldoBanco)), f:'Abonos menos Cargos', c:saldoBanco>=0?'var(--g)':'var(--r)'},
-    {l:'💵 Entró en Efectivo', v:formatMoney(efectivoToteat), f:'Según Toteat', c:'var(--g)'},
-    {l:'💸 Gastos de Caja', v:formatMoney(totalManual), f:'Hormiga / Manuales', c:'var(--y)'},
-    {l:'💰 Caja Física (Billetes)', v:(cajaRealFisica<0?'-':'')+formatMoney(Math.abs(cajaRealFisica)), f:'Efectivo menos Gastos', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
-  ].map(function(k){
-    return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div>'
-      +'<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
-  }).join('');
-  
-  tbody.innerHTML = rows;
-
-  // Rankings
-  if(panels) {
-    panels.style.display = 'grid';
-    var sortedOut = Object.keys(topOutMap).map(function(k){return {n:k, v:topOutMap[k]}}).sort(function(a,b){return b.v-a.v}).slice(0,5);
-    document.getElementById('flujo-top-out').innerHTML = sortedOut.length ? sortedOut.map(function(o){
-      var pct = Math.round((o.v / tOut) * 100) || 0;
-      return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-        +'<span style="font-size:12px;color:#aaa">'+o.n+'</span>'
-        +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
-    }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">No hay egresos este mes</div>';
-
-    var sortedIn = Object.keys(topInMap).map(function(k){return {n:k, v:topInMap[k]}}).sort(function(a,b){return b.v-a.v}).slice(0,4);
-    document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(function(o){
-      return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-        +'<span style="font-size:12px;color:#aaa">Día '+o.n+'</span>'
-        +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">'+formatMoney(o.v)+'</span></div>';
-    }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">No hay ingresos este mes</div>';
-  }
-}
-
-
-
-// ════ SINCRONIZACIÓN CON GOOGLE DRIVE (CLOUD) ════
-const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzQeVRcatdllVHgoDHccnmqigBtLZpYM_K7uz0Vf2QJtYySwhIjGEUf1zNCT3bdmqRdnw/exec";
-
-async function saveToCloud(btn) {
-  if(!confirm('¿Guardar todos tus registros actuales (gastos manuales, configuraciones, conteos) en Google Drive?')) return;
-  
-  var ogText = btn.innerHTML;
-  btn.innerHTML = '⏳ Subiendo...';
-  
-  // Recopilamos todo lo que está en la memoria del navegador
-  var dataToSave = {};
-  for(var i=0; i<localStorage.length; i++){
-    var key = localStorage.key(i);
-    dataToSave[key] = localStorage.getItem(key);
-  }
-  
-  try {
-    var res = await fetch(CLOUD_URL, {
-      method: 'POST',
-      body: JSON.stringify(dataToSave),
-      headers: {'Content-Type': 'text/plain'} // Text plain evita bloqueos de seguridad del navegador
-    });
-    var json = await res.json();
-    
-    if(json.status === 'ok') {
-      btn.innerHTML = '✅ Guardado';
-      setTimeout(function(){ btn.innerHTML = ogText; }, 2500);
-    } else {
-      alert('Error en el servidor: ' + json.message);
-      btn.innerHTML = ogText;
-    }
-  } catch(e) {
-    alert('Error de conexión. Verifica tu internet.');
-    btn.innerHTML = ogText;
-  }
-}
-
-async function loadFromCloud(btn) {
-  if(!confirm('ALERTA: ¿Sobrescribir tu memoria actual con los datos de la nube? (La página se recargará)')) return;
-  
-  var ogText = btn.innerHTML;
-  btn.innerHTML = '⏳ Descargando...';
-  
-  try {
-    var res = await fetch(CLOUD_URL);
-    var data = await res.json();
-    
-    if(data.status === "empty") {
-      alert('Aún no hay ningún archivo de respaldo guardado en tu Drive.');
-      btn.innerHTML = ogText;
-      return;
-    }
-    
-    // Limpiamos la memoria actual y volcamos lo descargado
-    localStorage.clear();
-    for(var key in data) {
-      if(data.hasOwnProperty(key)) {
-        localStorage.setItem(key, data[key]);
-      }
-    }  
-    
-    btn.innerHTML = '✅ Listo';
-    setTimeout(function(){ location.reload(); }, 800);
-    
-  } catch(e) {
-    alert('Error al descargar desde la nube.');
-    btn.innerHTML = ogText;
+    }).join('') : '<div style="color:var(--sub);font-size:12px;padding:10px 0">Sin registros</div>';
   }
 }
