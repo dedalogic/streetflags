@@ -2542,17 +2542,38 @@ async function loadFromCloud(btn) {
     var res = await fetch(CLOUD_URL);
     var data = await res.json();
     
+    // Imprimimos en la consola secreta (F12) lo que llegó para poder auditarlo si falla
+    console.log("📦 Datos recibidos desde Drive:", data);
+    
     if(data.status === "empty") {
       alert('Aún no hay ningún archivo de respaldo guardado en tu Drive.');
       btn.innerHTML = ogText;
       return;
     }
+
+    // A veces Google Apps Script envuelve los datos (ej: data.datos o data.payload)
+    // Buscamos dónde está realmente la "carne" de tu app
+    var realData = data;
+    if (data.data && typeof data.data === 'object') realData = data.data;
+    else if (data.payload && typeof data.payload === 'object') realData = data.payload;
+
+    // 🛡️ ESCUDO DE SEGURIDAD: 
+    // Verificamos que el paquete contenga AL MENOS una de las variables vitales de la app
+    if (!realData['app_sales'] && !realData['app_ingr'] && !realData['app_rec']) {
+        alert('❌ Error Crítico: El archivo de la nube está vacío o corrupto. Se canceló la descarga para proteger los datos que tienes actualmente en pantalla.');
+        btn.innerHTML = ogText;
+        return; 
+    }
     
-    // Limpiamos la memoria actual y volcamos lo descargado
+    // Si llegamos hasta aquí, el paquete es VÁLIDO. 
+    // Procedemos a limpiar y volcar los datos.
     localStorage.clear();
-    for(var key in data) {
-      if(data.hasOwnProperty(key)) {
-        localStorage.setItem(key, data[key]);
+    for(var key in realData) {
+      if(realData.hasOwnProperty(key)) {
+        // Filtramos variables basura que Google pueda inyectar
+        if (key !== 'status' && key !== 'message') {
+            localStorage.setItem(key, realData[key]);
+        }
       }
     }
     
@@ -2560,7 +2581,8 @@ async function loadFromCloud(btn) {
     setTimeout(function(){ location.reload(); }, 800);
     
   } catch(e) {
-    alert('Error al descargar desde la nube.');
+    alert('❌ Error de conexión al descargar. Revisa tu consola (F12).');
+    console.error("Error en Fetch:", e);
     btn.innerHTML = ogText;
   }
 }
