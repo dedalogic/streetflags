@@ -2495,16 +2495,17 @@ function renderFlujoCaja(isFilterChange){
       }
   }
 }
-// ════ SINCRONIZACIÓN CON GOOGLE DRIVE (CLOUD) ════
-const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxwv_AYQgWu6Xmo5LNvxVs5TATqwYHOdI03hhs__O9-if3k6x0DqsPcnVVqWRcD2uTDpg/exec";
+
+
+// ════ SINCRONIZACIÓN FIREBASE (100% BLINDADA) ════
 
 async function saveToCloud(btn) {
-  if(!confirm('¿Guardar todos tus registros actuales (gastos manuales, reglas, conteos) en Google Drive?')) return;
+  if(!confirm('¿Guardar todos tus registros actuales en la base de datos de la nube?')) return;
   
   var ogText = btn.innerHTML;
   btn.innerHTML = '⏳ Subiendo...';
   
-  // Recopilamos todo lo que está en la memoria del navegador
+  // Extraemos toda tu memoria actual de la pantalla
   var dataToSave = {};
   for(var i=0; i<localStorage.length; i++){
     var key = localStorage.key(i);
@@ -2512,80 +2513,53 @@ async function saveToCloud(btn) {
   }
   
   try {
-    var res = await fetch(CLOUD_URL, {
-      method: 'POST',
-      body: JSON.stringify(dataToSave),
-      headers: {'Content-Type': 'text/plain'} // Text plain evita bloqueos de seguridad del navegador
-    });
-    var json = await res.json();
+    // Mandamos los datos directo a Firebase en tiempo real
+    await db.ref('respaldo_principal').set(dataToSave);
     
-    if(json.status === 'ok') {
-      btn.innerHTML = '✅ Guardado';
-      setTimeout(function(){ btn.innerHTML = ogText; }, 2500);
-    } else {
-      alert('Error en el servidor: ' + json.message);
-      btn.innerHTML = ogText;
-    }
+    btn.innerHTML = '✅ Guardado';
+    setTimeout(function(){ btn.innerHTML = ogText; }, 2500);
   } catch(e) {
-    alert('Error de conexión. Verifica tu internet.');
+    console.error("Error Firebase:", e);
+    alert('❌ Error al subir a la base de datos.');
     btn.innerHTML = ogText;
   }
 }
 
 async function loadFromCloud(btn) {
-  if(!confirm('ALERTA: ¿Sobrescribir tu memoria actual con los datos de la nube? (La página se recargará)')) return;
+  if(!confirm('ALERTA: ¿Sobrescribir tu memoria actual con los datos de Firebase?')) return;
   
   var ogText = btn.innerHTML;
   btn.innerHTML = '⏳ Descargando...';
   
   try {
-    var res = await fetch(CLOUD_URL);
-    var data = await res.json();
+    // Leemos los datos desde Firebase
+    const snapshot = await db.ref('respaldo_principal').once('value');
+    const data = snapshot.val();
     
-    // Imprimimos en la consola secreta (F12) lo que llegó para poder auditarlo si falla
-    console.log("📦 Datos recibidos desde Drive:", data);
-    
-    if(data.status === "empty") {
-      alert('Aún no hay ningún archivo de respaldo guardado en tu Drive.');
+    // ESCUDO ANTI-BORRADO DEFINITIVO
+    if (!data) {
+      alert('❌ La base de datos en Firebase está vacía en este momento. Sube tus datos primero para no borrar tu memoria local.');
       btn.innerHTML = ogText;
       return;
     }
-
-    // A veces Google Apps Script envuelve los datos (ej: data.datos o data.payload)
-    // Buscamos dónde está realmente la "carne" de tu app
-    var realData = data;
-    if (data.data && typeof data.data === 'object') realData = data.data;
-    else if (data.payload && typeof data.payload === 'object') realData = data.payload;
-
-    // 🛡️ ESCUDO DE SEGURIDAD: 
-    // Verificamos que el paquete contenga AL MENOS una de las variables vitales de la app
-    if (!realData['app_sales'] && !realData['app_ingr'] && !realData['app_rec']) {
-        alert('❌ Error Crítico: El archivo de la nube está vacío o corrupto. Se canceló la descarga para proteger los datos que tienes actualmente en pantalla.');
-        btn.innerHTML = ogText;
-        return; 
-    }
     
-    // Si llegamos hasta aquí, el paquete es VÁLIDO. 
-    // Procedemos a limpiar y volcar los datos.
-    localStorage.clear();
-    for(var key in realData) {
-      if(realData.hasOwnProperty(key)) {
-        // Filtramos variables basura que Google pueda inyectar
-        if (key !== 'status' && key !== 'message') {
-            localStorage.setItem(key, realData[key]);
-        }
-      }
+    // Si hay datos, los grabamos en tu memoria local
+    for(var key in data) {
+      localStorage.setItem(key, data[key]);
     }
     
     btn.innerHTML = '✅ Listo';
     setTimeout(function(){ location.reload(); }, 800);
     
   } catch(e) {
-    alert('❌ Error de conexión al descargar. Revisa tu consola (F12).');
-    console.error("Error en Fetch:", e);
+    console.error("Error Firebase:", e);
+    alert('❌ Error de conexión al descargar. Tus datos en pantalla NO se borraron.');
     btn.innerHTML = ogText;
   }
 }
+
+
+
 function asociarProveedor(nombreOriginal) {
     var nombreLimpio = nombreOriginal.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').trim();
     var categoria = prompt("¿A qué categoría pertenece '" + nombreLimpio + "'? (Ej: Gas, Agua, Personal, Arriendo)");
