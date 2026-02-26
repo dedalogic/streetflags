@@ -2496,7 +2496,7 @@ function renderFlujoCaja(isFilterChange){
   }
 }
 // ════ SINCRONIZACIÓN CON GOOGLE DRIVE (CLOUD) ════
-const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyAYEqWFEEBEr8hTeuoz6cAWvznfikK4yDeyUUiUgsmDFbcaBo4Ly1qTk4vvG1lky24uQ/exec";
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxS4-WLSEyrd1rtEERJdM2qhIf4Otd_UHFs-io4NaMH9lsq0Y2cB-7B3PR1BA-iRqY5/exec";
 
 async function saveToCloud(btn) {
   if(!confirm('¿Guardar todos tus registros actuales (gastos manuales, reglas, conteos) en Google Drive?')) return;
