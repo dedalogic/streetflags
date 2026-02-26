@@ -695,6 +695,26 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBDkMmkgNMWDO4aerEpkWrj-nnten8tFvI",
+    authDomain: "street-flags.firebaseapp.com",
+    databaseURL: "https://street-flags-default-rtdb.firebaseio.com",
+    projectId: "street-flags",
+    storageBucket: "street-flags.firebasestorage.app",
+    messagingSenderId: "210252157672",
+    appId: "1:210252157672:web:39ea02f686ee15603c6f5d"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+  
 <script src="data.js"></script>
 <script src="app.js"></script>
 
@@ -993,3 +1013,4 @@ tr:last-child td{border-bottom:none}
 </div>
 </body>
 </html>
+
