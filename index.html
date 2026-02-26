@@ -331,7 +331,7 @@ tr:last-child td{border-bottom:none}
 <div id="p-analisis" class="page">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
     <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Ver datos de</span>
-    <select class="inp w200" id="an-mes-sel" onchange="initAnalisis"></select>
+    <select class="inp w200" id="an-mes-sel" onchange="initAnalisis()"></select>
     <span style="font-size:11px;color:var(--sub)" id="an-context"></span>
   </div>
   <div class="notice info">
@@ -711,9 +711,6 @@ tr:last-child td{border-bottom:none}
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 </script>
-
-<script src="data.js"></script>
-<script src="app.js"></script>
   
 <script src="data.js"></script>
 <script src="app.js"></script>
@@ -1013,4 +1010,5 @@ tr:last-child td{border-bottom:none}
 </div>
 </body>
 </html>
+
 
