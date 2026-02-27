@@ -579,33 +579,37 @@ function parseCSVRow(text, delimiter) {
   return ret;
 }
 
-// ─── EXTRACCIÓN NUMÉRICA ROBUSTA (formato chileno $1.234.567) ───
+// ─── EXTRACCIÓN NUMÉRICA ROBUSTA (Formato Chileno Anti-Excel) ───
 function extractNumFromCell(arr, index) {
   if (!arr || index >= arr.length) return 0;
   var val = arr[index];
   if (val == null) return 0;
   var s = String(val).trim();
   if (s === '' || s === '-') return 0;
-  // Quitar $ y espacios
-  s = s.replace(/[$\s]/g, '');
-  // Formato chileno: puntos = miles, coma = decimal
-  if (s.indexOf(',') > -1) {
-    s = s.replace(/\./g, '').replace(',', '.');
-  } else {
-    // Si hay múltiples puntos → son separadores de miles
-    var dotCount = (s.match(/\./g) || []).length;
-    if (dotCount > 1) {
-      s = s.replace(/\./g, '');
-    } else if (dotCount === 1) {
-      // Un solo punto con 3 dígitos después → es separador de miles (ej: 1.234)
-      var afterDot = s.split('.')[1];
-      if (afterDot && afterDot.length === 3 && /^\d+$/.test(afterDot)) {
-        s = s.replace('.', '');
+
+  // 1. Quitar símbolos de dinero, espacios y forzar comas gringas a puntos
+  s = s.replace(/[$\s]/g, '').replace(/,/g, '.');
+  
+  var parts = s.split('.');
+  if (parts.length > 1) {
+      var finalNumStr = parts[0];
+      for (var i = 1; i < parts.length; i++) {
+          var p = parts[i];
+          
+          // 🚨 FIX CRÍTICO: Excel/Toteat a veces trata el separador de miles como decimal 
+          // y borra los ceros a la derecha. (Ej: 354.000 se vuelve 354.00 o 354.0).
+          // En Chile, todo bloque después de un punto DEBE tener 3 números.
+          // Si tiene menos, rellenamos con ceros para recuperar el valor real.
+          while (p.length < 3) {
+              p += '0';
+          }
+          finalNumStr += p;
       }
-    }
+      s = finalNumStr;
   }
-  var num = parseFloat(s);
-  return isNaN(num) ? 0 : Math.round(num);
+  
+  var num = parseInt(s, 10);
+  return isNaN(num) ? 0 : num;
 }
 
 function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFileImp(f);}
