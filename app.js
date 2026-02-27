@@ -1061,7 +1061,7 @@ function handleFileImp(file){
               sums[label].ub += extractNum(rowUb, i);
           }
 
-          window.pendingSalesSum = sums;
+      window.pendingSalesSum = sums;
 
           $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Carga exitosa. Totales detectados:</span>';
           
@@ -1070,26 +1070,39 @@ function handleFileImp(file){
           
           for(var k in sums) {
               var data = sums[k];
-              if(data.efectivo > 0 || data.py > 0 || data.ub > 0) { 
-                  prevHtml += '<div style="padding:12px;background:var(--s2);border:1px solid var(--b2);border-left:3px solid var(--g);border-radius:6px;">'
-                            +'<div style="font-weight:800;color:var(--t);margin-bottom:6px;font-size:13px">'+k+'</div>'
-                            +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px"><span>Efectivo:</span><span style="color:var(--g);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.efectivo):'$'+data.efectivo)+'</span></div>'
-                            +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px"><span>PedidosYa:</span><span style="color:var(--m);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.py):'$'+data.py)+'</span></div>'
-                            +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub)"><span>Uber Eats:</span><span style="color:var(--c);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.ub):'$'+data.ub)+'</span></div>'
-                            +'</div>';
+              // Validamos que el mes tenga AL MENOS 1 peso de venta total
+              var sumaTotalDelMes = (data.local || 0) + (data.ya || 0) + (data.uber || 0) + (data.intern || 0) + (data.platforms || 0) + (data.otros || 0);
+
+              if(sumaTotalDelMes > 0) { 
+                  prevHtml += '<div style="padding:12px;background:var(--s2);border:1px solid var(--b2);border-left:3px solid var(--c);border-radius:6px;">'
+                            +'<div style="font-weight:800;color:var(--t);margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;">'
+                                +'<span>'+k+'</span>'
+                                +'<span style="color:var(--g);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(sumaTotalDelMes):'$'+sumaTotalDelMes)+'</span>'
+                            +'</div>'
+                            
+                            +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">';
+
+                  if (data.local > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Local (T/E/C): <span style="color:var(--t);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.local):'$'+data.local)+'</span></div>';
+                  if (data.ya > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">PedidosYa: <span style="color:var(--m);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.ya):'$'+data.ya)+'</span></div>';
+                  if (data.uber > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Uber Eats: <span style="color:var(--c);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.uber):'$'+data.uber)+'</span></div>';
+                  if (data.intern > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Del. Interno: <span style="color:var(--t);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.intern):'$'+data.intern)+'</span></div>';
+                  if (data.platforms > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Otras Apps: <span style="color:var(--t);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.platforms):'$'+data.platforms)+'</span></div>';
+                  if (data.otros > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Otros: <span style="color:var(--t);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.otros):'$'+data.otros)+'</span></div>';
+
+                  prevHtml += '</div></div>';
                   hasData = true;
               }
           }
           prevHtml += '</div>';
           
           if(!hasData) {
-              prevHtml = '<div class="notice warn">No se encontró dinero en las filas de Efectivo o Delivery.</div>';
+              prevHtml = '<div class="notice warn">El archivo de Excel parece estar vacío o no contiene montos de ventas reconocidos. Verifica el formato de tu exportación de Toteat.</div>';
           }
           
           $('imp-prev').innerHTML = prevHtml;
           $('imp-act').style.display='flex';
       }
-    }catch(err){$('imp-st').textContent='Error crítico al procesar: '+err.message;}
+    }catch(err){$('imp-st').textContent='Error crítico al procesar tu archivo: '+err.message;}
   };
   reader.readAsText(file,'UTF-8');
 }
@@ -1120,16 +1133,32 @@ function applyImport(){
     importPending = null;
     
   } else {
+    // ════ GUARDADO DE VENTAS 100% BLINDADO ════
     if(!window.pendingSalesSum) return;
     
     var sums = window.pendingSalesSum;
     var count = 0;
     for (var monthLabel in sums) {
         var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
-        if (targetMonth) {
-            if(sums[monthLabel].efectivo > 0) targetMonth.efectivo = sums[monthLabel].efectivo;
-            count++;
+        
+        // Si el mes no existe, lo creamos para no perder la data
+        if (!targetMonth) {
+            targetMonth = { month: monthLabel, local: 0, ya: 0, uber: 0, intern: 0, platforms: 0, otros: 0, total: 0 };
+            SALES.monthly.push(targetMonth);
         }
+
+        // Guardamos TODOS los canales sumando la data extraída
+        targetMonth.local = sums[monthLabel].local || 0;
+        targetMonth.ya = sums[monthLabel].ya || 0;
+        targetMonth.uber = sums[monthLabel].uber || 0;
+        targetMonth.intern = sums[monthLabel].intern || 0;
+        targetMonth.platforms = sums[monthLabel].platforms || 0;
+        targetMonth.otros = sums[monthLabel].otros || 0;
+        
+        // Recalculamos el total real del mes
+        targetMonth.total = targetMonth.local + targetMonth.ya + targetMonth.uber + targetMonth.intern + targetMonth.platforms + targetMonth.otros;
+        
+        count++;
     }
 
     localStorage.setItem('app_sales', JSON.stringify(SALES));
@@ -1137,7 +1166,7 @@ function applyImport(){
     if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
     cm('m-import'); 
     window.pendingSalesSum = null;
-    alert('✓ Datos guardados exitosamente.');
+    alert('✓ Ventas guardadas exitosamente. Tu dashboard ahora incluye Débito, Crédito y Transferencias.');
   }
 }
 
