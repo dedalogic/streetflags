@@ -300,15 +300,17 @@ tr:last-child td{border-bottom:none}
 <div style="display:flex;gap:6px;align-items:center">
         <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Canal</span>
         <div style="display:flex;gap:5px;flex-wrap:wrap">
-          <button class="pill-sel on"  id="vch-all"       onclick="setVCanal('all',this)">Todo</button>
-          <button class="pill-sel"     id="vch-local"     onclick="setVCanal('local',this)">Presencial (Todo)</button>
-          <button class="pill-sel"     id="vch-efectivo"  onclick="setVCanal('efectivo',this)">Efectivo</button>
-          <button class="pill-sel"     id="vch-tarjetas"  onclick="setVCanal('tarjetas',this)">Tarjetas (Débito/Crédito)</button>
-          <button class="pill-sel"     id="vch-junaeb"    onclick="setVCanal('junaeb',this)">Junaeb/Convenio</button>
-          <div style="width:1px;height:24px;background:var(--b2);margin:0 4px"></div> <button class="pill-sel"     id="vch-ya"        onclick="setVCanal('ya',this)">PedidosYa</button>
-          <button class="pill-sel"     id="vch-uber"      onclick="setVCanal('uber',this)">Uber Eats</button>
-          <button class="pill-sel"     id="vch-intern"    onclick="setVCanal('intern',this)">Transferencias (Interno)</button>
-        </div>
+<button class="pill-sel on"  id="vch-all"       onclick="setVCanal('all',this)">Todo</button>
+<button class="pill-sel"     id="vch-local"     onclick="setVCanal('local',this)">Presencial</button>
+<button class="pill-sel"     id="vch-efectivo"  onclick="setVCanal('efectivo',this)">Efectivo</button>
+<button class="pill-sel"     id="vch-tarjetas"  onclick="setVCanal('tarjetas',this)">Tarjetas</button>
+<button class="pill-sel"     id="vch-junaeb"    onclick="setVCanal('junaeb',this)">Junaeb</button>
+<div style="width:1px;height:24px;background:var(--b2);margin:0 4px"></div>
+<button class="pill-sel"     id="vch-ya"        onclick="setVCanal('ya',this)">PedidosYa</button>
+<button class="pill-sel"     id="vch-uber"      onclick="setVCanal('uber',this)">Uber Eats</button>
+<button class="pill-sel"     id="vch-rappi"     onclick="setVCanal('rappi',this)">Rappi</button>
+<button class="pill-sel"     id="vch-intern"    onclick="setVCanal('intern',this)">Interno</button>
+<button class="pill-sel"     id="vch-otros"     onclick="setVCanal('otros',this)">Otros</button>
       </div>
     </div>
     <button class="btn-icon" title="Importar datos de ventas" onclick="openImport('ventas')">&#8593; &#9729;</button>
@@ -1012,6 +1014,7 @@ tr:last-child td{border-bottom:none}
 </div>
 </body>
 </html>
+
 
 
 
