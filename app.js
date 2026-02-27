@@ -567,15 +567,23 @@ function renderPag(id,total,page,per,cb){
 // ════ UPLOAD ════
 function openUpload(){pendingUpload=null;$('up-st').textContent='';$('up-prev').innerHTML='';$('up-act').style.display='none';$('m-up').classList.add('on')}
 function handleDrop(e){e.preventDefault();$('dz').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFile(f)}
+
+
+
+
 function handleFileImp(file){
   if(!file) return;
   $('imp-st').textContent='Procesando: '+file.name+'...';
+  
+  window.importFileName = file.name.toLowerCase(); 
+  
   var reader=new FileReader();
   reader.onload=function(e){
     try{
       var text = e.target.result;
       var rows = [];
-      if(text.indexOf('<tr')>=0 || text.indexOf('<TR')>=0){
+      
+      if(text.toLowerCase().includes('<tr') || text.toLowerCase().includes('<table')){
         var doc=new DOMParser().parseFromString(text,'text/html');
         doc.querySelectorAll('tr').forEach(function(tr){
           var cells=[];
@@ -583,44 +591,179 @@ function handleFileImp(file){
           if(cells.some(function(c){return c;})) rows.push(cells);
         });
       } else {
-        var delimiter = text.indexOf('\t') >= 0 ? '\t' : (text.indexOf(';') >= 0 ? ';' : ',');
-        text.split(/\r?\n/).forEach(function(l){
+        var tabs = (text.match(/\t/g) || []).length;
+        var semis = (text.match(/;/g) || []).length;
+        var commas = (text.match(/,/g) || []).length;
+        var delimiter = ','; 
+        if (tabs > semis && tabs > commas) delimiter = '\t';
+        else if (semis > commas && semis > tabs) delimiter = ';';
+
+        var lines = text.split(/\r\n|\n|\r/); 
+        lines.forEach(function(l){
           if(l.trim()){
-            var cells = l.split(delimiter).map(function(c){return c.replace(/^"|"$/g,'').trim();});
+            var cells = parseCSVRow(l, delimiter);
             if(cells.some(function(c){return c;})) rows.push(cells);
           }
         });
       }
-      if(rows.length<2){$('imp-st').textContent='Archivo vacío o sin datos válidos.';return;}
       
-      // ── FIX INFALIBLE: LA FILA MÁS ANCHA ES LA DE LOS DÍAS ──
-      var headerIdx = 0;
-      var maxCols = 0;
-      for (var idx = 0; idx < rows.length; idx++) {
-          if (rows[idx].length > maxCols) {
-              maxCols = rows[idx].length;
-              headerIdx = idx;
+      if(rows.length<2){$('imp-st').textContent='Archivo vacío.';return;}
+
+      window.toteatRows = rows; 
+      importPending = rows; 
+
+      if(typeof importMode !== 'undefined' && importMode === 'inv') {
+          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Inventario detectado</span>';
+          $('imp-act').style.display='flex';
+      } else {
+          
+          var findRow = function(keyword) { 
+              return rows.findIndex(function(r){ 
+                  return r.some(function(c){ return String(c).toLowerCase().includes(keyword); }); 
+              }); 
+          };
+
+          var vIdx = findRow('venta neta');
+
+          if(vIdx === -1) {
+              $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró la palabra "Venta Neta"</span>';
+              $('imp-act').style.display='none';
+              return;
           }
+
+          // FIX CRÍTICO: BUSCAR LA FILA DE DÍAS POR PALABRAS EXACTAS (evita chocar con Descuentos)
+          var dayRowIdx = -1;
+          for(var r = 0; r < vIdx; r++) {
+              var isDayRow = rows[r].some(function(c) {
+                  var val = String(c).toLowerCase();
+                  return val.includes('lunes') || val.includes('martes') || val.includes('miércoles') || val.includes('miercoles') || val.includes('jueves') || val.includes('viernes') || val.includes('sábado') || val.includes('sabado') || val.includes('domingo');
+              });
+              if(isDayRow) {
+                  dayRowIdx = r;
+                  break;
+              }
+          }
+
+          var dayRow = dayRowIdx >= 0 ? rows[dayRowIdx] : [];
+          
+          var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+          var sums = {}; 
+          
+          // INICIO ANCLADO A ENERO 2025 (Punto de partida real de tu archivo)
+          var currentYear = 2025;
+          var currentMonthIdx = 0; 
+          var prevDayNum = 0;
+          
+          for (var i = 0; i < dayRow.length; i++) {
+              var dCell = String(dayRow[i]).toLowerCase().trim();
+              if (!dCell || dCell.includes('total') || dCell.includes('sem')) continue;
+
+              var dayMatch = dCell.match(/\d+/);
+              if (!dayMatch) continue; 
+              
+              var dayNum = parseInt(dayMatch[0]);
+              if (dayNum < 1 || dayNum > 31) continue; 
+
+              // Si cae de fin de mes a los primeros días, cambia el mes
+              if (dayNum < prevDayNum - 10) {
+                  currentMonthIdx++;
+                  if (currentMonthIdx > 11) {
+                      currentMonthIdx = 0;
+                      currentYear++;
+                  }
+              }
+              prevDayNum = dayNum;
+
+              var label = mNames[currentMonthIdx] + ' ' + currentYear;
+              
+              if(!sums[label]) sums[label] = { local: 0, ya: 0, uber: 0, intern: 0, platforms: 0, otros: 0 };
+              
+              var extractNum = function(arr, index) { return parseInt(String(arr[index] || '0').replace(/[^0-9]/g, '')) || 0; };
+
+              // ════ MOTOR DE CLASIFICACIÓN DE PAGOS ════
+              // Ahora revisamos desde "Venta Neta" hacia abajo para agarrar todos los medios de pago
+              for (var rowIdx = vIdx + 1; rowIdx < rows.length; rowIdx++) {
+                  var metodoStr = String(rows[rowIdx][0] || '').trim();
+                  if (!metodoStr || metodoStr === 'Total') continue; // Evitar basura
+
+                  var monto = extractNum(rows[rowIdx], i);
+                  if (monto === 0) continue; 
+
+                  var mLower = metodoStr.toLowerCase();
+
+                  if (mLower.includes('pedidosya') || mLower.includes('pedidos ya')) {
+                      sums[label].ya += monto;
+                  } 
+                  else if (mLower.includes('uber')) {
+                      sums[label].uber += monto;
+                  } 
+                  else if (mLower.includes('transferencia')) {
+                      sums[label].intern += monto;
+                  } 
+                  else if (mLower.includes('efectivo') || mLower.includes('crédito') || mLower.includes('credito') || mLower.includes('débito') || mLower.includes('debito') || mLower.includes('convenio') || mLower.includes('junaeb')) {
+                      sums[label].local += monto;
+                  } 
+                  else if (mLower.includes('rappi')) {
+                      sums[label].platforms += monto;
+                  } 
+                  else {
+                      // Cualquier cosa que sobre (Tickets, Cheques, o pagos nuevos)
+                      sums[label].otros += monto;
+                  }
+              }
+          }
+
+          window.pendingSalesSum = sums;
+
+          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Carga exitosa. Totales detectados:</span>';
+          
+          var prevHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:250px;overflow-y:auto;padding-right:5px">';
+          var hasData = false;
+          
+          for(var k in sums) {
+              var data = sums[k];
+              // Validamos que el mes tenga AL MENOS 1 peso de venta total
+              var sumaTotalDelMes = (data.local || 0) + (data.ya || 0) + (data.uber || 0) + (data.intern || 0) + (data.platforms || 0) + (data.otros || 0);
+
+              if(sumaTotalDelMes > 0) { 
+                  prevHtml += '<div style="padding:12px;background:var(--s2);border:1px solid var(--b2);border-left:3px solid var(--c);border-radius:6px;">'
+                            +'<div style="font-weight:800;color:var(--t);margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;">'
+                                +'<span>'+k+'</span>'
+                                +'<span style="color:var(--g);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(sumaTotalDelMes):'$'+sumaTotalDelMes)+'</span>'
+                            +'</div>'
+                            
+                            +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">';
+
+                  if (data.local > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Local (T/E/C): <span style="color:var(--t);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.local):'$'+data.local)+'</span></div>';
+                  if (data.ya > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">PedidosYa: <span style="color:var(--m);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.ya):'$'+data.ya)+'</span></div>';
+                  if (data.uber > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Uber Eats: <span style="color:var(--c);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.uber):'$'+data.uber)+'</span></div>';
+                  if (data.intern > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Del. Interno: <span style="color:var(--t);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.intern):'$'+data.intern)+'</span></div>';
+                  if (data.platforms > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Otras Apps: <span style="color:var(--t);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.platforms):'$'+data.platforms)+'</span></div>';
+                  if (data.otros > 0) prevHtml += '<div style="font-size:11px;color:var(--sub)">Otros: <span style="color:var(--t);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.otros):'$'+data.otros)+'</span></div>';
+
+                  prevHtml += '</div></div>';
+                  hasData = true;
+              }
+          }
+          prevHtml += '</div>';
+          
+          if(!hasData) {
+              prevHtml = '<div class="notice warn">El archivo de Excel parece estar vacío o no contiene montos de ventas reconocidos. Verifica el formato de tu exportación de Toteat.</div>';
+          }
+          
+          $('imp-prev').innerHTML = prevHtml;
+          $('imp-act').style.display='flex';
       }
-
-      var headers = rows[headerIdx];
-      window.importHeaders = headers; 
-      importPending = rows.slice(headerIdx + 1); 
-      
-      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; '+maxCols+' columnas detectadas correctamente</span>';
-      
-      // ── RESTAURAMOS LA VISTA PREVIA PARA QUE SE VEA ──
-      $('imp-prev').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'
-        +'<tr>'+headers.slice(0,10).map(function(c){return '<td style="padding:3px 8px;color:var(--sub);font-weight:700;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>'
-        +importPending.slice(0,4).map(function(r){
-          return '<tr>'+r.slice(0,10).map(function(c){return '<td style="padding:3px 8px;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>';
-        }).join('')+'</table>';
-
-      $('imp-act').style.display='flex';
-    }catch(err){$('imp-st').textContent='Error al leer el archivo: '+err.message;}
+    }catch(err){$('imp-st').textContent='Error crítico al procesar tu archivo: '+err.message;}
   };
   reader.readAsText(file,'UTF-8');
 }
+
+
+
+
+
+
 function applyUpload(){
   if(!pendingUpload)return;
   var u=0,a=0;
