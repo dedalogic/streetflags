@@ -614,8 +614,9 @@ function extractNumFromCell(arr, index) {
 
 function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFileImp(f);}
 
+
 // ════════════════════════════════════════════════════════════════
-// handleFileImp — VERSIÓN ÚNICA CORREGIDA (14 fixes aplicados)
+// IMPORTACIÓN Y EXTRACCIÓN (MOTOR ANTI-BASURA)
 // ════════════════════════════════════════════════════════════════
 function handleFileImp(file){
   if(!file) return;
@@ -629,7 +630,6 @@ function handleFileImp(file){
       var text = e.target.result;
       var rows = [];
       
-      // Detectar HTML (export Excel) vs texto plano
       if(text.toLowerCase().includes('<tr') || text.toLowerCase().includes('<table')){
         var doc=new DOMParser().parseFromString(text,'text/html');
         doc.querySelectorAll('tr').forEach(function(tr){
@@ -658,14 +658,12 @@ function handleFileImp(file){
       window.toteatRows = rows; 
       importPending = rows; 
 
-      // ── MODO INVENTARIO ──
       if(typeof importMode !== 'undefined' && importMode === 'inv') {
           $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Inventario detectado</span>';
           $('imp-act').style.display='flex';
           return;
       }
           
-      // ── MODO VENTAS ──
       var findRow = function(keyword) { 
           return rows.findIndex(function(r){ 
               return r.some(function(c){ return String(c).toLowerCase().includes(keyword); }); 
@@ -675,12 +673,11 @@ function handleFileImp(file){
       var vIdx = findRow('venta neta');
 
       if(vIdx === -1) {
-          $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró "Venta Neta" en el archivo</span>';
+          $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró "Venta Neta"</span>';
           $('imp-act').style.display='none';
           return;
       }
 
-      // Buscar la fila de días (lunes, martes, etc.) antes de Venta Neta
       var dayRowIdx = -1;
       for(var r = 0; r < vIdx; r++) {
           var isDayRow = rows[r].some(function(c) {
@@ -694,7 +691,6 @@ function handleFileImp(file){
       var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
       var sums = {}; 
       
-      // Inicio anclado a Enero 2025
       var currentYear = 2025;
       var currentMonthIdx = 0; 
       var prevDayNum = 0;
@@ -709,7 +705,6 @@ function handleFileImp(file){
           var dayNum = parseInt(dayMatch[0]);
           if (dayNum < 1 || dayNum > 31) continue; 
 
-          // Si cae de fin de mes a inicio → cambio de mes
           if (dayNum < prevDayNum - 10) {
               currentMonthIdx++;
               if (currentMonthIdx > 11) { currentMonthIdx = 0; currentYear++; }
@@ -718,64 +713,40 @@ function handleFileImp(file){
 
           var label = mNames[currentMonthIdx] + ' ' + currentYear;
           
-          // FIX: Estructura con TODOS los canales reales del SALES.monthly
           if(!sums[label]) sums[label] = { 
             venta_neta: 0, delivery_ya: 0, delivery_uber: 0, 
             delivery_transferencia: 0, delivery_rappi: 0,
-            local_efectivo: 0, local_credito: 0, local_debito: 0, 
-            local_convenio: 0, local_junaeb: 0, otros: 0
+            efectivo: 0, credito: 0, debito: 0, junaeb: 0, 
+            ticket: 0, cheque: 0, otros: 0
           };
 
-          // Extraer Venta Neta de esta columna
           sums[label].venta_neta += extractNumFromCell(rows[vIdx], i);
 
-          // ════ MOTOR DE CLASIFICACIÓN DE PAGOS (CORREGIDO) ════
-          // FIX CRÍTICO: Antes decía: if(m.includes('efectivo') || 'crédito' || 'débito')
-          //   → 'crédito' como string suelto SIEMPRE es truthy → TODO caía en local
-          // Ahora cada keyword se verifica con includes() individual
           for (var rowIdx = vIdx + 1; rowIdx < rows.length; rowIdx++) {
               var metodoStr = String(rows[rowIdx][0] || '').trim();
-              if (!metodoStr || metodoStr === 'Total') continue;
+              if (!metodoStr) continue;
+
+              var mLower = metodoStr.toLowerCase();
+
+              // 🛡️ ESCUDO ANTI-BASURA TOTEAT
+              if (mLower.includes('total') || mLower.includes('caja') || mLower.includes('propina') || mLower.includes('impuesto') || mLower.includes('venta') || mLower.includes('costo') || mLower.includes('margen') || mLower.includes('descuento') || mLower.includes('bruta') || mLower.includes('%')) {
+                  continue;
+              }
 
               var monto = extractNumFromCell(rows[rowIdx], i);
               if (monto === 0) continue; 
 
-              var mLower = metodoStr.toLowerCase();
-
-              // Plataformas delivery
-              if (mLower.includes('pedidosya') || mLower.includes('pedidos ya')) {
-                  sums[label].delivery_ya += monto;
-              } 
-              else if (mLower.includes('uber')) {
-                  sums[label].delivery_uber += monto;
-              } 
-              else if (mLower.includes('rappi')) {
-                  sums[label].delivery_rappi += monto;
-              } 
-              // Delivery interno (transferencias)
-              else if (mLower.includes('transferencia')) {
-                  sums[label].delivery_transferencia += monto;
-              } 
-              // Pagos locales (cada uno verificado individualmente)
-              else if (mLower.includes('efectivo')) {
-                  sums[label].local_efectivo += monto;
-              }
-              else if (mLower.includes('crédito') || mLower.includes('credito') || mLower.includes('credit')) {
-                  sums[label].local_credito += monto;
-              }
-              else if (mLower.includes('débito') || mLower.includes('debito') || mLower.includes('debit')) {
-                  sums[label].local_debito += monto;
-              }
-              else if (mLower.includes('convenio')) {
-                  sums[label].local_convenio += monto;
-              }
-              else if (mLower.includes('junaeb')) {
-                  sums[label].local_junaeb += monto;
-              }
-              // Todo lo demás
-              else {
-                  sums[label].otros += monto;
-              }
+              if (mLower.includes('pedidosya') || mLower.includes('pedidos ya') || mLower.includes('voucher') || mLower.includes('cash collection')) sums[label].delivery_ya += monto;
+              else if (mLower.includes('uber')) sums[label].delivery_uber += monto;
+              else if (mLower.includes('rappi')) sums[label].delivery_rappi += monto;
+              else if (mLower.includes('transferencia')) sums[label].delivery_transferencia += monto;
+              else if (mLower.includes('efectivo')) sums[label].efectivo += monto;
+              else if (mLower.includes('débito') || mLower.includes('debito') || mLower.includes('debit')) sums[label].debito += monto;
+              else if (mLower.includes('crédito') || mLower.includes('credito') || mLower.includes('credit')) sums[label].credito += monto;
+              else if (mLower.includes('convenio') || mLower.includes('junaeb')) sums[label].junaeb += monto;
+              else if (mLower.includes('ticket')) sums[label].ticket += monto;
+              else if (mLower.includes('cheque')) sums[label].cheque += monto;
+              else sums[label].otros += monto;
           }
       }
 
@@ -783,43 +754,35 @@ function handleFileImp(file){
 
       $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Carga exitosa. Totales detectados:</span>';
       
-      // ── PREVIEW (usa los campos reales) ──
-      var prevHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:300px;overflow-y:auto;padding-right:5px">';
+      var prevHtml = '<div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;max-height:350px;overflow-y:auto;padding-right:5px">';
       var hasData = false;
       var fmtPrev = function(v){ return typeof formatMoney==='function'?formatMoney(v):'$'+Math.round(v).toLocaleString('es-CL'); };
       
       for(var k in sums) {
           var d = sums[k];
-          var localTotal = (d.local_efectivo||0) + (d.local_credito||0) + (d.local_debito||0) + (d.local_convenio||0) + (d.local_junaeb||0);
-          var sumaTotal = localTotal + (d.delivery_ya||0) + (d.delivery_uber||0) + (d.delivery_transferencia||0) + (d.delivery_rappi||0) + (d.otros||0);
+          var sumaTotal = d.efectivo + d.debito + d.credito + d.junaeb + d.delivery_ya + d.delivery_uber + d.delivery_rappi + d.delivery_transferencia + d.ticket + d.cheque + d.otros;
 
           if(sumaTotal > 0) { 
-              prevHtml += '<div style="padding:12px;background:var(--s2);border:1px solid var(--b2);border-left:3px solid var(--c);border-radius:6px;">'
-                        +'<div style="font-weight:800;color:var(--t);margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;">'
+              prevHtml += '<div style="padding:14px;background:var(--s2);border:1px solid var(--b2);border-left:4px solid var(--c);border-radius:8px;">'
+                        +'<div style="font-weight:800;color:var(--t);margin-bottom:12px;font-size:14px;display:flex;justify-content:space-between;border-bottom:1px solid var(--b);padding-bottom:6px">'
                             +'<span>'+k+'</span>'
                             +'<span style="color:var(--g);font-family:var(--mono)">'+fmtPrev(d.venta_neta)+'</span>'
                         +'</div>'
-                        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">';
+                        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
 
-              // Canales principales
-              if (d.delivery_ya > 0)              prevHtml += '<div style="font-size:11px;color:var(--sub)">PedidosYa: <span style="color:var(--m);font-family:var(--mono)">'+fmtPrev(d.delivery_ya)+'</span></div>';
-              if (d.delivery_uber > 0)            prevHtml += '<div style="font-size:11px;color:var(--sub)">Uber Eats: <span style="color:var(--c);font-family:var(--mono)">'+fmtPrev(d.delivery_uber)+'</span></div>';
-              if (d.delivery_rappi > 0)           prevHtml += '<div style="font-size:11px;color:var(--sub)">Rappi: <span style="color:var(--c);font-family:var(--mono)">'+fmtPrev(d.delivery_rappi)+'</span></div>';
-              if (d.delivery_transferencia > 0)   prevHtml += '<div style="font-size:11px;color:var(--sub)">Del. Interno: <span style="color:var(--t);font-family:var(--mono)">'+fmtPrev(d.delivery_transferencia)+'</span></div>';
-              if (localTotal > 0)                 prevHtml += '<div style="font-size:11px;color:var(--sub)">Local: <span style="color:var(--t);font-family:var(--mono)">'+fmtPrev(localTotal)+'</span></div>';
-              if (d.otros > 0)                    prevHtml += '<div style="font-size:11px;color:var(--sub)">Otros: <span style="color:var(--t);font-family:var(--mono)">'+fmtPrev(d.otros)+'</span></div>';
-
-              // Detalle local expandible
-              if (localTotal > 0) {
-                  prevHtml += '<details style="grid-column:1/-1;margin-top:4px"><summary style="font-size:10px;color:var(--sub);cursor:pointer">Detalle local</summary>'
-                    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:4px 0">';
-                  if(d.local_efectivo>0)  prevHtml += '<div style="font-size:10px;color:var(--sub)">Efectivo: '+fmtPrev(d.local_efectivo)+'</div>';
-                  if(d.local_credito>0)   prevHtml += '<div style="font-size:10px;color:var(--sub)">Crédito: '+fmtPrev(d.local_credito)+'</div>';
-                  if(d.local_debito>0)    prevHtml += '<div style="font-size:10px;color:var(--sub)">Débito: '+fmtPrev(d.local_debito)+'</div>';
-                  if(d.local_convenio>0)  prevHtml += '<div style="font-size:10px;color:var(--sub)">Convenio: '+fmtPrev(d.local_convenio)+'</div>';
-                  if(d.local_junaeb>0)    prevHtml += '<div style="font-size:10px;color:var(--sub)">Junaeb: '+fmtPrev(d.local_junaeb)+'</div>';
-                  prevHtml += '</div></details>';
-              }
+              if (d.efectivo > 0)                 prevHtml += '<div style="font-size:11.5px;color:var(--t)">Efectivo: <strong style="font-family:var(--mono)">'+fmtPrev(d.efectivo)+'</strong></div>';
+              if (d.debito > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--t)">Débito: <strong style="font-family:var(--mono)">'+fmtPrev(d.debito)+'</strong></div>';
+              if (d.credito > 0)                  prevHtml += '<div style="font-size:11.5px;color:var(--t)">Crédito: <strong style="font-family:var(--mono)">'+fmtPrev(d.credito)+'</strong></div>';
+              if (d.junaeb > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--t)">Junaeb: <strong style="font-family:var(--mono)">'+fmtPrev(d.junaeb)+'</strong></div>';
+              
+              if (d.delivery_ya > 0)              prevHtml += '<div style="font-size:11.5px;color:var(--m)">PedidosYa: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_ya)+'</strong></div>';
+              if (d.delivery_uber > 0)            prevHtml += '<div style="font-size:11.5px;color:var(--c)">Uber Eats: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_uber)+'</strong></div>';
+              if (d.delivery_rappi > 0)           prevHtml += '<div style="font-size:11.5px;color:#ff6b6b">Rappi: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_rappi)+'</strong></div>';
+              if (d.delivery_transferencia > 0)   prevHtml += '<div style="font-size:11.5px;color:var(--g)">Transf: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_transferencia)+'</strong></div>';
+              
+              if (d.ticket > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--sub)">Ticket Rest: <strong style="font-family:var(--mono)">'+fmtPrev(d.ticket)+'</strong></div>';
+              if (d.cheque > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--sub)">Cheque Rest: <strong style="font-family:var(--mono)">'+fmtPrev(d.cheque)+'</strong></div>';
+              if (d.otros > 0)                    prevHtml += '<div style="font-size:11.5px;color:var(--sub)">Otros Pagos: <strong style="font-family:var(--mono)">'+fmtPrev(d.otros)+'</strong></div>';
 
               prevHtml += '</div></div>';
               hasData = true;
@@ -827,9 +790,7 @@ function handleFileImp(file){
       }
       prevHtml += '</div>';
       
-      if(!hasData) {
-          prevHtml = '<div class="notice warn">El archivo parece vacío o sin montos reconocidos. Verifica el formato de exportación de Toteat.</div>';
-      }
+      if(!hasData) prevHtml = '<div class="notice warn">Archivo vacío.</div>';
       
       $('imp-prev').innerHTML = prevHtml;
       $('imp-act').style.display='flex';
@@ -839,14 +800,6 @@ function handleFileImp(file){
   reader.readAsText(file,'UTF-8');
 }
 
-
-// ════════════════════════════════════════════════════════════════
-// applyImport — CORREGIDO: Mapea a los campos REALES de SALES.monthly
-// ════════════════════════════════════════════════════════════════
-// FIX: Antes guardaba en .local, .ya, .uber (NO EXISTEN en data.js)
-// Ahora guarda en .delivery_ya, .delivery_uber, .delivery_transferencia, .venta_neta
-// y calcula .venta_sin_iva y .avg_daily_sin_iva automáticamente.
-// ════════════════════════════════════════════════════════════════
 function applyImport(){
   if(importMode === 'inv'){
     if(!importPending) return;
@@ -872,7 +825,6 @@ function applyImport(){
     importPending = null;
     
   } else {
-    // ════ GUARDADO DE VENTAS — MAPEO CORRECTO ════
     if(!window.pendingSalesSum) return;
     
     var sums = window.pendingSalesSum;
@@ -883,9 +835,7 @@ function applyImport(){
         var data = sums[monthLabel];
         var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
         
-        // Si el mes no existe, lo creamos
         if (!targetMonth) {
-            // Calcular days_active del label
             var pts = monthLabel.split(' ');
             var mIdx = mNames.indexOf(pts[0]);
             var yr = parseInt(pts[1]);
@@ -895,8 +845,7 @@ function applyImport(){
               month: monthLabel, 
               venta_bruta: 0, venta_neta: 0, venta_sin_iva: 0,
               costo: 0, margen_pct: 0,
-              days_active: daysInMonth, avg_daily_sin_iva: 0,
-              delivery_ya: 0, delivery_uber: 0, delivery_transferencia: 0
+              days_active: daysInMonth, avg_daily_sin_iva: 0
             };
             SALES.monthly.push(targetMonth);
             createdCount++;
@@ -904,24 +853,30 @@ function applyImport(){
             updatedCount++;
         }
 
-        // ═══ MAPEO A CAMPOS REALES DE SALES.monthly ═══
         if (data.venta_neta > 0)              targetMonth.venta_neta = data.venta_neta;
         if (data.delivery_ya > 0)             targetMonth.delivery_ya = data.delivery_ya;
         if (data.delivery_uber > 0)           targetMonth.delivery_uber = data.delivery_uber;
+        if (data.delivery_rappi > 0)          targetMonth.delivery_rappi = data.delivery_rappi;
         if (data.delivery_transferencia > 0)  targetMonth.delivery_transferencia = data.delivery_transferencia;
         
-        // Calcular campos derivados
+        if (data.efectivo > 0)                targetMonth.efectivo = data.efectivo;
+        if (data.debito > 0)                  targetMonth.debito = data.debito;
+        if (data.credito > 0)                 targetMonth.credito = data.credito;
+        if (data.junaeb > 0)                  targetMonth.junaeb = data.junaeb;
+        
+        if (data.ticket > 0)                  targetMonth.ticket = data.ticket;
+        if (data.cheque > 0)                  targetMonth.cheque = data.cheque;
+        if (data.otros > 0)                   targetMonth.otros = data.otros;
+        
         targetMonth.venta_sin_iva = Math.round(targetMonth.venta_neta / 1.19);
         if (targetMonth.days_active > 0) {
             targetMonth.avg_daily_sin_iva = Math.round(targetMonth.venta_sin_iva / targetMonth.days_active);
         }
-        // Venta bruta (si no existía, estimamos desde venta_neta)
         if (!targetMonth.venta_bruta || targetMonth.venta_bruta === 0) {
-            targetMonth.venta_bruta = Math.round(targetMonth.venta_neta * 1.03); // ~3% descuentos
+            targetMonth.venta_bruta = Math.round(targetMonth.venta_neta * 1.03); 
         }
     }
 
-    // Ordenar meses cronológicamente
     SALES.monthly.sort(function(a,b){
       var pa = a.month.split(' '), pb = b.month.split(' ');
       var ya = parseInt(pa[1]), yb = parseInt(pb[1]);
@@ -931,7 +886,6 @@ function applyImport(){
 
     localStorage.setItem('app_sales', JSON.stringify(SALES));
     
-    // Refrescar dashboard
     if(typeof initDash === 'function') initDash();
     if(typeof initDashSel === 'function') initDashSel();
     if(typeof initMonthSel === 'function') initMonthSel();
@@ -941,11 +895,11 @@ function applyImport(){
     cm('m-import'); 
     window.pendingSalesSum = null;
     
-    var msg = '✓ Ventas guardadas: ' + updatedCount + ' mes(es) actualizados';
-    if (createdCount > 0) msg += ', ' + createdCount + ' mes(es) nuevos creados';
-    alert(msg);
+    alert('✓ Ventas y métodos de pago guardados exitosamente.');
   }
 }
+
+
 
 
 
