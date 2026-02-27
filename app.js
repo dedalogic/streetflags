@@ -173,22 +173,29 @@ var DM_BY_LABEL=(function(){
 
 function getVenta(m){
   var dy=(m.delivery_ya||0), du=(m.delivery_uber||0), dt=(m.delivery_transferencia||0);
-  var platforms=dy+du;
-  var local=Math.max(0,m.venta_neta-platforms-dt);
+  var dr=(m.delivery_rappi||0);
+  var ef=(m.efectivo||0), cr=(m.credito||0), db=(m.debito||0), ju=(m.junaeb||0);
+  var ot=(m.otros||0)+(m.ticket||0)+(m.cheque||0);
+  var tarjetas=cr+db;
+  var platforms=dy+du+dr;
+  var local=ef+tarjetas+ju+ot;
   if(vCanal==='all')       return m.venta_neta;
   if(vCanal==='local')     return local;
+  if(vCanal==='efectivo')  return ef;
+  if(vCanal==='tarjetas')  return tarjetas;
+  if(vCanal==='junaeb')    return ju;
   if(vCanal==='intern')    return dt;
-  if(vCanal==='platforms') return platforms;
   if(vCanal==='ya')        return dy;
   if(vCanal==='uber')      return du;
+  if(vCanal==='rappi')     return dr;
+  if(vCanal==='otros')     return ot;
   return m.venta_neta;
 }
 
 function canalLabel(){
-  var labels={'all':'Total','local':'Local','intern':'Del. interno (transf.)','platforms':'Plataformas ext.','ya':'PedidosYa','uber':'Uber Eats'};
+  var labels={'all':'Total','local':'Presencial','efectivo':'Efectivo','tarjetas':'Tarjetas','junaeb':'Junaeb','intern':'Interno','ya':'PedidosYa','uber':'Uber Eats','rappi':'Rappi','otros':'Otros'};
   return labels[vCanal]||vCanal;
 }
-
 
 function renderV(){
   var M=SALES.monthly, D=SALES.daily;
@@ -247,24 +254,51 @@ function renderV(){
   }), '#00e5a0', fmtM);
 
   // --- DESGLOSE DE CANALES ---
-  if(vCanal==='all'&&sm.length>0){
+if(vCanal==='all'&&sm.length>0){
+    var efT=sm.reduce(function(s,m){return s+(m.efectivo||0);},0);
+    var crT=sm.reduce(function(s,m){return s+(m.credito||0);},0);
+    var dbT=sm.reduce(function(s,m){return s+(m.debito||0);},0);
+    var tjT=crT+dbT;
+    var juT=sm.reduce(function(s,m){return s+(m.junaeb||0);},0);
     var yaT=sm.reduce(function(s,m){return s+(m.delivery_ya||0);},0);
     var ubT=sm.reduce(function(s,m){return s+(m.delivery_uber||0);},0);
+    var rpT=sm.reduce(function(s,m){return s+(m.delivery_rappi||0);},0);
     var dtT=sm.reduce(function(s,m){return s+(m.delivery_transferencia||0);},0);
-    var locT=sm.reduce(function(s,m){return s+m.venta_neta;},0)-yaT-ubT-dtT;
-    var tot=yaT+ubT+dtT+locT;
-    
-    // Se inserta de manera limpia debajo del lineChart
+    var otT=sm.reduce(function(s,m){return s+(m.otros||0)+(m.ticket||0)+(m.cheque||0);},0);
+    var tot=efT+tjT+juT+yaT+ubT+rpT+dtT+otT;
+
+    var items=[
+      {l:'Efectivo',v:efT,c:'#00e5a0'},
+      {l:'Tarjetas',v:tjT,c:'#00d4ff',sub:[{l:'Débito',v:dbT},{l:'Crédito',v:crT}]},
+      {l:'Junaeb',v:juT,c:'#ffb020'},
+      {l:'PedidosYa',v:yaT,c:'#ff3fa4'},
+      {l:'Uber Eats',v:ubT,c:'#a78bfa'},
+      {l:'Rappi',v:rpT,c:'#ff6b6b'},
+      {l:'Interno',v:dtT,c:'#33ddff'},
+      {l:'Otros',v:otT,c:'#6b6b88'}
+    ].filter(function(x){return x.v>0;});
+
+    var barsHtml=items.map(function(x){
+      var bar=mkBar(x.l,x.v,tot,x.c,fmtM,120);
+      if(x.sub){
+        bar+='<div style="padding-left:132px;margin-top:-4px;margin-bottom:4px">';
+        x.sub.filter(function(s){return s.v>0;}).forEach(function(s){
+          bar+='<span style="font-size:10px;color:var(--sub);margin-right:12px">'+s.l+': <strong style="font-family:var(--mono);color:var(--t)">'+fmtM(s.v)+'</strong></span>';
+        });
+        bar+='</div>';
+      }
+      return bar;
+    }).join('');
+
     $('ch-vd').innerHTML+='<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--b)">'
-      +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:12px">Desglose por canal</div>'
-      +[{l:'Local',v:locT,c:'#00d4ff'},{l:'Del. interno',v:dtT,c:'#00e5a0'},{l:'PedidosYa',v:yaT,c:'#ff3fa4'},{l:'Uber Eats',v:ubT,c:'#a78bfa'}]
-      .filter(function(x){return x.v>0;})
-      .map(function(x){return mkBar(x.l,x.v,tot,x.c,fmtM,120);}).join('')
-      +'</div>';
-      
-    pieChart('ch-vd-pie',[{l:'Local',v:locT},{l:'Del. interno',v:dtT},{l:'PedidosYa',v:yaT},{l:'Uber Eats',v:ubT}].filter(function(x){return x.v>0;}));
+      +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:12px">Desglose por método de pago</div>'
+      +barsHtml+'</div>';
+
+    pieChart('ch-vd-pie',items.map(function(x){return{l:x.l,v:x.v};}));
   }
 }
+    
+
 
 
 // ════ ANÁLISIS INTELIGENTE ════
@@ -744,8 +778,8 @@ function handleFileImp(file){
               else if (mLower.includes('débito') || mLower.includes('debito') || mLower.includes('debit')) sums[label].debito += monto;
               else if (mLower.includes('crédito') || mLower.includes('credito') || mLower.includes('credit')) sums[label].credito += monto;
               else if (mLower.includes('convenio') || mLower.includes('junaeb')) sums[label].junaeb += monto;
-              else if (mLower.includes('ticket')) sums[label].ticket += monto;
-              else if (mLower.includes('cheque')) sums[label].cheque += monto;
+              else if (mLower.includes('ticket')) sums[label].otros += monto;
+              else if (mLower.includes('cheque')) sums[label].otros += monto;
               else sums[label].otros += monto;
           }
       }
@@ -779,12 +813,9 @@ function handleFileImp(file){
               if (d.delivery_uber > 0)            prevHtml += '<div style="font-size:11.5px;color:var(--c)">Uber Eats: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_uber)+'</strong></div>';
               if (d.delivery_rappi > 0)           prevHtml += '<div style="font-size:11.5px;color:#ff6b6b">Rappi: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_rappi)+'</strong></div>';
               if (d.delivery_transferencia > 0)   prevHtml += '<div style="font-size:11.5px;color:var(--g)">Transf: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_transferencia)+'</strong></div>';
-              
-              if (d.ticket > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--sub)">Ticket Rest: <strong style="font-family:var(--mono)">'+fmtPrev(d.ticket)+'</strong></div>';
-              if (d.cheque > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--sub)">Cheque Rest: <strong style="font-family:var(--mono)">'+fmtPrev(d.cheque)+'</strong></div>';
-              if (d.otros > 0)                    prevHtml += '<div style="font-size:11.5px;color:var(--sub)">Otros Pagos: <strong style="font-family:var(--mono)">'+fmtPrev(d.otros)+'</strong></div>';
 
-              prevHtml += '</div></div>';
+
+            if (d.otros > 0)                    prevHtml += '<div style="font-size:11.5px;color:var(--sub)">Otros: <strong style="font-family:var(--mono)">'+fmtPrev(d.otros)+'</strong></div>';
               hasData = true;
           }
       }
@@ -864,9 +895,7 @@ function applyImport(){
         if (data.credito > 0)                 targetMonth.credito = data.credito;
         if (data.junaeb > 0)                  targetMonth.junaeb = data.junaeb;
         
-        if (data.ticket > 0)                  targetMonth.ticket = data.ticket;
-        if (data.cheque > 0)                  targetMonth.cheque = data.cheque;
-        if (data.otros > 0)                   targetMonth.otros = data.otros;
+if (data.otros > 0)                   targetMonth.otros = (targetMonth.otros||0) + data.otros;
         
         targetMonth.venta_sin_iva = Math.round(targetMonth.venta_neta / 1.19);
         if (targetMonth.days_active > 0) {
