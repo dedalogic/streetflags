@@ -2401,53 +2401,69 @@ function verticalBarChart(elId,dataArr,color,vFmt){
 }
 
 
-
-
-
 // ════ INIT CLOUD FIRST INTELIGENTE ════
-$('c-fecha').value=new Date().toISOString().split('T')[0];
+var cf2 = $('c-fecha');
+if(cf2) cf2.value=new Date().toISOString().split('T')[0];
 
-db.ref('respaldo_principal').once('value').then(function(snapshot) {
-  var data = snapshot.val();
-  if (data) {
-    try { 
-        if (data['app_sales'] && data['app_sales'].length > 10) { 
-            var pSales = JSON.parse(data['app_sales']);
-            if(pSales.monthly && pSales.monthly.length > 0) { SALES = pSales; localStorage.setItem('app_sales', data['app_sales']); }
-        } 
-    } catch(e) {}
-    try { 
-        if (data['app_ingr'] && data['app_ingr'].length > 10) { 
-            var pIngr = JSON.parse(data['app_ingr']);
-            if(pIngr.length > 0) { INGR = pIngr; localStorage.setItem('app_ingr', data['app_ingr']); }
-        } 
-    } catch(e) {}
-    try { 
-        if (data['app_rec'] && data['app_rec'].length > 10) { 
-            var pRec = JSON.parse(data['app_rec']);
-            if(pRec.length > 0) { RECIPES = pRec; localStorage.setItem('app_rec', data['app_rec']); }
-        } 
-    } catch(e) {}
-    try { 
-        if (data['app_gastos'] && data['app_gastos'].length > 10) { 
-            var pGastos = JSON.parse(data['app_gastos']);
-            if(pGastos.length > 0) { GASTOS = pGastos; localStorage.setItem('app_gastos', data['app_gastos']); }
-        } 
-    } catch(e) {}
-  }
-  renderAppSeguro();
-}).catch(function(e) {
-  renderAppSeguro();
-});
+var cloudDone = false;
+
+function startApp() {
+    if(cloudDone) return;
+    cloudDone = true;
+    renderAppSeguro();
+}
+
+// Timeout: si Firebase no responde en 4 seg, arrancar sin él
+var cloudTimer = setTimeout(startApp, 4000);
+
+if(typeof db !== 'undefined' && db && db.ref) {
+    console.log("Conectando con la nube...");
+    db.ref('respaldo_principal').once('value').then(function(snapshot) {
+      if(cloudDone) return;
+      clearTimeout(cloudTimer);
+      var data = snapshot.val();
+      if (data) {
+        try { 
+            if (data['app_sales'] && data['app_sales'].length > 10) { 
+                var pSales = JSON.parse(data['app_sales']);
+                if(pSales.monthly && pSales.monthly.length > 0) { SALES = pSales; localStorage.setItem('app_sales', data['app_sales']); }
+            } 
+        } catch(e) {}
+        try { 
+            if (data['app_ingr'] && data['app_ingr'].length > 10) { 
+                var pIngr = JSON.parse(data['app_ingr']);
+                if(pIngr.length > 0) { INGR = pIngr; localStorage.setItem('app_ingr', data['app_ingr']); }
+            } 
+        } catch(e) {}
+        try { 
+            if (data['app_rec'] && data['app_rec'].length > 10) { 
+                var pRec = JSON.parse(data['app_rec']);
+                if(pRec.length > 0) { RECIPES = pRec; localStorage.setItem('app_rec', data['app_rec']); }
+            } 
+        } catch(e) {}
+        try { 
+            if (data['app_gastos'] && data['app_gastos'].length > 10) { 
+                var pGastos = JSON.parse(data['app_gastos']);
+                if(pGastos.length > 0) { GASTOS = pGastos; localStorage.setItem('app_gastos', data['app_gastos']); }
+            } 
+        } catch(e) {}
+      }
+      startApp();
+    }).catch(function(e) {
+      console.error("Error Firebase:", e);
+      clearTimeout(cloudTimer);
+      startApp();
+    });
+} else {
+    clearTimeout(cloudTimer);
+    startApp();
+}
 
 function renderAppSeguro() {
    // PROTECCIÓN: si Firebase/localStorage dejaron todo vacío, restaurar desde data.js
    if ((!INGR || INGR.length === 0) && typeof INGR_RAW !== 'undefined' && INGR_RAW.length > 0) INGR = JSON.parse(JSON.stringify(INGR_RAW));
    if ((!RECIPES || RECIPES.length === 0) && typeof RECIPES_RAW !== 'undefined' && RECIPES_RAW.length > 0) RECIPES = JSON.parse(JSON.stringify(RECIPES_RAW));
    if ((!GASTOS || GASTOS.length === 0) && typeof GASTOS_INIT !== 'undefined' && GASTOS_INIT.length > 0) GASTOS = JSON.parse(JSON.stringify(GASTOS_INIT));
-   if ((!SALES.monthly || SALES.monthly.length === 0) && typeof SALES !== 'undefined') {
-     // SALES ya viene de data.js como const, no debería estar vacío
-   }
 
    try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
    try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
@@ -2463,7 +2479,6 @@ function exportGastosPDF(){
   var now=new Date();
   var dateStr=now.toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
   var G=GASTOS;
-  // Group by category
   var byCat={};
   G.forEach(function(g){ (byCat[g.cat]=byCat[g.cat]||[]).push(g); });
   var tMes=G.reduce(function(s,g){return s+toMes(g);},0);
@@ -2499,14 +2514,12 @@ function exportGastosPDF(){
     +'<title>Reporte de Gastos — Street Flags</title>'
     +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d0d0f;color:#e8e8ec;padding:40px}@media print{body{background:#fff;color:#000}.card{background:#fff!important;border:1px solid #ddd!important}.kpi-v{color:#000!important}.kpi-l{color:#555!important}}</style>'
     +'</head><body style="max-width:800px;margin:0 auto">'
-    // Header
     +'<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #1e1e2a">'
     +'<div><div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px">Street Flags</div>'
     +'<div style="font-size:13px;color:#555;margin-top:3px">Reporte de Gastos Fijos</div></div>'
     +'<div style="text-align:right"><div style="font-size:12px;color:#555">'+dateStr+'</div>'
     +'<div style="font-size:11px;color:#333;margin-top:2px">'+G.length+' gastos registrados</div></div>'
     +'</div>'
-    // KPIs
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px">'
     +[
       {l:'Total mensual',v:fmt(Math.round(tMes)),c:'#00d4ff'},
@@ -2520,11 +2533,9 @@ function exportGastosPDF(){
         +'</div>';
     }).join('')
     +'</div>'
-    // Category breakdown
     +'<div style="background:#16161a;border:1px solid #222;border-radius:10px;padding:20px;margin-bottom:20px">'
     +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:16px">Desglose por categoría</div>'
     +catBlocks+'</div>'
-    // Full table
     +'<div style="background:#16161a;border:1px solid #222;border-radius:10px;padding:20px">'
     +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:14px">Detalle completo</div>'
     +'<table style="width:100%;border-collapse:collapse">'
@@ -2549,9 +2560,10 @@ function exportGastosPDF(){
   w.document.close();
   setTimeout(function(){w.print();},400);
 }
-// ── FLUJO DE CAJA PRO (CON TICKETS Y MEMORIA) ──
 
-const REGLAS_PROVEEDORES = {
+// ── FLUJO DE CAJA PRO ──
+
+var REGLAS_PROVEEDORES = {
   "HECTOR SALAS": "Gas",
   "AGUAS DEL ALTIPLANO": "Agua",
   "CGE": "Electricidad",
@@ -2561,8 +2573,6 @@ const REGLAS_PROVEEDORES = {
 
 function formatMoney(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
 
-
-// ─── LECTOR BANCO ITAÚ ───
 function handleBankFile(input) {
   var file = input.files[0]; if(!file) return;
   var reader = new FileReader();
@@ -2570,62 +2580,42 @@ function handleBankFile(input) {
   reader.onload = function(e) {
     var text = e.target.result;
     var lines = text.split(/\r?\n/).filter(function(x){return x.trim();});
-    
-    // Extracción de año inteligente
     var year = new Date().getFullYear();
     var pMatch = text.match(/Período.*?(\d{4})/i) || text.match(/20\d{2}/); 
     if(pMatch) year = pMatch[1] || pMatch[0];
-    
-    // Detección automática del separador del CSV
     var delimiter = text.indexOf(';') >= 0 ? ';' : ',';
-    
     var txs = [];
     lines.forEach(function(l) {
-      // Uso del motor avanzado en vez del split antiguo
       var p = parseCSVRow(l, delimiter); 
       if(p.length < 6) return;
-      
       var dateStr = p[0].trim();
       if(/^\d{2}\/\d{2}$/.test(dateStr)) {
         var pts = dateStr.split('/'); var isoDate = year + '-' + pts[1] + '-' + pts[0];
-        
-        // Limpiamos la basura de los números antes de pasarlos a entero
         var abono = parseInt(String(p[4]).replace(/[^0-9]/g, '')) || 0;
         var cargo = parseInt(String(p[5]).replace(/[^0-9]/g, '')) || 0;
-        
         var descOriginal = p[3].trim().toUpperCase();
         var etiqueta = "Otros";
-        
         for (var clave in REGLAS_PROVEEDORES) {
-          if (descOriginal.includes(clave)) {
-            etiqueta = REGLAS_PROVEEDORES[clave];
-            break;
-          }
+          if (descOriginal.indexOf(clave) >= 0) { etiqueta = REGLAS_PROVEEDORES[clave]; break; }
         }
-        
-        if(abono > 0 || cargo > 0) txs.push({ 
-          date: isoDate, desc: p[3].trim(), cat: etiqueta, in: abono, out: cargo 
-        });
+        if(abono > 0 || cargo > 0) txs.push({ date: isoDate, desc: p[3].trim(), cat: etiqueta, in: abono, out: cargo });
       }
     });
-    
     if(txs.length > 0) {
       var existing = JSON.parse(localStorage.getItem('bank_tx') || '[]');
       var all = existing.concat(txs);
-      
-      // Filtramos duplicados para que no se sumen dos veces si subes el mismo archivo
-      var unique = []; var seen = new Set();
+      var unique = []; var seen = {};
       all.forEach(function(t) {
-        var str = t.date + t.desc + t.in + t.out;
-        if(!seen.has(str)) { seen.add(str); unique.push(t); }
+        var str = t.date + t.desc + t['in'] + t.out;
+        if(!seen[str]) { seen[str] = true; unique.push(t); }
       });
-      
-      unique.sort(function(a,b){return b.date.localeCompare(a.date)});
+      unique.sort(function(a,b){return b.date.localeCompare(a.date);});
       localStorage.setItem('bank_tx', JSON.stringify(unique));
       renderFlujoCaja(false);
-      alert('✓ ' + txs.length + ' movimientos bancarios procesados con éxito.');
+      autoSaveToCloud();
+      alert('✓ ' + txs.length + ' movimientos bancarios procesados.');
     } else {
-      alert('❌ No se detectaron movimientos. Verifica que sea la cartola de Itaú.');
+      alert('❌ No se detectaron movimientos.');
     }
   };
   reader.readAsText(file, 'utf-8');
@@ -2636,284 +2626,248 @@ function filtrarPorProveedor(nombre) {
   var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
   var sel = document.getElementById('flujo-mes-sel');
   var currentMonth = sel ? sel.value : 'all';
-  
   var filtrados = bankData.filter(function(t) {
-    var coincideMes = currentMonth === 'all' || t.date.startsWith(currentMonth);
-    return coincideMes && t.desc.toUpperCase().includes(nombre.toUpperCase());
+    var coincideMes = currentMonth === 'all' || t.date.indexOf(currentMonth) === 0;
+    return coincideMes && t.desc.toUpperCase().indexOf(nombre.toUpperCase()) >= 0;
   });
-
   renderTablaFlujo(filtrados, true, nombre);
 }
 
 function renderTablaFlujo(data, esFiltroManual, nombreProv) {
   var tbody = document.getElementById('flujo-body');
   if(!tbody) return;
-
   var rows = data.map(function(t){
     var reglasMemoria = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
     var catAprendida = reglasMemoria[t.desc.toUpperCase()];
-    
     if(!catAprendida) {
        for(var clave in REGLAS_PROVEEDORES) {
-          if(t.desc.toUpperCase().includes(clave)) catAprendida = REGLAS_PROVEEDORES[clave];
+          if(t.desc.toUpperCase().indexOf(clave) >= 0) catAprendida = REGLAS_PROVEEDORES[clave];
        }
     }
     var categoriaFinal = (t.cat && t.cat !== "Otros") ? t.cat : (catAprendida || null);
-    
-    // Ticket visual: Verde ● si está registrado, gris ○ si no lo está
     var statusIcon = categoriaFinal
-      ? '<span style="color:var(--g); margin-right:8px; font-size:12px;">●</span>' 
-      : '<span style="color:var(--sub2); margin-right:8px; font-size:12px;">○</span>';
-
-    var catBadge = categoriaFinal ? '<br><span style="font-size:9.5px;color:var(--m);text-transform:uppercase;font-weight:700;">['+categoriaFinal+']</span>' : '';
-
+      ? '<span style="color:var(--g);margin-right:8px;font-size:12px">●</span>' 
+      : '<span style="color:var(--sub);margin-right:8px;font-size:12px">○</span>';
+    var catBadge = categoriaFinal ? '<br><span style="font-size:9.5px;color:var(--m);text-transform:uppercase;font-weight:700">['+categoriaFinal+']</span>' : '';
     return '<tr>'
       +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
-      +'<td style="text-align:left;font-weight:600;color:var(--t);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color=\'var(--c)\'" onmouseout="this.style.color=\'var(--t)\'" onclick="asociarProveedor(\''+t.desc+'\')" title="Clic para categorizar">'
+      +'<td style="text-align:left;font-weight:600;color:var(--t);cursor:pointer" onclick="asociarProveedor(\''+t.desc.replace(/'/g,"\\'")+'\')" title="Clic para categorizar">'
       + statusIcon + t.desc + catBadge +'</td>'
-      +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? formatMoney(t.in) : '—')+'</td>'
+      +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t['in']>0 ? formatMoney(t['in']) : '—')+'</td>'
       +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? formatMoney(t.out) : '—')+'</td>'
       +'</tr>';
   }).join('');
-
   if(esFiltroManual) {
     tbody.innerHTML = '<tr><td colspan="4" style="background:rgba(0,212,255,0.05);padding:10px;text-align:center;font-size:12px">'
-      +'Mostrando movimientos de: <strong>'+nombreProv+'</strong> '
+      +'Mostrando: <strong>'+(nombreProv||'')+'</strong> '
       +'<button onclick="renderFlujoCaja(true)" style="background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;margin-left:10px">Ver todos</button></td></tr>' + rows;
   } else {
     tbody.innerHTML = rows;
   }
 }
 
-
-
-
-// ─── SINCRONIZADOR AUTOMÁTICO DE RECETAS ───
+// ─── SINCRONIZADOR DE RECETAS ───
 function syncRecetasCost() {
-  if (typeof REC === 'undefined' || !REC || typeof INGR === 'undefined') return;
-  
-  REC.forEach(function(receta) {
-    var nuevoCosto = 0;
-    if (receta.ings && receta.ings.length > 0) {
-      receta.ings.forEach(function(item) {
-        // Busca el ingrediente en el inventario
-        var ingDB = INGR.find(function(i) { return i.code === item.code || i.name === item.name; });
-        if (ingDB) {
-          // Calcula el costo considerando si tiene factor de conversión (rinde) o es directo
-          var costoUnidad = ingDB.cost || 0;
-          if (ingDB.conv && ingDB.conv > 0) {
-            costoUnidad = ingDB.cost / ingDB.conv;
-          }
-          nuevoCosto += (costoUnidad * (item.qty || 0));
-        }
-      });
-    }
-    receta.cost = Math.round(nuevoCosto); // Guarda el nuevo precio exacto
+  RECIPES.forEach(function(r) {
+    var newCost = 0;
+    r.ingredients.forEach(function(ing) {
+      var found = INGR.find(function(i) { return i.name === ing.name; });
+      if (found) {
+        var qty = ing.qty || 0;
+        var costPerUnit = found.cost || 0;
+        var qtyInBase = qty;
+        if (found.unit === 'kg' && ing.unit === 'g') qtyInBase = qty / 1000;
+        else if (found.unit === 'g' && ing.unit === 'kg') qtyInBase = qty * 1000;
+        else if (found.unit === 'L' && (ing.unit === 'mL' || ing.unit === 'ml')) qtyInBase = qty / 1000;
+        else if ((found.unit === 'mL' || found.unit === 'ml') && ing.unit === 'L') qtyInBase = qty * 1000;
+        ing.cost = Math.round(qtyInBase * costPerUnit);
+      }
+      newCost += (ing.cost || 0);
+    });
+    r.cost = newCost;
   });
-  
-  // Guardamos las recetas actualizadas
-  localStorage.setItem('app_rec', JSON.stringify(REC));
-  
-  // Si estás en la pestaña de recetas, se refresca la pantalla sola
-  if (typeof renderRec === 'function') renderRec();
 }
 
-
-
-
-
-
-
-
-
+// ─── FLUJO DE CAJA ───
 function renderFlujoCaja(isFilterChange){
-  var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
+  var bankData = [];
+  try { bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]'); } catch(e) {}
   var kpiDiv = document.getElementById('kpi-flujo');
   var sel = document.getElementById('flujo-mes-sel');
   var panels = document.getElementById('flujo-panels');
   
   if(!kpiDiv) return;
 
-  // 1. AUTO-GENERAR MESES (Desde Enero 2025 hasta la actualidad)
   if (sel && sel.options.length <= 3) { 
       var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
       var d = new Date();
-      var currentYear = d.getFullYear();
-      var currentMonth = d.getMonth();
+      var curYear = d.getFullYear();
+      var curMon = d.getMonth();
       var optionsHtml = '<option value="all">Todos los meses</option>';
-      
-      for (var y = currentYear; y >= 2025; y--) {
-          var mStart = (y === currentYear) ? currentMonth : 11;
+      for (var y = curYear; y >= 2025; y--) {
+          var mStart = (y === curYear) ? curMon : 11;
           for (var m = mStart; m >= 0; m--) {
               var val = y + '-' + (m + 1 < 10 ? '0' : '') + (m + 1);
-              var label = mNames[m] + ' ' + y;
-              optionsHtml += '<option value="' + val + '">' + label + '</option>';
+              optionsHtml += '<option value="' + val + '">' + mNames[m] + ' ' + y + '</option>';
           }
       }
       sel.innerHTML = optionsHtml;
-      
-      // Si el filtro no se activó a mano, intentar preseleccionar el mes actual
       if (!isFilterChange) {
-          var currentVal = currentYear + '-' + (currentMonth + 1 < 10 ? '0' : '') + (currentMonth + 1);
+          var currentVal = curYear + '-' + (curMon + 1 < 10 ? '0' : '') + (curMon + 1);
           if (sel.querySelector('option[value="'+currentVal+'"]')) sel.value = currentVal;
       }
   }
 
-  var currentMonth = sel ? sel.value : 'all';
-  var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
+  var selMonth = sel ? sel.value : 'all';
+  var filteredBank = selMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.indexOf(selMonth) === 0; });
 
-  // 2. CÁLCULOS DEL BANCO
   var tIn = 0, tOut = 0;
   var topOutMap = {}, topInMap = {};
-
   filteredBank.forEach(function(t){
-    tIn += t.in; tOut += t.out;
+    tIn += (t['in'] || 0); tOut += (t.out || 0);
     if(t.out > 0) {
       var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim().toUpperCase();
       topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
     }
-    if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
+    if(t['in'] > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t['in'];
   });
 
-// 3. CÁLCULO DE GASTOS FIJOS MENSUALES (desde GASTOS en memoria)
-var totalManual = 0;
-if(typeof GASTOS !== 'undefined') {
-    totalManual = GASTOS.reduce(function(s, g) {
-        return s + toMes(g);
-    }, 0);
-}
+  // Gastos fijos mensuales
+  var totalManual = 0;
+  if(typeof GASTOS !== 'undefined') {
+      totalManual = GASTOS.reduce(function(s, g){ return s + toMes(g); }, 0);
+  }
+  
+  // Efectivo desde ventas Toteat (último mes seleccionado o promedio)
+  var efectivoToteat = 0;
+  if(typeof SALES !== 'undefined' && SALES.monthly) {
+      var sm = SALES.monthly;
+      if(selMonth !== 'all') {
+          var mNamesX = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+          var px = selMonth.split('-');
+          var mLabel = mNamesX[parseInt(px[1])-1] + ' ' + px[0];
+          var found = sm.find(function(m){ return m.month === mLabel; });
+          if(found) efectivoToteat = found.efectivo || 0;
+      }
+      if(efectivoToteat === 0 && sm.length > 0) {
+          efectivoToteat = sm[sm.length-1].efectivo || 0;
+      }
+  }
   
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
-  // 4. RENDERIZAR KPIs
-  kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
   kpiDiv.innerHTML = [
     {l:'Abonos Banco', v:formatMoney(tIn), f:'Total Digital', c:'var(--g)'},
     {l:'Cargos Banco', v:formatMoney(tOut), f:'Egresos Digitales', c:'var(--r)'},
     {l:'Saldo Banco', v:formatMoney(saldoBanco), f:'Neto Banco', c:saldoBanco>=0?'var(--g)':'var(--r)'},
     {l:'Efectivo Entrante', v:formatMoney(efectivoToteat), f:'Ventas Toteat', c:'var(--g)'},
-    {l:'Gastos Efectivo', v:formatMoney(totalManual), f:'Caja Chica', c:'var(--y)'},
-    {l:'Caja Fuerte', v:formatMoney(cajaRealFisica), f:'Billetes Reales', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
-  ].map(k => '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>').join('');
+    {l:'Gastos Efectivo', v:formatMoney(Math.round(totalManual)), f:'Caja Chica', c:'#ffb020'},
+    {l:'Caja Fuerte', v:formatMoney(Math.round(cajaRealFisica)), f:'Billetes Reales', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
+  ].map(function(k){
+    return '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
+  }).join('');
 
-  // 5. RENDERIZAR TABLA Y GRÁFICOS
+  var flujoBody = $('flujo-body');
   if (!filteredBank.length) {
-      $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco registrados para esta fecha. Los cálculos de Caja Fuerte siguen activos.</td></tr>';
+      if(flujoBody) flujoBody.innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco para esta fecha.</td></tr>';
       if(panels) panels.style.display = 'none';
   } else {
-      renderTablaFlujo(filteredBank, false);
-      
+      renderTablaFlujo(filteredBank, false, '');
       if(panels) {
         panels.style.display = 'grid';
-        
-        var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v);
+        var sortedOut = [];
+        for(var k in topOutMap) sortedOut.push({n:k, v:topOutMap[k]});
+        sortedOut.sort(function(a,b){return b.v-a.v;});
         var topDisplay = sortedOut.slice(0, 10);
         
-        document.getElementById('flujo-top-out').innerHTML = topDisplay.length ? topDisplay.map(function(o){
-          var pct = Math.round((o.v / tOut) * 100) || 0;
-          return '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer" title="Clic para ver detalle">'
-            +'<span style="font-size:12px;color:var(--m)">'+o.n+'</span>'
-            +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
-        }).join('') : '<div class="empty">Sin registros</div>';
+        var flujoTopOut = document.getElementById('flujo-top-out');
+        if(flujoTopOut) {
+            flujoTopOut.innerHTML = topDisplay.length ? topDisplay.map(function(o){
+              var pctX = tOut > 0 ? Math.round((o.v / tOut) * 100) : 0;
+              return '<div onclick="filtrarPorProveedor(\''+o.n.replace(/'/g,"\\'")+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer">'
+                +'<span style="font-size:12px;color:var(--m)">'+o.n+'</span>'
+                +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pctX+'%)</span></span></div>';
+            }).join('') : '<div class="empty">Sin registros</div>';
+        }
 
-        var sortedIn = Object.keys(topInMap).map(k => ({d:k, v:topInMap[k]})).sort((a,b) => b.v-a.v).slice(0, 5);
+        var sortedIn = [];
+        for(var k2 in topInMap) sortedIn.push({d:k2, v:topInMap[k2]});
+        sortedIn.sort(function(a,b){return b.v-a.v;});
+        sortedIn = sortedIn.slice(0, 5);
         
-        document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(o => {
-          return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-            +'<span style="font-size:12px;color:var(--sub)">' + o.d + '</span>'
-            +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">' + formatMoney(o.v) + '</span></div>';
-        }).join('') : '<div class="empty">Sin ingresos</div>';
+        var flujoTopIn = document.getElementById('flujo-top-in');
+        if(flujoTopIn) {
+            flujoTopIn.innerHTML = sortedIn.length ? sortedIn.map(function(o){
+              return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+                +'<span style="font-size:12px;color:var(--sub)">' + o.d + '</span>'
+                +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">' + formatMoney(o.v) + '</span></div>';
+            }).join('') : '<div class="empty">Sin ingresos</div>';
+        }
       }
   }
 }
 
+// ════ SINCRONIZACIÓN FIREBASE ════
 
-// ════ SINCRONIZACIÓN FIREBASE (100% BLINDADA) ════
-
-async function saveToCloud(btn) {
-  if(!confirm('¿Guardar todos tus registros actuales en la base de datos de la nube?')) return;
+function saveToCloud(btn) {
+  if(!confirm('¿Guardar todos tus registros en la nube?')) return;
+  if(typeof db === 'undefined' || !db || !db.ref) { alert('Firebase no disponible.'); return; }
   
   var ogText = btn.innerHTML;
   btn.innerHTML = '⏳ Subiendo...';
   
-  // Extraemos toda tu memoria actual de la pantalla
   var dataToSave = {};
   for(var i=0; i<localStorage.length; i++){
     var key = localStorage.key(i);
-    
-    // 🔥 EL FILTRO BLINDADO (Vital para que Firebase no rechace la subida)
-    if(key.startsWith('firebase') || /[.#$\[\]\/]/.test(key)) {
-        continue; 
-    }
-    
+    if(key.indexOf('firebase') === 0 || /[.#$\[\]\/]/.test(key)) continue;
     dataToSave[key] = localStorage.getItem(key);
   }
   
-  try {
-    // Mandamos los datos directo a Firebase en tiempo real
-    await db.ref('respaldo_principal').set(dataToSave);
-    
+  db.ref('respaldo_principal').set(dataToSave).then(function(){
     btn.innerHTML = '✅ Guardado';
     setTimeout(function(){ btn.innerHTML = ogText; }, 2500);
-  } catch(e) {
+  }).catch(function(e){
     console.error("Error Firebase:", e);
-    alert('❌ Error al subir a la base de datos.');
+    alert('❌ Error al subir.');
     btn.innerHTML = ogText;
-  }
+  });
 }
 
-async function loadFromCloud(btn) {
-  if(!confirm('ALERTA: ¿Sobrescribir tu memoria actual con los datos de Firebase?')) return;
+function loadFromCloud(btn) {
+  if(!confirm('¿Sobrescribir datos locales con los de Firebase?')) return;
+  if(typeof db === 'undefined' || !db || !db.ref) { alert('Firebase no disponible.'); return; }
   
   var ogText = btn.innerHTML;
   btn.innerHTML = '⏳ Descargando...';
   
-  try {
-    // Leemos los datos desde Firebase
-    const snapshot = await db.ref('respaldo_principal').once('value');
-    const data = snapshot.val();
-    
-    // ESCUDO ANTI-BORRADO DEFINITIVO
+  db.ref('respaldo_principal').once('value').then(function(snapshot){
+    var data = snapshot.val();
     if (!data) {
-      alert('❌ La base de datos en Firebase está vacía en este momento. Sube tus datos primero para no borrar tu memoria local.');
+      alert('❌ Firebase está vacío. Sube datos primero.');
       btn.innerHTML = ogText;
       return;
     }
-    
-    // Si hay datos, los grabamos en tu memoria local
-    for(var key in data) {
-      localStorage.setItem(key, data[key]);
-    }
-    
+    for(var key in data) { localStorage.setItem(key, data[key]); }
     btn.innerHTML = '✅ Listo';
     setTimeout(function(){ location.reload(); }, 800);
-    
-  } catch(e) {
+  }).catch(function(e){
     console.error("Error Firebase:", e);
-    alert('❌ Error de conexión al descargar. Tus datos en pantalla NO se borraron.');
+    alert('❌ Error de conexión.');
     btn.innerHTML = ogText;
-  }
+  });
 }
-
-
 
 function asociarProveedor(nombreOriginal) {
     var nombreLimpio = nombreOriginal.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').trim();
-    var categoria = prompt("¿A qué categoría pertenece '" + nombreLimpio + "'? (Ej: Gas, Agua, Personal, Arriendo)");
-    
+    var categoria = prompt("¿Categoría para '" + nombreLimpio + "'? (Gas, Agua, Personal, Arriendo, etc.)");
     if (categoria && categoria.trim() !== "") {
         var reglasActuales = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
         reglasActuales[nombreOriginal.toUpperCase()] = categoria.trim();
         localStorage.setItem('reglas_prov', JSON.stringify(reglasActuales));
-        
         var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
-        var dataActualizada = bankData.map(function(t) {
-            if (t.desc === nombreOriginal) t.cat = categoria.trim();
-            return t;
-        });
-        localStorage.setItem('bank_tx', JSON.stringify(dataActualizada));
-
+        bankData.forEach(function(t) { if (t.desc === nombreOriginal) t.cat = categoria.trim(); });
+        localStorage.setItem('bank_tx', JSON.stringify(bankData));
         renderFlujoCaja(true);
     }
 }
