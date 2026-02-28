@@ -46,7 +46,7 @@ body{
   display:flex;align-items:center;
   padding:0 20px;
 }
-.nav-brand-sm{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.05em;color:var(--t);white-space:nowrap;padding:0 6px;opacity:.7;margin-right:10px}
+.nav-brand-sm{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.05em;color:var(--t);white-space:nowrap;padding:0 6px;opacity:.7}
 .nav-brand-sm .sf{color:var(--c)}
 .nav-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;flex:1}
 .nav-tabs::-webkit-scrollbar{display:none}
@@ -59,13 +59,21 @@ body{
 }
 .nt:hover{color:var(--t)}
 .nt.on{color:var(--c);border-bottom-color:var(--c)}
-
-/* ─── MENÚ LATERAL MINIMALISTA ─── */
-.hamburger {
-  background:none; border:none; color:var(--sub); cursor:pointer; 
-  padding:6px; margin-left:auto; transition:color 0.2s; display:flex; align-items:center; justify-content:center;
+.nav-r{margin-left:auto;flex-shrink:0;padding-left:12px;display:flex;gap:8px;align-items:center}
+.tog{
+  height:36px;width:36px;border-radius:var(--rad-s);
+  border:1px solid var(--b2);background:var(--s3);
+  color:var(--sub);display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s
 }
-.hamburger:hover { color:var(--t); }
+.tog:hover{color:var(--t);border-color:var(--c)}
+
+/* ─── MENÚ MÓVIL ─── */
+.hamburger {
+  display:none; background:none; border:none; color:var(--t); cursor:pointer; 
+  padding:6px; margin-left:auto; transition:color 0.2s;
+}
+.hamburger:hover { color:var(--c); }
 .mob-overlay {
   display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:900; 
   backdrop-filter:blur(3px); opacity:0; transition:opacity .3s;
@@ -95,6 +103,11 @@ body{
 .mm-item svg { color:var(--sub); transition:color .2s; }
 .mm-item:hover, .mm-item.on { color:var(--c); }
 .mm-item:hover svg, .mm-item.on svg { color:var(--c); }
+
+@media(max-width:860px){
+  .nav-r { display:none!important; }
+  .hamburger { display:block; }
+}
 
 /* ─── PAGE ─── */
 .page{display:none;padding:24px 20px 60px;max-width:1380px;margin:0 auto}
@@ -224,7 +237,7 @@ tr:last-child td{border-bottom:none}
   <div class="nav-tabs">
     <div class="nt on" id="t-dash"     onclick="go('dash')">Dashboard</div>
     <div class="nt"    id="t-ventas"   onclick="go('ventas')">Ventas</div>
-    <div class="nt"    id="t-analisis" onclick="go('analisis')">An&#225;lisis</div>
+    <div class="nt"    id="t-analisis" onclick="go('analisis')">Análisis</div>
     <div class="nt"    id="t-delivery" onclick="go('delivery')">Delivery</div>
     <div class="nt"    id="t-stock"    onclick="go('stock')">Stock</div>
     <div class="nt"    id="t-rec"      onclick="go('rec')">Recetas</div>
@@ -232,8 +245,20 @@ tr:last-child td{border-bottom:none}
     <div class="nt"    id="t-obj"      onclick="go('obj')">Objetivos</div>
   </div>
 
-  <button class="hamburger" onclick="toggleMenu()" title="Menú del Sistema">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  <div class="nav-r" id="desktop-actions">
+    <button class="tog" id="tog" onclick="toggleTheme()" title="Cambiar Tema">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+    <button class="btn btn-sm" onclick="loadFromCloud(this)" style="background:var(--s2);color:var(--m);border:1px solid var(--b2)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Bajar Nube
+    </button>
+    <button class="btn btn-sm" onclick="saveToCloud(this)" style="background:var(--m);color:#000;border:1px solid var(--m);font-weight:700">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir Nube
+    </button>
+  </div>
+
+  <button class="hamburger" id="btn-hamburger" onclick="toggleMenu()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
 </nav>
 
@@ -242,23 +267,20 @@ tr:last-child td{border-bottom:none}
   <button class="mm-close" onclick="toggleMenu()">&times;</button>
   
   <div class="mm-sec">
-    <div class="mm-title">Controles del Sistema</div>
+    <div class="mm-title">Sistema</div>
     <div class="mm-item" onclick="toggleTheme(); toggleMenu()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> 
-      Cambiar Tema
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> Cambiar Tema
     </div>
     <div class="mm-item" onclick="loadFromCloud(this); toggleMenu()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 
-      Bajar Nube
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Bajar Datos
     </div>
-    <div class="mm-item" onclick="saveToCloud(this); toggleMenu()" style="color:var(--m)">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> 
-      Subir Nube
+    <div class="mm-item" onclick="saveToCloud(this); toggleMenu()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir a la Nube
     </div>
   </div>
 
-  <div class="mm-sec" style="border-bottom:none">
-    <div class="mm-title">Navegación Rápida (Móvil)</div>
+  <div class="mm-sec">
+    <div class="mm-title">Navegación Rápida</div>
     <div class="mm-item" onclick="go('dash'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</div>
     <div class="mm-item" onclick="go('ventas'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Ventas</div>
     <div class="mm-item" onclick="go('analisis'); toggleMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Análisis</div>
@@ -297,20 +319,16 @@ tr:last-child td{border-bottom:none}
           <select class="inp w200" id="v-mes-sel" onchange="setMonth(this.value)"></select>
         </div>
       </div>
-<div style="display:flex;gap:6px;align-items:center">
+      <div style="display:flex;gap:6px;align-items:center">
         <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Canal</span>
         <div style="display:flex;gap:5px;flex-wrap:wrap">
-<button class="pill-sel on"  id="vch-all"        onclick="setVCanal('all',this)">Todo</button>
-<button class="pill-sel"     id="vch-local"     onclick="setVCanal('local',this)">Presencial</button>
-<button class="pill-sel"     id="vch-efectivo"  onclick="setVCanal('efectivo',this)">Efectivo</button>
-<button class="pill-sel"     id="vch-tarjetas"  onclick="setVCanal('tarjetas',this)">Tarjetas</button>
-<button class="pill-sel"     id="vch-junaeb"    onclick="setVCanal('junaeb',this)">Junaeb</button>
-<div style="width:1px;height:24px;background:var(--b2);margin:0 4px"></div>
-<button class="pill-sel"     id="vch-ya"        onclick="setVCanal('ya',this)">PedidosYa</button>
-<button class="pill-sel"     id="vch-uber"      onclick="setVCanal('uber',this)">Uber Eats</button>
-<button class="pill-sel"     id="vch-rappi"     onclick="setVCanal('rappi',this)">Rappi</button>
-<button class="pill-sel"     id="vch-intern"    onclick="setVCanal('intern',this)">Interno</button>
-<button class="pill-sel"     id="vch-otros"     onclick="setVCanal('otros',this)">Otros</button>
+          <button class="pill-sel on"  id="vch-all"      onclick="setVCanal('all',this)">Todo</button>
+          <button class="pill-sel"     id="vch-local"    onclick="setVCanal('local',this)">Local</button>
+          <button class="pill-sel"     id="vch-intern"   onclick="setVCanal('intern',this)">Del. interno</button>
+          <button class="pill-sel"     id="vch-platforms" onclick="setVCanal('platforms',this)">Plataformas</button>
+          <button class="pill-sel"     id="vch-ya"       onclick="setVCanal('ya',this)">PedidosYa</button>
+          <button class="pill-sel"     id="vch-uber"     onclick="setVCanal('uber',this)">Uber</button>
+        </div>
       </div>
     </div>
     <button class="btn-icon" title="Importar datos de ventas" onclick="openImport('ventas')">&#8593; &#9729;</button>
@@ -335,7 +353,7 @@ tr:last-child td{border-bottom:none}
 <div id="p-analisis" class="page">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
     <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)">Ver datos de</span>
-    <select class="inp w200" id="an-mes-sel" onchange="initAnalisis()"></select>
+    <select class="inp w200" id="an-mes-sel" onchange="initAnalisis"></select>
     <span style="font-size:11px;color:var(--sub)" id="an-context"></span>
   </div>
   <div class="notice info">
@@ -366,6 +384,7 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <div id="p-stock" class="page">
+  
   <div style="display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap">
     <button class="pill-sel on" id="stab-inv" onclick="setStockTab('inv',this)">Inventario</button>
     <button class="pill-sel"    id="stab-ped" onclick="setStockTab('ped',this)">Pedido Semanal</button>
@@ -588,7 +607,7 @@ tr:last-child td{border-bottom:none}
       <div id="del-heatmap" style="margin-top:8px"></div>
     </div>
     <div class="card">
-      <div class="card-hd">Top platos (&#250;ltimos 6 meses · PedidosYa)</div>
+      <div class="card-hd">Top platos (últimos 6 meses · PedidosYa)</div>
       <div class="bars" id="del-top-platos"></div>
     </div>
   </div>
@@ -615,7 +634,7 @@ tr:last-child td{border-bottom:none}
   <div id="gview-resumen" class="gview">
     <div id="kpi-gastos" class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
     <div class="g2" style="margin-bottom:20px">
-      <div class="card"><div class="card-hd">Por categor&#237;a (mensual)</div><div class="bars" id="ch-gcat"></div></div>
+      <div class="card"><div class="card-hd">Por categoría (mensual)</div><div class="bars" id="ch-gcat"></div></div>
       <div class="card"><div class="card-hd">Impacto sobre venta mensual prom.</div><div id="gasto-impact" style="padding:12px 0"></div></div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="gcat-filters">
@@ -629,8 +648,8 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="tbl-shell"><div class="tbl-scroll"><table>
       <thead><tr>
-        <th>Gasto</th><th class="hide-sm">Categor&#237;a</th><th class="hide-sm">Proveedor / Contacto</th>
-        <th class="r">Sem</th><th class="r hide-xs">Mes</th><th class="r hide-xs">A&#241;o</th>
+        <th>Gasto</th><th class="hide-sm">Categoría</th><th class="hide-sm">Proveedor / Contacto</th>
+        <th class="r">Sem</th><th class="r hide-xs">Mes</th><th class="r hide-xs">Año</th>
         <th class="hide-xs">Vencimiento</th><th></th>
       </tr></thead>
       <tbody id="g-body"></tbody>
@@ -652,7 +671,7 @@ tr:last-child td{border-bottom:none}
     <div style="margin-top:12px"><button class="btn btn-sm btn-c" onclick="openAddHist()">+ Agregar pago</button></div>
   </div>
 
-<div id="gview-flujo" class="gview" style="display:none">
+  <div id="gview-flujo" class="gview" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <div style="font-size:12px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Auditoría Financiera</div>
@@ -699,25 +718,8 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBDkMmkgNMWDO4aerEpkWrj-nnten8tFvI",
-    authDomain: "street-flags.firebaseapp.com",
-    databaseURL: "https://street-flags-default-rtdb.firebaseio.com",
-    projectId: "street-flags",
-    storageBucket: "street-flags.firebasestorage.app",
-    messagingSenderId: "210252157672",
-    appId: "1:210252157672:web:39ea02f686ee15603c6f5d"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-</script>
-  
-<script src="data.js" defer></script>
-<script src="app.js" defer></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
 
 <script>
   /* Función para el menú lateral en móviles */
@@ -848,17 +850,17 @@ tr:last-child td{border-bottom:none}
     <input class="f-inp" type="text" id="mg-name" placeholder="Ej: Arriendo local">
     <div class="f2">
       <div>
-        <label class="f-lbl">Categor&#237;a</label>
+        <label class="f-lbl">Categoría</label>
         <select class="f-inp" id="mg-cat">
-          <option value="arriendo">&#127968; Arriendo</option>
-          <option value="servicios">&#9889; Servicios b&#225;sicos</option>
-          <option value="gas">&#128293; Gas</option>
-          <option value="personal">&#128104;&#8205;&#127859; Personal</option>
-          <option value="marketing">&#128227; Marketing</option>
-          <option value="mantencion">&#128296; Mantenci&#243;n</option>
-          <option value="software">&#128187; Software/Sistemas</option>
-          <option value="insumos">&#127859; Insumos</option>
-          <option value="otros">&#128230; Otros</option>
+          <option value="arriendo">🏢 Arriendo</option>
+          <option value="servicios">⚡ Servicios básicos</option>
+          <option value="gas">🔥 Gas</option>
+          <option value="personal">👨‍🍳 Personal</option>
+          <option value="marketing">📢 Marketing</option>
+          <option value="mantencion">🔧 Mantencion</option>
+          <option value="software">💻 Software/Sistemas</option>
+          <option value="insumos">🍽️ Insumos</option>
+          <option value="otros">📦 Otros</option>
         </select>
       </div>
       <div>
@@ -946,7 +948,7 @@ tr:last-child td{border-bottom:none}
 <div class="overlay" id="m-export">
   <div class="modal" style="max-width:400px">
     <div class="modal-hd"><span style="font-weight:700;font-size:14px">Exportar datos</span>
-      <button class="btn-close" onclick="cm('m-export')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <button class="btn-close" onclick="$('m-export').classList.remove('on')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
       <div><label style="font-size:11px;color:var(--sub);font-weight:700;display:block;margin-bottom:5px">Seccion</label>
         <select class="inp" id="exp-section" style="width:100%">
@@ -967,7 +969,7 @@ tr:last-child td{border-bottom:none}
 <div class="overlay" id="m-histpago">
   <div class="modal" style="max-width:380px">
     <div class="modal-hd"><span id="mhp-title" style="font-weight:700;font-size:14px">Registrar pago</span>
-      <button class="btn-close" onclick="cm('m-histpago')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <button class="btn-close" onclick="$('m-histpago').classList.remove('on')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
       <input type="hidden" id="mhp-idx">
       <div><label style="font-size:11px;color:var(--sub);font-weight:700;display:block;margin-bottom:5px">Mes</label>
@@ -982,7 +984,7 @@ tr:last-child td{border-bottom:none}
         <input type="text" class="inp" id="mhp-notas" placeholder="Opcional..." style="width:100%"></div>
       <div style="display:flex;gap:8px;margin-top:4px">
         <button class="btn btn-c" style="flex:1;padding:9px" onclick="saveHist()">Guardar</button>
-        <button class="btn" style="flex:1;padding:9px" onclick="cm('m-histpago')">Cancelar</button>
+        <button class="btn" style="flex:1;padding:9px" onclick="$('m-histpago').classList.remove('on')">Cancelar</button>
       </div>
     </div>
   </div>
@@ -991,7 +993,7 @@ tr:last-child td{border-bottom:none}
 <div class="overlay" id="m-cred">
   <div class="modal" style="max-width:380px">
     <div class="modal-hd"><span id="mcred-title" style="font-weight:700;font-size:14px">Credencial</span>
-      <button class="btn-close" onclick="cm('m-cred')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <button class="btn-close" onclick="$('m-cred').classList.remove('on')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
       <input type="hidden" id="mcred-idx">
       <div><label style="font-size:11px;color:var(--sub);font-weight:700;display:block;margin-bottom:5px">Sistema</label>
@@ -1007,7 +1009,7 @@ tr:last-child td{border-bottom:none}
       <div style="display:flex;gap:8px;margin-top:4px">
         <button class="btn btn-c" style="flex:1;padding:9px" onclick="saveCred()">Guardar</button>
         <button class="btn" id="mcred-del" style="padding:9px 14px;display:none" onclick="deleteCred()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
-        <button class="btn" style="flex:1;padding:9px" onclick="cm('m-cred')">Cancelar</button>
+        <button class="btn" style="flex:1;padding:9px" onclick="$('m-cred').classList.remove('on')">Cancelar</button>
       </div>
     </div>
   </div>
