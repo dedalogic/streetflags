@@ -2441,18 +2441,14 @@ db.ref('respaldo_principal').once('value').then(function(snapshot) {
 });
 
 function renderAppSeguro() {
-   try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
-   try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
-   try { initAnalisis(); } catch(e) { console.error("Error Analisis", e); }
-   try { initDeliveryMesSel(); } catch(e) { console.error("Error Delivery", e); }
-   try { renderIngr(); } catch(e) { console.error("Error Insumos", e); }
-   try { renderRec(); } catch(e) { console.error("Error Recetas", e); }
-   try { renderCnt(); } catch(e) { console.error("Error Conteo", e); }
-   try { renderGastos(); } catch(e) { console.error("Error Gastos", e); }
-}
+   // PROTECCIÓN: si Firebase/localStorage dejaron todo vacío, restaurar desde data.js
+   if ((!INGR || INGR.length === 0) && typeof INGR_RAW !== 'undefined' && INGR_RAW.length > 0) INGR = JSON.parse(JSON.stringify(INGR_RAW));
+   if ((!RECIPES || RECIPES.length === 0) && typeof RECIPES_RAW !== 'undefined' && RECIPES_RAW.length > 0) RECIPES = JSON.parse(JSON.stringify(RECIPES_RAW));
+   if ((!GASTOS || GASTOS.length === 0) && typeof GASTOS_INIT !== 'undefined' && GASTOS_INIT.length > 0) GASTOS = JSON.parse(JSON.stringify(GASTOS_INIT));
+   if ((!SALES.monthly || SALES.monthly.length === 0) && typeof SALES !== 'undefined') {
+     // SALES ya viene de data.js como const, no debería estar vacío
+   }
 
-
-function renderAppSeguro() {
    try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
    try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
    try { initAnalisis(); } catch(e) { console.error("Error Analisis", e); }
