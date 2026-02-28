@@ -1,44 +1,2706 @@
-const INGR_RAW=[{"code": "ABA015", "name": "Pan", "unit": "UN", "cost": 571.0, "total_used": 28502.5, "weekly_avg": 508.97, "total_cost": 16274928.0, "brand": "Hawaiian", "category": "IC.010"}, {"code": "CAR02", "name": "Sobrecostilla", "unit": "kg", "cost": 6590.0, "total_used": 1874.99, "weekly_avg": 33.48, "total_cost": 12356184.0, "brand": "Carne Sudamericana", "category": "IC.020"}, {"code": "CONG07", "name": "Papas Fritas ICB", "unit": "kg", "cost": 3017.0, "total_used": 3901.85, "weekly_avg": 69.68, "total_cost": 11771866.0, "brand": "7mm", "category": "IC.060"}, {"code": "ABA0308", "name": "Mayo Kraft", "unit": "kg", "cost": 3333.0, "total_used": 3269.2, "weekly_avg": 58.38, "total_cost": 10896244.0, "brand": "bifood 10 bolsas", "category": "IC.010"}, {"code": "CAR09", "name": "Lomo Vetado", "unit": "kg", "cost": 11120.0, "total_used": 902.61, "weekly_avg": 16.12, "total_cost": 10037001.0, "brand": "Carne Sudamericana", "category": "IC.020"}, {"code": "CAR04", "name": "Pollo Truto", "unit": "kg", "cost": 4911.0, "total_used": 2476.42, "weekly_avg": 44.22, "total_cost": 8667470.0, "brand": "truto entero deshuesado", "category": "IC.020"}, {"code": "ABA012", "name": "Queso Cheddar ICB", "unit": "kg", "cost": 14734.0, "total_used": 461.78, "weekly_avg": 8.25, "total_cost": 6803793.0, "brand": "ICB", "category": "IC.010"}, {"code": "DEC04", "name": "Caja Blanca", "unit": "UN", "cost": 279.0, "total_used": 22806.0, "weekly_avg": 407.25, "total_cost": 6362874.0, "brand": "caja con asa", "category": "IC.070"}, {"code": "CONG02", "name": "Bolitas Jalapeños", "unit": "kg", "cost": 12000.0, "total_used": 109.85, "weekly_avg": 1.96, "total_cost": 3515200.0, "brand": "AVIKO ICB", "category": "IC.060"}, {"code": "CAR06", "name": "Tocino", "unit": "kg", "cost": 11888.0, "total_used": 263.57, "weekly_avg": 4.71, "total_cost": 3133344.0, "brand": "Ahumado laminado ICB", "category": "IC.020"}, {"code": "ABA014", "name": "BBQ", "unit": "kg", "cost": 13990.0, "total_used": 207.87, "weekly_avg": 3.71, "total_cost": 2908101.0, "brand": "smoky hungry", "category": "IC.010"}, {"code": "1440", "name": "Vaso Cafe", "unit": "UN", "cost": 54.0, "total_used": 52573.0, "weekly_avg": 938.8, "total_cost": 2838942.0, "brand": "", "category": "IC.010"}, {"code": "1460", "name": "Papel Antigrasa", "unit": "UN", "cost": 90.0, "total_used": 25301.0, "weekly_avg": 451.8, "total_cost": 2277090.0, "brand": "", "category": "IC.010"}, {"code": "CONG01", "name": "Empanadas Queso", "unit": "UN", "cost": 72.0, "total_used": 26361.0, "weekly_avg": 470.73, "total_cost": 1897992.0, "brand": "Raviolera ICB", "category": "IC.060"}, {"code": "ABA07", "name": "Pepinillos", "unit": "kg", "cost": 6191.0, "total_used": 295.86, "weekly_avg": 5.28, "total_cost": 1831686.0, "brand": "Puente pacific limitada", "category": "IC.010"}, {"code": "CAR05", "name": "Camarón Apanado", "unit": "kg", "cost": 9650.0, "total_used": 150.53, "weekly_avg": 2.69, "total_cost": 1452595.0, "brand": "36/40 PROMAR", "category": "IC.020"}, {"code": "ABA0306", "name": "Cebolla Crispy", "unit": "kg", "cost": 11979.0, "total_used": 118.87, "weekly_avg": 2.12, "total_cost": 1423956.0, "brand": "Puente pacific limitada", "category": "IC.010"}, {"code": "ABA0301", "name": "Salsa Cheddar Ricos", "unit": "kg", "cost": 5438.0, "total_used": 220.96, "weekly_avg": 3.95, "total_cost": 1201575.0, "brand": "BEICK Y THOMAS SPA", "category": "IC.010"}, {"code": "CONG03", "name": "Not Burger", "unit": "UN", "cost": 1487.0, "total_used": 749.0, "weekly_avg": 13.38, "total_cost": 1113763.0, "brand": "foos service ICB", "category": "IC.060"}, {"code": "BEB09", "name": "Pepsi", "unit": "CAN", "cost": 644.0, "total_used": 1568.0, "weekly_avg": 28.0, "total_cost": 1009792.0, "brand": "350 ml", "category": "IC.040"}, {"code": "320", "name": "Aro de Cebolla", "unit": "kg", "cost": 2532.0, "total_used": 392.0, "weekly_avg": 7.0, "total_cost": 992544.0, "brand": "", "category": "IC.010"}, {"code": "FRV04", "name": "Manzana Verde", "unit": "kg", "cost": 3000.0, "total_used": 286.27, "weekly_avg": 5.11, "total_cost": 858816.0, "brand": "Agro", "category": "IC.030"}, {"code": "ABA05", "name": "Mostaza", "unit": "kg", "cost": 2535.0, "total_used": 302.54, "weekly_avg": 5.4, "total_cost": 766948.0, "brand": "heinz 1 kg ICB", "category": "IC.010"}, {"code": "ABA010", "name": "Miel", "unit": "kg", "cost": 9000.0, "total_used": 83.8, "weekly_avg": 1.5, "total_cost": 754212.0, "brand": "Agro", "category": "IC.010"}, {"code": "570", "name": "Vinagre de Manzana", "unit": "L", "cost": 4340.0, "total_used": 127.23, "weekly_avg": 2.27, "total_cost": 552187.0, "brand": "Salsas", "category": "IC.010"}, {"code": "FRV07", "name": "Limon", "unit": "kg", "cost": 2200.0, "total_used": 249.95, "weekly_avg": 4.46, "total_cost": 549893.0, "brand": "Agro", "category": "IC.030"}, {"code": "ABA022", "name": "Fideos Quifaros", "unit": "kg", "cost": 1964.0, "total_used": 275.84, "weekly_avg": 4.93, "total_cost": 541750.0, "brand": "Agro", "category": "IC.010"}, {"code": "FRV16", "name": "Ajo", "unit": "kg", "cost": 500.0, "total_used": 1080.59, "weekly_avg": 19.3, "total_cost": 540293.0, "brand": "Agro", "category": "IC.030"}, {"code": "1430", "name": "Lechuga Costina", "unit": "UN", "cost": 515.0, "total_used": 1037.0, "weekly_avg": 18.52, "total_cost": 534055.0, "brand": "ensaladas", "category": "IC.010"}, {"code": "FRV02", "name": "Repollo", "unit": "kg", "cost": 1143.0, "total_used": 385.83, "weekly_avg": 6.89, "total_cost": 441008.0, "brand": "Agro", "category": "IC.030"}, {"code": "1470", "name": "Bowl Grande", "unit": "UN", "cost": 201.0, "total_used": 2149.0, "weekly_avg": 38.38, "total_cost": 431949.0, "brand": "", "category": "IC.010"}, {"code": "ABA0307", "name": "Jalapeños", "unit": "kg", "cost": 5341.0, "total_used": 79.27, "weekly_avg": 1.42, "total_cost": 423360.0, "brand": "ICB", "category": "IC.010"}, {"code": "270", "name": "Cebolla Caramelizada", "unit": "kg", "cost": 2150.0, "total_used": 186410.0, "weekly_avg": 3328.75, "total_cost": 400782.0, "brand": "", "category": "IC.010"}, {"code": "ABA06", "name": "Ketchup", "unit": "kg", "cost": 3299.0, "total_used": 115.66, "weekly_avg": 2.07, "total_cost": 381547.0, "brand": "heinz 3 kg ICB", "category": "IC.010"}, {"code": "FRV15", "name": "Zanahoria", "unit": "kg", "cost": 1100.0, "total_used": 290.41, "weekly_avg": 5.19, "total_cost": 319451.0, "brand": "Agro", "category": "IC.030"}, {"code": "FRV11", "name": "Tomate", "unit": "kg", "cost": 1000.0, "total_used": 298.64, "weekly_avg": 5.33, "total_cost": 298640.0, "brand": "Agro", "category": "IC.030"}, {"code": "FRV03", "name": "Repollo Morado", "unit": "kg", "cost": 1143.0, "total_used": 242.7, "weekly_avg": 4.33, "total_cost": 277404.0, "brand": "Agro", "category": "IC.030"}, {"code": "DEC01", "name": "Vasos Cafe", "unit": "UN", "cost": 54.0, "total_used": 3810.0, "weekly_avg": 68.04, "total_cost": 205740.0, "brand": "80z import export abp spa", "category": "IC.070"}, {"code": "DEC03", "name": "Tenedor", "unit": "UN", "cost": 21.0, "total_used": 9592.0, "weekly_avg": 171.29, "total_cost": 201432.0, "brand": "madera", "category": "IC.070"}, {"code": "FRV08", "name": "Palta", "unit": "kg", "cost": 5000.0, "total_used": 35.4, "weekly_avg": 0.63, "total_cost": 177000.0, "brand": "Agro", "category": "IC.030"}, {"code": "ABA01", "name": "Aceite Vegetal", "unit": "L", "cost": 1800.0, "total_used": 95.42, "weekly_avg": 1.7, "total_cost": 171763.0, "brand": "Agro", "category": "IC.010"}, {"code": "DEC06", "name": "Posillo Salsa", "unit": "UN", "cost": 19.0, "total_used": 6635.84, "weekly_avg": 118.5, "total_cost": 126081.0, "brand": "import export abp spa", "category": "IC.070"}, {"code": "FRV12", "name": "Cebolla", "unit": "kg", "cost": 600.0, "total_used": 195.49, "weekly_avg": 3.49, "total_cost": 117296.0, "brand": "Agro", "category": "IC.030"}, {"code": "ABA028", "name": "Yogurth", "unit": "kg", "cost": 369.0, "total_used": 286.27, "weekly_avg": 5.11, "total_cost": 105634.0, "brand": "Supermercado", "category": "IC.010"}, {"code": "ABA013", "name": "Queso Azul", "unit": "kg", "cost": 2058.0, "total_used": 49.35, "weekly_avg": 0.88, "total_cost": 101568.0, "brand": "Supermercado", "category": "IC.010"}, {"code": "FRV01", "name": "Lechuga", "unit": "kg", "cost": 833.0, "total_used": 121.06, "weekly_avg": 2.16, "total_cost": 100843.0, "brand": "Agro", "category": "IC.030"}, {"code": "FRV09", "name": "Rucula", "unit": "kg", "cost": 12000.0, "total_used": 6.35, "weekly_avg": 0.11, "total_cost": 76188.0, "brand": "Agro", "category": "IC.030"}, {"code": "FRV14", "name": "Cebollín", "unit": "kg", "cost": 1200.0, "total_used": 28.08, "weekly_avg": 0.5, "total_cost": 33701.0, "brand": "Agro", "category": "IC.030"}, {"code": "550", "name": "Sriracha", "unit": "kg", "cost": 9458.0, "total_used": 3.18, "weekly_avg": 0.06, "total_cost": 30112.0, "brand": "SALSAS", "category": "IC.010"}, {"code": "FRV10", "name": "Champiñón", "unit": "kg", "cost": 1700.0, "total_used": 13.61, "weekly_avg": 0.24, "total_cost": 23128.0, "brand": "agro", "category": "IC.030"}, {"code": "560", "name": "Paprika", "unit": "kg", "cost": 8000.0, "total_used": 2.26, "weekly_avg": 0.04, "total_cost": 18046.0, "brand": "SALSAS", "category": "IC.010"}, {"code": "BEB17", "name": "Limon Soda", "unit": "CAN", "cost": 645.0, "total_used": 16.0, "weekly_avg": 0.29, "total_cost": 10320.0, "brand": "350 ml", "category": "IC.040"}, {"code": "ABA017", "name": "Pimienta", "unit": "kg", "cost": 560.0, "total_used": 17.14, "weekly_avg": 0.31, "total_cost": 9599.0, "brand": "Agro", "category": "IC.010"}, {"code": "580", "name": "Kimchi", "unit": "kg", "cost": 10000.0, "total_used": 0.46, "weekly_avg": 0.01, "total_cost": 4640.0, "brand": "Salsa", "category": "IC.010"}, {"code": "1480", "name": "Bowl Mediano", "unit": "UN", "cost": 119.0, "total_used": -19.0, "weekly_avg": -0.34, "total_cost": 2261.0, "brand": "", "category": "IC.010"}, {"code": "ABA02", "name": "Sal", "unit": "kg", "cost": 800.0, "total_used": 1.59, "weekly_avg": 0.03, "total_cost": 1272.0, "brand": "Agro", "category": "IC.010"}, {"code": "BEB11", "name": "Pap", "unit": "CAN", "cost": 645.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "350 ml", "category": "IC.040"}, {"code": "ABA0305", "name": "Aceite Freir", "unit": "L", "cost": 21008.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "10 lts PROMAR", "category": "IC.010"}, {"code": "BEB06", "name": "Kem Piña", "unit": "CAN", "cost": 645.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "350 ml", "category": "IC.040"}, {"code": "ABA029", "name": "Margarina", "unit": "kg", "cost": 2394.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Supermercado", "category": "IC.010"}, {"code": "ABA016", "name": "Ajo Polvo", "unit": "kg", "cost": 250.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Agro", "category": "IC.010"}, {"code": "ABA018", "name": "Leche", "unit": "L", "cost": 1300.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Agro", "category": "IC.010"}, {"code": "BEB05", "name": "7up", "unit": "CAN", "cost": 645.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "350 ml", "category": "IC.040"}, {"code": "ABA011", "name": "Queso Crema", "unit": "kg", "cost": 10924.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Promar", "category": "IC.010"}, {"code": "DEC07", "name": "Bowl Mediano", "unit": "UN", "cost": 76.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "import export abp spa", "category": "IC.070"}, {"code": "ABA023", "name": "Panko", "unit": "UN", "cost": 23530.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "amarillo saco PROMAR", "category": "IC.010"}, {"code": "BEB12", "name": "Crush", "unit": "CAN", "cost": 615.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "350 ml", "category": "IC.040"}, {"code": "ABA026", "name": "Vinagre Rosado", "unit": "L", "cost": 1050.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Agro", "category": "IC.010"}, {"code": "DEC02", "name": "Vasos Plasticos", "unit": "UN", "cost": 46.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "import export abp spa", "category": "IC.070"}, {"code": "ABA030", "name": "Aceite Freir", "unit": "L", "cost": 21000.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "bidon BEICK Y THOMAS SPA", "category": "IC.010"}, {"code": "CAR01", "name": "Wagyu", "unit": "kg", "cost": 12000.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "distribuidora hym spa", "category": "IC.020"}, {"code": "FRV17", "name": "Pimentón", "unit": "kg", "cost": 1200.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Agro", "category": "IC.030"}, {"code": "ABA0304", "name": "Queso Cheddar", "unit": "UN", "cost": 20168.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Barra PROMAR", "category": "IC.010"}, {"code": "1450", "name": "Bolsa Cafe", "unit": "UN", "cost": 132.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "", "category": "IC.010"}, {"code": "BEB15", "name": "Redbull Yellow", "unit": "CAN", "cost": 21962.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "250 ml", "category": "IC.040"}, {"code": "BEB18", "name": "Canada Dry", "unit": "CAN", "cost": 645.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "350 ml", "category": "IC.040"}, {"code": "BEB03", "name": "Jugo Durazno", "unit": "CAN", "cost": 846.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "300 ml", "category": "IC.040"}, {"code": "BEB07", "name": "Canada Dry Zero", "unit": "CAN", "cost": 645.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "350 ml", "category": "IC.040"}, {"code": "BEB13", "name": "Redbull", "unit": "CAN", "cost": 21962.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "350 ml", "category": "IC.040"}, {"code": "ABA025", "name": "Vinagre Blanco", "unit": "L", "cost": 1050.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Agro", "category": "IC.010"}, {"code": "BEB16", "name": "Redbull Verde", "unit": "CAN", "cost": 21962.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "250 ml", "category": "IC.040"}, {"code": "CONG04", "name": "Not Chicken", "unit": "UN", "cost": 1450.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "notco ICB", "category": "IC.060"}, {"code": "ABA08", "name": "Jalapeños", "unit": "kg", "cost": 10990.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Puente pacific limitada", "category": "IC.010"}, {"code": "ABA04", "name": "Mayonesa", "unit": "kg", "cost": 20000.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "deli kraft 1 kg ICB", "category": "IC.010"}, {"code": "ABA03", "name": "Azucar", "unit": "kg", "cost": 1300.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Agro", "category": "IC.010"}, {"code": "BEB02", "name": "Agua con Gas", "unit": "BOT", "cost": 561.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "600 ml", "category": "IC.040"}, {"code": "DEC05", "name": "Bolsa Negra", "unit": "UN", "cost": 181.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "import export abp spa", "category": "IC.070"}, {"code": "ABA09", "name": "Mantequilla", "unit": "kg", "cost": 1336.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Supermercado", "category": "IC.010"}, {"code": "BEB14", "name": "Redbull Light", "unit": "CAN", "cost": 23324.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "250 ml", "category": "IC.040"}, {"code": "BEB01", "name": "Agua Sin Gas", "unit": "BOT", "cost": 561.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "600 ml", "category": "IC.040"}, {"code": "CAR08", "name": "Camarón", "unit": "kg", "cost": 7143.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "largo Promar", "category": "IC.020"}, {"code": "ABA024", "name": "Crema", "unit": "L", "cost": 1300.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Supermercado", "category": "IC.010"}, {"code": "BEB10", "name": "Pepsi Zero", "unit": "CAN", "cost": 645.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "350 ml", "category": "IC.040"}, {"code": "BEB08", "name": "Limon Soda Zero", "unit": "CAN", "cost": 645.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "350 ml", "category": "IC.040"}, {"code": "FRV13", "name": "Cebolla Morada", "unit": "kg", "cost": 882.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Agro", "category": "IC.030"}, {"code": "BEB04", "name": "Jugo Tutifrutilla", "unit": "BOT", "cost": 836.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "300 ml", "category": "IC.040"}, {"code": "ABA019", "name": "Chuño", "unit": "kg", "cost": 50000.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "Agro", "category": "IC.010"}, {"code": "DEC08", "name": "Bowl Grande", "unit": "UN", "cost": 212.0, "total_used": 0, "weekly_avg": 0.0, "total_cost": 0, "brand": "import export abp spa", "category": "IC.070"}];
-const RECIPES_RAW=[{"id": "290", "name": "Coleslow", "cost": 13173, "ingredients": [{"name": "Repollo Morado", "qty": 600.0, "unit": "g", "cost": 686}, {"name": "Repollo", "qty": 1050.0, "unit": "g", "cost": 1200}, {"name": "Manzana Verde", "qty": 900.0, "unit": "g", "cost": 2700}, {"name": "Zanahoria", "qty": 750.0, "unit": "g", "cost": 825}, {"name": "Yogurth", "qty": 900.0, "unit": "g", "cost": 332}, {"name": "Mayo Kraft", "qty": 1000.0, "unit": "g", "cost": 3333}, {"name": "Mostaza", "qty": 300.0, "unit": "g", "cost": 760}, {"name": "Limon", "qty": 450.0, "unit": "g", "cost": 990}, {"name": "Aceite Vegetal", "qty": 300.0, "unit": "mL", "cost": 540}, {"name": "Sal", "qty": 5.0, "unit": "g", "cost": 4}, {"name": "Pimienta", "qty": 6.0, "unit": "g", "cost": 3}, {"name": "Miel", "qty": 7.0, "unit": "g", "cost": 63}, {"name": "Vinagre de Manzana", "qty": 400.0, "unit": "mL", "cost": 1736}], "weekly_units": 1.9, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 1808, "avg_ticket": 949, "total_venta": 110134, "total_qty": 116}, {"id": "170", "name": "Chick - Fill -a", "cost": 7431, "ingredients": [{"name": "Mayo Kraft", "qty": 1.0, "unit": "kg", "cost": 3333}, {"name": "BBQ", "qty": 250.0, "unit": "g", "cost": 3498}, {"name": "Mostaza", "qty": 70.0, "unit": "g", "cost": 177}, {"name": "Miel", "qty": 40.0, "unit": "g", "cost": 360}, {"name": "Limon", "qty": 20.0, "unit": "g", "cost": 44}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 7.1, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 0, "avg_ticket": 0, "total_venta": 0, "total_qty": 434}, {"id": "200", "name": "Alioli", "cost": 3710, "ingredients": [{"name": "Mostaza", "qty": 100.0, "unit": "g", "cost": 254}, {"name": "Miel", "qty": 10.0, "unit": "g", "cost": 90}, {"name": "Mayo Kraft", "qty": 1.0, "unit": "kg", "cost": 3333}, {"name": "Ajo", "qty": 30.0, "unit": "g", "cost": 15}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 15.2, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 4335, "avg_ticket": 285, "total_venta": 264029, "total_qty": 926}, {"id": "160", "name": "Korean", "cost": 4889, "ingredients": [{"name": "Mayo Kraft", "qty": 1.0, "unit": "UN", "cost": 3333}, {"name": "Sriracha", "qty": 100.0, "unit": "g", "cost": 946}, {"name": "Limon", "qty": 50.0, "unit": "g", "cost": 110}, {"name": "Kimchi", "qty": 50.0, "unit": "g", "cost": 500}], "weekly_units": 0.5, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 2172, "avg_ticket": 4134, "total_venta": 132276, "total_qty": 32}, {"id": "260", "name": "Tercio de Libra Triple", "cost": 4839, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Queso Cheddar ICB", "qty": 45.0, "unit": "g", "cost": 663}, {"name": "Sobrecostilla", "qty": 240.0, "unit": "g", "cost": 1582}, {"name": "Lomo Vetado", "qty": 119.0, "unit": "g", "cost": 1323}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Pepinillos", "qty": 15.0, "unit": "g", "cost": 93}, {"name": "Cebolla", "qty": 10.0, "unit": "g", "cost": 6}, {"name": "Chick - Fill -a", "qty": 20.0, "unit": "g", "cost": 0}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}], "weekly_units": 0.3, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 2987, "avg_ticket": 10700, "total_venta": 181900, "total_qty": 17}, {"id": "150", "name": "Sweet Chipolte", "cost": 4599, "ingredients": [{"name": "Ajo", "qty": 2.0, "unit": "UN", "cost": 1000}, {"name": "Mayo Kraft", "qty": 1.0, "unit": "kg", "cost": 3333}, {"name": "Limon", "qty": 10.0, "unit": "g", "cost": 22}, {"name": "Miel", "qty": 25.0, "unit": "g", "cost": 225}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 4.2, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 0, "avg_ticket": 0, "total_venta": 0, "total_qty": 0}, {"id": "SF270", "name": "Street Sauce", "cost": 4499, "ingredients": [{"name": "Mayo Kraft", "qty": 1.0, "unit": "kg", "cost": 3333}, {"name": "Mostaza", "qty": 50.0, "unit": "g", "cost": 127}, {"name": "Ketchup", "qty": 130.0, "unit": "g", "cost": 429}, {"name": "Pimienta", "qty": 10.0, "unit": "g", "cost": 6}, {"name": "Pepinillos", "qty": 85.0, "unit": "g", "cost": 526}, {"name": "Cebolla", "qty": 100.0, "unit": "g", "cost": 60}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 11.9, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 7404, "avg_ticket": 621, "total_venta": 450914, "total_qty": 726}, {"id": "180", "name": "Honey Mustand", "cost": 4027, "ingredients": [{"name": "Mayo Kraft", "qty": 1.0, "unit": "kg", "cost": 3333}, {"name": "Mostaza", "qty": 100.0, "unit": "g", "cost": 254}, {"name": "Miel", "qty": 25.0, "unit": "g", "cost": 225}, {"name": "Limon", "qty": 10.0, "unit": "g", "cost": 22}, {"name": "Sriracha", "qty": 10.0, "unit": "g", "cost": 95}, {"name": "Paprika", "qty": 10.0, "unit": "g", "cost": 80}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 3.1, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 0, "avg_ticket": 0, "total_venta": 0, "total_qty": 0}, {"id": "SF250", "name": "Jalapeño Ranch", "cost": 3740, "ingredients": [{"name": "Jalapeños", "qty": 50.0, "unit": "g", "cost": 267}, {"name": "Limon", "qty": 50.0, "unit": "g", "cost": 110}, {"name": "Mayo Kraft", "qty": 1.0, "unit": "kg", "cost": 3333}, {"name": "Pimienta", "qty": 20.0, "unit": "g", "cost": 11}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 4.2, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 2766, "avg_ticket": 661, "total_venta": 168430, "total_qty": 255}, {"id": "190", "name": "Salsa Jalapeños", "cost": 3740, "ingredients": [{"name": "Jalapeños", "qty": 50.0, "unit": "g", "cost": 267}, {"name": "Limon", "qty": 50.0, "unit": "g", "cost": 110}, {"name": "Mayo Kraft", "qty": 1.0, "unit": "kg", "cost": 3333}, {"name": "Pimienta", "qty": 20.0, "unit": "g", "cost": 11}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 1.7, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 0, "avg_ticket": 0, "total_venta": 0, "total_qty": 105}, {"id": "SF170", "name": "Meat Fries", "cost": 3603, "ingredients": [{"name": "Papas Fritas ICB", "qty": 240.0, "unit": "g", "cost": 724}, {"name": "Sobrecostilla", "qty": 160.0, "unit": "g", "cost": 1054}, {"name": "Lomo Vetado", "qty": 80.0, "unit": "g", "cost": 890}, {"name": "Queso Cheddar ICB", "qty": 30.0, "unit": "g", "cost": 442}, {"name": "Cebollín", "qty": 10.0, "unit": "g", "cost": 12}, {"name": "Jalapeños", "qty": 30.0, "unit": "g", "cost": 160}, {"name": "Tenedor", "qty": 2.0, "unit": "UN", "cost": 42}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}], "weekly_units": 8.4, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 64698, "avg_ticket": 7666, "total_venta": 3940101, "total_qty": 514}, {"id": "860", "name": "Black Burger", "cost": 3466, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Sobrecostilla", "qty": 140.0, "unit": "g", "cost": 923}, {"name": "Lomo Vetado", "qty": 80.0, "unit": "g", "cost": 890}, {"name": "Queso Cheddar ICB", "qty": 40.0, "unit": "g", "cost": 589}, {"name": "Tocino", "qty": 20.0, "unit": "g", "cost": 238}, {"name": "Pepinillos", "qty": 15.0, "unit": "g", "cost": 93}, {"name": "Salsa Cheddar Ricos", "qty": 30.0, "unit": "g", "cost": 163}], "weekly_units": 1.0, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 9402, "avg_ticket": 9235, "total_venta": 572579, "total_qty": 62}, {"id": "950", "name": "Triple Hamburguesa", "cost": 3381, "ingredients": [{"name": "Queso Cheddar ICB", "qty": 45.0, "unit": "g", "cost": 663}, {"name": "Sobrecostilla", "qty": 210.0, "unit": "g", "cost": 1384}, {"name": "Lomo Vetado", "qty": 120.0, "unit": "g", "cost": 1334}], "weekly_units": 2.0, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 6854, "avg_ticket": 3450, "total_venta": 417392, "total_qty": 121}, {"id": "L210", "name": "Big Mick", "cost": 3195, "ingredients": [{"name": "Pan", "qty": 1.5, "unit": "UN", "cost": 856}, {"name": "Lomo Vetado", "qty": 80.0, "unit": "g", "cost": 890}, {"name": "Sobrecostilla", "qty": 160.0, "unit": "g", "cost": 1054}, {"name": "Tomate", "qty": 80.0, "unit": "g", "cost": 80}, {"name": "Lechuga", "qty": 30.0, "unit": "g", "cost": 25}, {"name": "Pepinillos", "qty": 15.0, "unit": "g", "cost": 93}, {"name": "Cebolla", "qty": 30.0, "unit": "g", "cost": 18}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Street Sauce", "qty": 20.0, "unit": "g", "cost": 0}], "weekly_units": 1.9, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 18183, "avg_ticket": 9799, "total_venta": 1107334, "total_qty": 113}, {"id": "110", "name": "Bolitas Jalapeño X 10", "cost": 3138, "ingredients": [{"name": "Bolitas Jalapeños", "qty": 250.0, "unit": "g", "cost": 3000}, {"name": "Bowl Mediano", "qty": 1.0, "unit": "UN", "cost": 119}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 3.4, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 16797, "avg_ticket": 4894, "total_venta": 1022950, "total_qty": 209}, {"id": "L260", "name": "Bacon Master", "cost": 2668, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Pepinillos", "qty": 15.0, "unit": "g", "cost": 93}, {"name": "Lomo Vetado", "qty": 40.0, "unit": "g", "cost": 445}, {"name": "Sobrecostilla", "qty": 80.0, "unit": "g", "cost": 527}, {"name": "BBQ", "qty": 15.0, "unit": "g", "cost": 210}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}], "weekly_units": 64.5, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 509622, "avg_ticket": 7901, "total_venta": 31036000, "total_qty": 3928}, {"id": "990", "name": "Shrimp Salad", "cost": 2642, "ingredients": [{"name": "Zanahoria", "qty": 50.0, "unit": "g", "cost": 55}, {"name": "Repollo", "qty": 50.0, "unit": "g", "cost": 57}, {"name": "Repollo Morado", "qty": 50.0, "unit": "g", "cost": 57}, {"name": "Camarón Apanado", "qty": 160.0, "unit": "g", "cost": 1544}, {"name": "Limon", "qty": 70.0, "unit": "g", "cost": 154}, {"name": "Lechuga Costina", "qty": 1.0, "unit": "UN", "cost": 515}, {"name": "Bowl Grande", "qty": 1.0, "unit": "UN", "cost": 201}, {"name": "Tenedor", "qty": 1.0, "unit": "UN", "cost": 21}, {"name": "Posillo Salsa", "qty": 2.0, "unit": "UN", "cost": 38}], "weekly_units": 3.2, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 23982, "avg_ticket": 7490, "total_venta": 1460500, "total_qty": 195}, {"id": "L280", "name": "The Lord Of The Rings", "cost": 2519, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Jalapeños", "qty": 18.0, "unit": "g", "cost": 96}, {"name": "Tomate", "qty": 40.0, "unit": "g", "cost": 40}, {"name": "Lechuga", "qty": 20.0, "unit": "g", "cost": 17}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Aro de Cebolla", "qty": 0.2, "unit": "g", "cost": 1}, {"name": "Sobrecostilla", "qty": 80.0, "unit": "g", "cost": 527}, {"name": "Lomo Vetado", "qty": 40.0, "unit": "g", "cost": 445}, {"name": "Chick - Fill -a", "qty": 20.0, "unit": "g", "cost": 0}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}], "weekly_units": 20.7, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 193659, "avg_ticket": 9345, "total_venta": 11793826, "total_qty": 1262}, {"id": "SF040", "name": "Tercio de Libra", "cost": 2041, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Cebolla", "qty": 10.0, "unit": "g", "cost": 6}, {"name": "Pepinillos", "qty": 15.0, "unit": "g", "cost": 93}, {"name": "Lomo Vetado", "qty": 40.0, "unit": "g", "cost": 445}, {"name": "Sobrecostilla", "qty": 80.0, "unit": "g", "cost": 527}, {"name": "Chick - Fill -a", "qty": 20.0, "unit": "g", "cost": 0}], "weekly_units": 0.3, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 2987, "avg_ticket": 10700, "total_venta": 181900, "total_qty": 17}, {"id": "L290", "name": "Cheese Burger", "cost": 2475, "ingredients": [{"name": "Cebolla", "qty": 15.0, "unit": "g", "cost": 9}, {"name": "Queso Cheddar ICB", "qty": 30.0, "unit": "g", "cost": 442}, {"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Ketchup", "qty": 10.0, "unit": "g", "cost": 33}, {"name": "Mostaza", "qty": 10.0, "unit": "g", "cost": 25}, {"name": "Lomo Vetado", "qty": 40.0, "unit": "g", "cost": 445}, {"name": "Sobrecostilla", "qty": 80.0, "unit": "g", "cost": 527}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}], "weekly_units": 30.1, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 218550, "avg_ticket": 7261, "total_venta": 13309708, "total_qty": 1833}, {"id": "L350", "name": "Crispy Chicken", "cost": 2419, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Cebolla Crispy", "qty": 20.0, "unit": "g", "cost": 240}, {"name": "Pollo Truto", "qty": 160.0, "unit": "g", "cost": 786}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Chick - Fill -a", "qty": 20.0, "unit": "g", "cost": 0}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}], "weekly_units": 47.1, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 395649, "avg_ticket": 8401, "total_venta": 24095034, "total_qty": 2868}, {"id": "920", "name": "Avocado Chicken", "cost": 2373, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Pollo Truto", "qty": 160.0, "unit": "g", "cost": 786}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Tomate", "qty": 30.0, "unit": "g", "cost": 30}, {"name": "Palta", "qty": 50.0, "unit": "g", "cost": 250}, {"name": "Cebolla", "qty": 20.0, "unit": "g", "cost": 12}, {"name": "Jalapeños", "qty": 15.0, "unit": "g", "cost": 80}, {"name": "Salsa Jalapeños", "qty": 20.0, "unit": "g", "cost": 0}, {"name": "Alioli", "qty": 15.0, "unit": "g", "cost": 0}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}], "weekly_units": 12.1, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 107999, "avg_ticket": 8900, "total_venta": 6577132, "total_qty": 739}, {"id": "L370", "name": "Classic Chicken", "cost": 2296, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Pollo Truto", "qty": 160.0, "unit": "g", "cost": 786}, {"name": "Tomate", "qty": 40.0, "unit": "g", "cost": 40}, {"name": "Lechuga", "qty": 15.0, "unit": "g", "cost": 12}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Jalapeños", "qty": 12.0, "unit": "g", "cost": 64}, {"name": "Salsa Jalapeños", "qty": 20.0, "unit": "g", "cost": 0}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}], "weekly_units": 18.5, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 151368, "avg_ticket": 8187, "total_venta": 9218320, "total_qty": 1126}, {"id": "L240", "name": "Honey Mustang", "cost": 2286, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Lomo Vetado", "qty": 40.0, "unit": "g", "cost": 445}, {"name": "Sobrecostilla", "qty": 80.0, "unit": "g", "cost": 527}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Cebolla", "qty": 10.0, "unit": "g", "cost": 6}, {"name": "Pepinillos", "qty": 15.0, "unit": "g", "cost": 93}, {"name": "Honey Mustand", "qty": 25.0, "unit": "g", "cost": 0}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}], "weekly_units": 37.7, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 237359, "avg_ticket": 6299, "total_venta": 14455146, "total_qty": 2295}, {"id": "130", "name": "Bubba Gump Shrimp X6", "cost": 2243, "ingredients": [{"name": "Camarón Apanado", "qty": 216.0, "unit": "g", "cost": 2084}, {"name": "Tenedor", "qty": 1.0, "unit": "UN", "cost": 21}, {"name": "Bowl Mediano", "qty": 1.0, "unit": "UN", "cost": 119}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 8.5, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 38194, "avg_ticket": 4516, "total_venta": 2326102, "total_qty": 515}, {"id": "L220", "name": "Fantastic Burger", "cost": 2198, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Sobrecostilla", "qty": 80.0, "unit": "g", "cost": 527}, {"name": "Lomo Vetado", "qty": 40.0, "unit": "g", "cost": 445}, {"name": "Tomate", "qty": 40.0, "unit": "g", "cost": 40}, {"name": "Lechuga", "qty": 20.0, "unit": "g", "cost": 17}, {"name": "Cebolla Caramelizada", "qty": 40.0, "unit": "g", "cost": 86}, {"name": "Pepinillos", "qty": 15.0, "unit": "g", "cost": 93}, {"name": "Street Sauce", "qty": 20.0, "unit": "g", "cost": 0}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}, {"name": "Vasos Cafe", "qty": 1.0, "unit": "UN", "cost": 54}], "weekly_units": 66.8, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 538463, "avg_ticket": 8061, "total_venta": 32792416, "total_qty": 4068}, {"id": "L340", "name": "The Notorius Big", "cost": 2180, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Aro de Cebolla", "qty": 0.2, "unit": "g", "cost": 1}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Pollo Truto", "qty": 160.0, "unit": "g", "cost": 786}, {"name": "Salsa Jalapeños", "qty": 20.0, "unit": "g", "cost": 0}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}], "weekly_units": 12.9, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 111230, "avg_ticket": 8651, "total_venta": 6773935, "total_qty": 783}, {"id": "SF160", "name": "Chicken Fries", "cost": 2157, "ingredients": [{"name": "Papas Fritas ICB", "qty": 285.0, "unit": "g", "cost": 860}, {"name": "Pollo Truto", "qty": 140.0, "unit": "g", "cost": 688}, {"name": "Salsa Cheddar Ricos", "qty": 41.0, "unit": "g", "cost": 223}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Cebolla Crispy", "qty": 15.0, "unit": "g", "cost": 180}, {"name": "Cebollín", "qty": 6.0, "unit": "g", "cost": 7}, {"name": "Tenedor", "qty": 1.0, "unit": "UN", "cost": 21}, {"name": "Caja Blanca", "qty": 0.0, "unit": "UN", "cost": 0}], "weekly_units": 68.7, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 481997, "avg_ticket": 7017, "total_venta": 29353598, "total_qty": 4183}, {"id": "L310", "name": "Slaw Chicken", "cost": 2094, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Pollo Truto", "qty": 160.0, "unit": "g", "cost": 786}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Pepinillos", "qty": 15.0, "unit": "g", "cost": 93}, {"name": "Coleslow", "qty": 80.0, "unit": "g", "cost": 0}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}], "weekly_units": 43.3, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 363039, "avg_ticket": 8375, "total_venta": 22109077, "total_qty": 2640}, {"id": "L300", "name": "Blue Cheese Chicken", "cost": 2067, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Rucula", "qty": 7.0, "unit": "g", "cost": 84}, {"name": "Champiñón", "qty": 15.0, "unit": "g", "cost": 26}, {"name": "Pollo Truto", "qty": 160.0, "unit": "g", "cost": 786}, {"name": "Cebolla Caramelizada", "qty": 30.0, "unit": "g", "cost": 64}, {"name": "Queso Azul", "qty": 55.0, "unit": "g", "cost": 113}, {"name": "Alioli", "qty": 15.0, "unit": "g", "cost": 0}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}], "weekly_units": 15.5, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 133106, "avg_ticket": 8569, "total_venta": 8106174, "total_qty": 946}, {"id": "L330", "name": "Picky Chicken", "cost": 2001, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Pollo Truto", "qty": 160.0, "unit": "g", "cost": 786}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}], "weekly_units": 35.7, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 175921, "avg_ticket": 4926, "total_venta": 10713603, "total_qty": 2175}, {"id": "250", "name": "Fantastic", "cost": 2000, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}, {"name": "Tomate", "qty": 40.0, "unit": "g", "cost": 40}, {"name": "Lechuga", "qty": 20.0, "unit": "g", "cost": 17}, {"name": "Pepinillos", "qty": 15.0, "unit": "g", "cost": 93}, {"name": "Lomo Vetado", "qty": 40.0, "unit": "g", "cost": 445}, {"name": "Sobrecostilla", "qty": 80.0, "unit": "g", "cost": 527}, {"name": "Cebolla Caramelizada", "qty": 40.0, "unit": "g", "cost": 86}, {"name": "Street Sauce", "qty": 20.0, "unit": "g", "cost": 0}], "weekly_units": 66.8, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 538463, "avg_ticket": 8061, "total_venta": 32792416, "total_qty": 4068}, {"id": "L360", "name": "Korean Chicken", "cost": 1964, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Tocino", "qty": 15.0, "unit": "g", "cost": 178}, {"name": "Pollo Truto", "qty": 160.0, "unit": "g", "cost": 786}, {"name": "Cebollín", "qty": 5.0, "unit": "g", "cost": 6}, {"name": "Korean", "qty": 20.0, "unit": "g", "cost": 0}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Papel Antigrasa", "qty": 1.0, "unit": "UN", "cost": 90}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}], "weekly_units": 0.5, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 2172, "avg_ticket": 4134, "total_venta": 132276, "total_qty": 32}, {"id": "100", "name": "Bolitas Jalapeño X 6", "cost": 1894, "ingredients": [{"name": "Bolitas Jalapeños", "qty": 150.0, "unit": "g", "cost": 1800}, {"name": "Tenedor", "qty": 1.0, "unit": "UN", "cost": 21}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 6.9, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 26980, "avg_ticket": 3921, "total_venta": 1643074, "total_qty": 419}, {"id": "40", "name": "Picky Meat", "cost": 1764, "ingredients": [{"name": "Pan", "qty": 1.0, "unit": "UN", "cost": 571}, {"name": "Lomo Vetado", "qty": 40.0, "unit": "g", "cost": 445}, {"name": "Sobrecostilla", "qty": 80.0, "unit": "g", "cost": 527}, {"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}], "weekly_units": 44.4, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 210830, "avg_ticket": 4748, "total_venta": 12839519, "total_qty": 2704}, {"id": "980", "name": "Chicken Salad", "cost": 1709, "ingredients": [{"name": "Repollo", "qty": 50.0, "unit": "g", "cost": 57}, {"name": "Repollo Morado", "qty": 50.0, "unit": "g", "cost": 57}, {"name": "Zanahoria", "qty": 50.0, "unit": "g", "cost": 55}, {"name": "Pollo Truto", "qty": 120.0, "unit": "g", "cost": 589}, {"name": "Limon", "qty": 70.0, "unit": "g", "cost": 154}, {"name": "Lechuga Costina", "qty": 1.0, "unit": "UN", "cost": 515}, {"name": "Tenedor", "qty": 2.0, "unit": "UN", "cost": 42}, {"name": "Bowl Grande", "qty": 1.0, "unit": "UN", "cost": 201}, {"name": "Posillo Salsa", "qty": 2.0, "unit": "UN", "cost": 38}], "weekly_units": 15.4, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 98799, "avg_ticket": 6428, "total_venta": 6016830, "total_qty": 936}, {"id": "1280", "name": "Chicken Salad Promo", "cost": 1688, "ingredients": [{"name": "Zanahoria", "qty": 50.0, "unit": "g", "cost": 55}, {"name": "Repollo", "qty": 50.0, "unit": "g", "cost": 57}, {"name": "Repollo Morado", "qty": 50.0, "unit": "g", "cost": 57}, {"name": "Pollo Truto", "qty": 120.0, "unit": "g", "cost": 589}, {"name": "Limon", "qty": 70.0, "unit": "g", "cost": 154}, {"name": "Crutones", "qty": 10.0, "unit": "kg", "cost": 0}, {"name": "Lechuga Costina", "qty": 1.0, "unit": "UN", "cost": 515}, {"name": "Tenedor", "qty": 1.0, "unit": "UN", "cost": 21}, {"name": "Bowl Grande", "qty": 1.0, "unit": "UN", "cost": 201}, {"name": "Posillo Salsa", "qty": 2.0, "unit": "UN", "cost": 38}], "weekly_units": 15.4, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 98799, "avg_ticket": 6428, "total_venta": 6016830, "total_qty": 936}, {"id": "SF150", "name": "Chicken Pop", "cost": 1673, "ingredients": [{"name": "Fideos Quifaros", "qty": 240.0, "unit": "g", "cost": 471}, {"name": "Pollo Truto", "qty": 110.0, "unit": "g", "cost": 540}, {"name": "Cebolla Crispy", "qty": 8.0, "unit": "g", "cost": 96}, {"name": "Tocino", "qty": 6.0, "unit": "g", "cost": 71}, {"name": "Salsa Cheddar Ricos", "qty": 50.0, "unit": "g", "cost": 272}, {"name": "Tenedor", "qty": 1.0, "unit": "UN", "cost": 21}, {"name": "Bowl Grande", "qty": 1.0, "unit": "UN", "cost": 201}], "weekly_units": 21.0, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 102987, "avg_ticket": 4908, "total_venta": 6271923, "total_qty": 1278}, {"id": "1240", "name": "Not Chicken", "cost": 1487, "ingredients": [{"name": "Not Burger", "qty": 1.0, "unit": "UN", "cost": 1487}], "weekly_units": 4.6, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 4451, "avg_ticket": 968, "total_venta": 271065, "total_qty": 280}, {"id": "1230", "name": "Not Burger", "cost": 1487, "ingredients": [{"name": "Not Burger", "qty": 1.0, "unit": "UN", "cost": 1487}], "weekly_units": 8.3, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 8088, "avg_ticket": 977, "total_venta": 492535, "total_qty": 504}, {"id": "80", "name": "Empanadas X 16", "cost": 1359, "ingredients": [{"name": "Empanadas Queso", "qty": 15.0, "unit": "UN", "cost": 1080}, {"name": "Caja Blanca", "qty": 1.0, "unit": "UN", "cost": 279}], "weekly_units": 14.4, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 53284, "avg_ticket": 3709, "total_venta": 3245000, "total_qty": 875}, {"id": "120", "name": "Bubba Gump Shrimp X12", "cost": 1199, "ingredients": [{"name": "Camarón Apanado", "qty": 108.0, "unit": "g", "cost": 1042}, {"name": "Bowl Mediano", "qty": 1.0, "unit": "UN", "cost": 119}, {"name": "Posillo Salsa", "qty": 2.0, "unit": "UN", "cost": 38}], "weekly_units": 2.3, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 13666, "avg_ticket": 5905, "total_venta": 832610, "total_qty": 141}, {"id": "EX080", "name": "Ham. de Carne", "cost": 972, "ingredients": [{"name": "Sobrecostilla", "qty": 80.0, "unit": "g", "cost": 527}, {"name": "Lomo Vetado", "qty": 40.0, "unit": "g", "cost": 445}], "weekly_units": 75.5, "via_ingredient": "datos reales Toteat", "cat": "hamburguesas", "weekly_venta": 149828, "avg_ticket": 1985, "total_venta": 9124520, "total_qty": 4596}, {"id": "1290", "name": "BBQ", "cost": 858, "ingredients": [{"name": "BBQ", "qty": 60.0, "unit": "g", "cost": 839}, {"name": "Posillo Salsa", "qty": 1.0, "unit": "UN", "cost": 19}], "weekly_units": 16.7, "via_ingredient": "datos reales Toteat", "cat": "salsas", "weekly_venta": 8404, "avg_ticket": 504, "total_venta": 511833, "total_qty": 1015}, {"id": "EX120", "name": "Doble Pollo", "cost": 786, "ingredients": [{"name": "Pollo Truto", "qty": 160.0, "unit": "g", "cost": 786}], "weekly_units": 2.3, "via_ingredient": "datos reales Toteat", "cat": "pollo", "weekly_venta": 4737, "avg_ticket": 2017, "total_venta": 288467, "total_qty": 143}, {"id": "510", "name": "Crush Zero Lata", "cost": 645, "ingredients": [{"name": "Limon Soda", "qty": 1.0, "unit": "CAN", "cost": 645}], "weekly_units": 0.3, "via_ingredient": "datos reales Toteat", "cat": "bebidas", "weekly_venta": 456, "avg_ticket": 1738, "total_venta": 27800, "total_qty": 16}, {"id": "EX107", "name": "Pap", "cost": 645, "ingredients": [{"name": "Pap", "qty": 1.0, "unit": "CAN", "cost": 645}], "weekly_units": 400.4, "via_ingredient": "datos reales Toteat", "cat": "otros", "weekly_venta": 0, "avg_ticket": 0, "total_venta": 0, "total_qty": 24385}, {"id": "EX105", "name": "Pepsi Zero", "cost": 645, "ingredients": [{"name": "Pepsi Zero", "qty": 1.0, "unit": "CAN", "cost": 645}], "weekly_units": 2.6, "via_ingredient": "datos reales Toteat", "cat": "bebidas", "weekly_venta": 5103, "avg_ticket": 1955, "total_venta": 310800, "total_qty": 159}, {"id": "SF300", "name": "Pepsi Lata", "cost": 644, "ingredients": [{"name": "Pepsi", "qty": 1.0, "unit": "CAN", "cost": 644}], "weekly_units": 36.5, "via_ingredient": "datos reales Toteat", "cat": "bebidas", "weekly_venta": 62386, "avg_ticket": 1711, "total_venta": 3799289, "total_qty": 2221}, {"id": "EX104", "name": "Pepsi", "cost": 644, "ingredients": [{"name": "Pepsi", "qty": 1.0, "unit": "CAN", "cost": 644}], "weekly_units": 2.6, "via_ingredient": "datos reales Toteat", "cat": "bebidas", "weekly_venta": 5103, "avg_ticket": 1955, "total_venta": 310800, "total_qty": 159}, {"id": "EX106", "name": "Crush", "cost": 615, "ingredients": [{"name": "Crush", "qty": 1.0, "unit": "CAN", "cost": 615}], "weekly_units": 0.3, "via_ingredient": "datos reales Toteat", "cat": "bebidas", "weekly_venta": 456, "avg_ticket": 1738, "total_venta": 27800, "total_qty": 16}, {"id": "EX102", "name": "Mac & Cheese", "cost": 556, "ingredients": [{"name": "Fideos Quifaros", "qty": 35.0, "unit": "g", "cost": 69}, {"name": "Salsa Cheddar Ricos", "qty": 20.0, "unit": "g", "cost": 109}, {"name": "Tocino", "qty": 10.0, "unit": "g", "cost": 119}, {"name": "Cebolla Crispy", "qty": 10.0, "unit": "g", "cost": 120}, {"name": "Tenedor", "qty": 1.0, "unit": "UN", "cost": 21}, {"name": "Bowl Mediano", "qty": 1.0, "unit": "UN", "cost": 119}], "weekly_units": 55.1, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 0, "avg_ticket": 0, "total_venta": 0, "total_qty": 3354}, {"id": "50", "name": "Empanadas X 8", "cost": 457, "ingredients": [{"name": "Empanadas Queso", "qty": 8.0, "unit": "UN", "cost": 576}, {"name": "Bowl Mediano", "qty": -1.0, "unit": "UN", "cost": -119}], "weekly_units": 30.5, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 81705, "avg_ticket": 2680, "total_venta": 4975838, "total_qty": 1857}, {"id": "EX040", "name": "Tocino", "cost": 357, "ingredients": [{"name": "Tocino", "qty": 30.0, "unit": "g", "cost": 357}], "weekly_units": 6.8, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 8881, "avg_ticket": 1313, "total_venta": 540857, "total_qty": 412}, {"id": "EX103", "name": "Papas Fritas", "cost": 356, "ingredients": [{"name": "Papas Fritas ICB", "qty": 100.0, "unit": "g", "cost": 302}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}], "weekly_units": 400.4, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 0, "avg_ticket": 0, "total_venta": 0, "total_qty": 24385}, {"id": "EX110", "name": "Con Papas Fritas", "cost": 356, "ingredients": [{"name": "Papas Fritas ICB", "qty": 100.0, "unit": "g", "cost": 302}, {"name": "Vaso Cafe", "qty": 1.0, "unit": "UN", "cost": 54}], "weekly_units": 400.4, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 0, "avg_ticket": 0, "total_venta": 0, "total_qty": 24385}, {"id": "EX010", "name": "Queso Cheddar", "cost": 221, "ingredients": [{"name": "Queso Cheddar ICB", "qty": 15.0, "unit": "g", "cost": 221}], "weekly_units": 2.2, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 1791, "avg_ticket": 808, "total_venta": 109095, "total_qty": 135}, {"id": "EX050", "name": "Tomate", "cost": 100, "ingredients": [{"name": "Tomate", "qty": 100.0, "unit": "g", "cost": 100}], "weekly_units": 3.9, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 1794, "avg_ticket": 457, "total_venta": 109279, "total_qty": 239}, {"id": "910", "name": "Cebolla Caramelizada", "cost": 64, "ingredients": [{"name": "Cebolla Caramelizada", "qty": 30.0, "unit": "g", "cost": 64}], "weekly_units": 2.6, "via_ingredient": "datos reales Toteat", "cat": "acompañamientos", "weekly_venta": 2372, "avg_ticket": 908, "total_venta": 144435, "total_qty": 159}];
-const SALES={"monthly": [{"month":"Enero 2025","venta_bruta":32814401,"venta_neta":32021953,"venta_sin_iva":26909205,"costo":9497572,"margen_pct":64.7,"days_active":31,"avg_daily_sin_iva":868039,"delivery_ya":3421798,"delivery_uber":1363239,"delivery_transferencia":3142208},{"month":"Febrero 2025","venta_bruta":29867684,"venta_neta":28850004,"venta_sin_iva":24243701,"costo":8010928,"margen_pct":67.0,"days_active":28,"avg_daily_sin_iva":865846,"delivery_ya":3222774,"delivery_uber":1081002,"delivery_transferencia":2248860},{"month":"Marzo 2025","venta_bruta":30564862,"venta_neta":29774737,"venta_sin_iva":25020785,"costo":8053612,"margen_pct":67.8,"days_active":31,"avg_daily_sin_iva":807122,"delivery_ya":4493809,"delivery_uber":1207616,"delivery_transferencia":2994535},{"month":"Abril 2025","venta_bruta":31160474,"venta_neta":30348826,"venta_sin_iva":25503217,"costo":8870837,"margen_pct":65.2,"days_active":30,"avg_daily_sin_iva":850107,"delivery_ya":4619670,"delivery_uber":2292129,"delivery_transferencia":3096312},{"month":"Mayo 2025","venta_bruta":49266738,"venta_neta":43922313,"venta_sin_iva":36909510,"costo":11358918,"margen_pct":69.2,"days_active":31,"avg_daily_sin_iva":1190629,"delivery_ya":11127449,"delivery_uber":2435102,"delivery_transferencia":4470724},{"month":"Junio 2025","venta_bruta":41538453,"venta_neta":37622484,"venta_sin_iva":31615530,"costo":9378822,"margen_pct":70.3,"days_active":30,"avg_daily_sin_iva":1053851,"delivery_ya":9370782,"delivery_uber":2012785,"delivery_transferencia":2284769},{"month":"Julio 2025","venta_bruta":47518435,"venta_neta":43201671,"venta_sin_iva":36303925,"costo":10808607,"margen_pct":70.2,"days_active":31,"avg_daily_sin_iva":1171094,"delivery_ya":9274367,"delivery_uber":2140723,"delivery_transferencia":3263337},{"month":"Agosto 2025","venta_bruta":43628779,"venta_neta":39957398,"venta_sin_iva":33577645,"costo":10147257,"margen_pct":69.8,"days_active":31,"avg_daily_sin_iva":1083150,"delivery_ya":8759735,"delivery_uber":1579052,"delivery_transferencia":2244872},{"month":"Septiembre 2025","venta_bruta":40401296,"venta_neta":37698679,"venta_sin_iva":31679561,"costo":9969608,"margen_pct":68.5,"days_active":30,"avg_daily_sin_iva":1055985,"delivery_ya":7585897,"delivery_uber":1343910,"delivery_transferencia":2179178},{"month":"Octubre 2025","venta_bruta":38676749,"venta_neta":35626409,"venta_sin_iva":29938161,"costo":8974979,"margen_pct":70.0,"days_active":31,"avg_daily_sin_iva":965747,"delivery_ya":8466753,"delivery_uber":1702535,"delivery_transferencia":2418042},{"month":"Noviembre 2025","venta_bruta":38163835,"venta_neta":35804297,"venta_sin_iva":30087644,"costo":9469156,"margen_pct":68.5,"days_active":30,"avg_daily_sin_iva":1002921,"delivery_ya":7567192,"delivery_uber":1355217,"delivery_transferencia":2232413},{"month":"Diciembre 2025","venta_bruta":39009027,"venta_neta":36582689,"venta_sin_iva":30741755,"costo":9700177,"margen_pct":68.4,"days_active":31,"avg_daily_sin_iva":991670,"delivery_ya":7321474,"delivery_uber":989995,"delivery_transferencia":2848210},{"month":"Enero 2026","venta_bruta":34651843,"venta_neta":33028040,"venta_sin_iva":27754655,"costo":8693029,"margen_pct":68.7,"days_active":30,"avg_daily_sin_iva":925155,"delivery_ya":6169148,"delivery_uber":712442,"delivery_transferencia":2515708},{"month":"Febrero 2026","venta_bruta":24068809,"venta_neta":22288296,"venta_sin_iva":18729661,"costo":5645651,"margen_pct":69.9,"days_active":22,"avg_daily_sin_iva":851348,"delivery_ya":4737848,"delivery_uber":311231,"delivery_transferencia":1787467}], "daily": [{"date": "miércoles 1", "month": "Enero 2025", "month_idx": 0, "venta_neta": 2208848, "margen_pct": 60.8, "costo": 727450}, {"date": "jueves 2", "month": "Enero 2025", "month_idx": 0, "venta_neta": 998787, "margen_pct": 57.8, "costo": 353836}, {"date": "viernes 3", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1241288, "margen_pct": 61.4, "costo": 402946}, {"date": "sábado 4", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1019403, "margen_pct": 65.4, "costo": 296574}, {"date": "domingo 5", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1235740, "margen_pct": 55.1, "costo": 466705}, {"date": "lunes 6", "month": "Enero 2025", "month_idx": 0, "venta_neta": 929442, "margen_pct": 58.9, "costo": 321209}, {"date": "martes 7", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1086076, "margen_pct": 63.9, "costo": 329556}, {"date": "miércoles 8", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1129954, "margen_pct": 64.5, "costo": 337602}, {"date": "jueves 9", "month": "Enero 2025", "month_idx": 0, "venta_neta": 722855, "margen_pct": 64.2, "costo": 217358}, {"date": "viernes 10", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1187330, "margen_pct": 62.5, "costo": 373782}, {"date": "sábado 11", "month": "Enero 2025", "month_idx": 0, "venta_neta": 993650, "margen_pct": 61.7, "costo": 319636}, {"date": "domingo 12", "month": "Enero 2025", "month_idx": 0, "venta_neta": 922642, "margen_pct": 65.4, "costo": 268444}, {"date": "lunes 13", "month": "Enero 2025", "month_idx": 0, "venta_neta": 853746, "margen_pct": 64.6, "costo": 254121}, {"date": "martes 14", "month": "Enero 2025", "month_idx": 0, "venta_neta": 893021, "margen_pct": 59.6, "costo": 303348}, {"date": "miércoles 15", "month": "Enero 2025", "month_idx": 0, "venta_neta": 848720, "margen_pct": 65.1, "costo": 249104}, {"date": "jueves 16", "month": "Enero 2025", "month_idx": 0, "venta_neta": 760797, "margen_pct": 70.0, "costo": 191598}, {"date": "viernes 17", "month": "Enero 2025", "month_idx": 0, "venta_neta": 913993, "margen_pct": 64.1, "costo": 275422}, {"date": "sábado 18", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1283091, "margen_pct": 68.6, "costo": 338440}, {"date": "domingo 19", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1203956, "margen_pct": 67.7, "costo": 326670}, {"date": "lunes 20", "month": "Enero 2025", "month_idx": 0, "venta_neta": 840706, "margen_pct": 68.8, "costo": 220491}, {"date": "martes 21", "month": "Enero 2025", "month_idx": 0, "venta_neta": 949476, "margen_pct": 67.3, "costo": 260552}, {"date": "miércoles 22", "month": "Enero 2025", "month_idx": 0, "venta_neta": 959132, "margen_pct": 74.1, "costo": 209101}, {"date": "jueves 23", "month": "Enero 2025", "month_idx": 0, "venta_neta": 813994, "margen_pct": 73.2, "costo": 183242}, {"date": "viernes 24", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1070342, "margen_pct": 66.7, "costo": 299826}, {"date": "sábado 25", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1157430, "margen_pct": 65.9, "costo": 331561}, {"date": "domingo 26", "month": "Enero 2025", "month_idx": 0, "venta_neta": 1358900, "margen_pct": 68.5, "costo": 359460}, {"date": "lunes 27", "month": "Enero 2025", "month_idx": 0, "venta_neta": 689980, "margen_pct": 66.1, "costo": 196315}, {"date": "martes 28", "month": "Enero 2025", "month_idx": 0, "venta_neta": 986981, "margen_pct": 60.9, "costo": 324084}, {"date": "miércoles 29", "month": "Enero 2025", "month_idx": 0, "venta_neta": 919087, "margen_pct": 65.5, "costo": 266248}, {"date": "jueves 30", "month": "Enero 2025", "month_idx": 0, "venta_neta": 897222, "margen_pct": 67.2, "costo": 247264}, {"date": "viernes 31", "month": "Enero 2025", "month_idx": 0, "venta_neta": 945364, "margen_pct": 69.1, "costo": 245627}, {"date": "sábado 1", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1239012, "margen_pct": 61.3, "costo": 402811}, {"date": "domingo 2", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1592752, "margen_pct": 62.9, "costo": 496131}, {"date": "lunes 3", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 824648, "margen_pct": 65.5, "costo": 239067}, {"date": "martes 4", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 910444, "margen_pct": 69.7, "costo": 231551}, {"date": "miércoles 5", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 961811, "margen_pct": 66.8, "costo": 268221}, {"date": "jueves 6", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 946636, "margen_pct": 67.5, "costo": 258508}, {"date": "viernes 7", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1179449, "margen_pct": 68.2, "costo": 315204}, {"date": "sábado 8", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1015941, "margen_pct": 67.5, "costo": 277425}, {"date": "domingo 9", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1307551, "margen_pct": 66.3, "costo": 369845}, {"date": "lunes 10", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 672543, "margen_pct": 56.7, "costo": 244553}, {"date": "martes 11", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1085653, "margen_pct": 71.0, "costo": 264070}, {"date": "miércoles 12", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 897978, "margen_pct": 66.4, "costo": 253822}, {"date": "jueves 13", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1147383, "margen_pct": 73.5, "costo": 255708}, {"date": "viernes 14", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1154145, "margen_pct": 68.3, "costo": 307816}, {"date": "sábado 15", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1271299, "margen_pct": 69.3, "costo": 327481}, {"date": "domingo 16", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1142793, "margen_pct": 68.8, "costo": 299152}, {"date": "lunes 17", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 943788, "margen_pct": 65.1, "costo": 276499}, {"date": "martes 18", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 878637, "margen_pct": 64.5, "costo": 261978}, {"date": "miércoles 19", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 771459, "margen_pct": 68.8, "costo": 202007}, {"date": "jueves 20", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 774410, "margen_pct": 71.8, "costo": 183184}, {"date": "viernes 21", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1487841, "margen_pct": 62.2, "costo": 472619}, {"date": "sábado 22", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 886294, "margen_pct": 62.6, "costo": 278831}, {"date": "domingo 23", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1211340, "margen_pct": 68.7, "costo": 318335}, {"date": "lunes 24", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1140221, "margen_pct": 76.2, "costo": 228451}, {"date": "martes 25", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 144230, "margen_pct": 61.2, "costo": 46960}, {"date": "miércoles 26", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1025740, "margen_pct": 60.4, "costo": 341754}, {"date": "jueves 27", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1021524, "margen_pct": 65.9, "costo": 292571}, {"date": "viernes 28", "month": "Febrero 2025", "month_idx": 1, "venta_neta": 1214482, "margen_pct": 71.0, "costo": 296374}, {"date": "sábado 1", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1297061, "margen_pct": 68.6, "costo": 342482}, {"date": "domingo 2", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1304187, "margen_pct": 68.1, "costo": 349930}, {"date": "lunes 3", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1136105, "margen_pct": 61.5, "costo": 367465}, {"date": "martes 4", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 814660, "margen_pct": 69.5, "costo": 209153}, {"date": "miércoles 5", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 766278, "margen_pct": 70.5, "costo": 189952}, {"date": "jueves 6", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 847036, "margen_pct": 74.9, "costo": 178675}, {"date": "viernes 7", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1378020, "margen_pct": 69.3, "costo": 355959}, {"date": "sábado 8", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1197632, "margen_pct": 75.2, "costo": 249550}, {"date": "domingo 9", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1034950, "margen_pct": 70.3, "costo": 258515}, {"date": "lunes 10", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 763520, "margen_pct": 69.5, "costo": 195687}, {"date": "martes 11", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 804020, "margen_pct": 60.4, "costo": 267546}, {"date": "miércoles 12", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 746050, "margen_pct": 69.2, "costo": 192858}, {"date": "jueves 13", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 877505, "margen_pct": 67.6, "costo": 238986}, {"date": "viernes 14", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1248026, "margen_pct": 68.1, "costo": 334113}, {"date": "sábado 15", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1278306, "margen_pct": 64.2, "costo": 384776}, {"date": "domingo 16", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1050127, "margen_pct": 64.1, "costo": 316759}, {"date": "lunes 17", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 561794, "margen_pct": 71.6, "costo": 134237}, {"date": "martes 18", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 749210, "margen_pct": 68.1, "costo": 201082}, {"date": "miércoles 19", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 622380, "margen_pct": 62.3, "costo": 197387}, {"date": "jueves 20", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 669791, "margen_pct": 75.5, "costo": 137608}, {"date": "viernes 21", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1153998, "margen_pct": 65.2, "costo": 336973}, {"date": "sábado 22", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1067700, "margen_pct": 67.8, "costo": 288860}, {"date": "domingo 23", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1201341, "margen_pct": 72.4, "costo": 278708}, {"date": "lunes 24", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 612350, "margen_pct": 67.2, "costo": 169028}, {"date": "martes 25", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 562118, "margen_pct": 63.7, "costo": 171459}, {"date": "miércoles 26", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 452180, "margen_pct": 70.2, "costo": 113053}, {"date": "jueves 27", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 833890, "margen_pct": 66.2, "costo": 237082}, {"date": "viernes 28", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1251216, "margen_pct": 67.8, "costo": 338242}, {"date": "sábado 29", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1299053, "margen_pct": 69.5, "costo": 333254}, {"date": "domingo 30", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 1297373, "margen_pct": 70.2, "costo": 325459}, {"date": "lunes 31", "month": "Marzo 2025", "month_idx": 2, "venta_neta": 896860, "margen_pct": 52.4, "costo": 358774}, {"date": "martes 1", "month": "Abril 2025", "month_idx": 3, "venta_neta": 979968, "margen_pct": 68.9, "costo": 256184}, {"date": "miércoles 2", "month": "Abril 2025", "month_idx": 3, "venta_neta": 919180, "margen_pct": 69.3, "costo": 236827}, {"date": "jueves 3", "month": "Abril 2025", "month_idx": 3, "venta_neta": 827040, "margen_pct": 67.1, "costo": 228826}, {"date": "viernes 4", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1388560, "margen_pct": 70.8, "costo": 341326}, {"date": "sábado 5", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1515934, "margen_pct": 64.0, "costo": 458301}, {"date": "domingo 6", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1057710, "margen_pct": 65.9, "costo": 302968}, {"date": "lunes 7", "month": "Abril 2025", "month_idx": 3, "venta_neta": 734864, "margen_pct": 67.7, "costo": 199380}, {"date": "martes 8", "month": "Abril 2025", "month_idx": 3, "venta_neta": 637870, "margen_pct": 64.8, "costo": 188571}, {"date": "miércoles 9", "month": "Abril 2025", "month_idx": 3, "venta_neta": 694880, "margen_pct": 66.0, "costo": 198244}, {"date": "jueves 10", "month": "Abril 2025", "month_idx": 3, "venta_neta": 805266, "margen_pct": 56.3, "costo": 295918}, {"date": "viernes 11", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1303084, "margen_pct": 63.9, "costo": 395562}, {"date": "sábado 12", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1537605, "margen_pct": 68.0, "costo": 414076}, {"date": "domingo 13", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1384504, "margen_pct": 69.1, "costo": 359311}, {"date": "lunes 14", "month": "Abril 2025", "month_idx": 3, "venta_neta": 531000, "margen_pct": 57.6, "costo": 189375}, {"date": "martes 15", "month": "Abril 2025", "month_idx": 3, "venta_neta": 625040, "margen_pct": 61.2, "costo": 203986}, {"date": "miércoles 16", "month": "Abril 2025", "month_idx": 3, "venta_neta": 841769, "margen_pct": 69.7, "costo": 214711}, {"date": "jueves 17", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1325291, "margen_pct": 65.7, "costo": 382399}, {"date": "viernes 18", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1101823, "margen_pct": 66.5, "costo": 310019}, {"date": "sábado 19", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1308157, "margen_pct": 64.1, "costo": 395064}, {"date": "domingo 20", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1434198, "margen_pct": 61.8, "costo": 460731}, {"date": "lunes 21", "month": "Abril 2025", "month_idx": 3, "venta_neta": 695155, "margen_pct": 66.0, "costo": 198453}, {"date": "martes 22", "month": "Abril 2025", "month_idx": 3, "venta_neta": 581928, "margen_pct": 61.9, "costo": 186447}, {"date": "miércoles 23", "month": "Abril 2025", "month_idx": 3, "venta_neta": 698614, "margen_pct": 63.8, "costo": 212380}, {"date": "jueves 24", "month": "Abril 2025", "month_idx": 3, "venta_neta": 674870, "margen_pct": 62.9, "costo": 210305}, {"date": "viernes 25", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1306501, "margen_pct": 61.6, "costo": 421443}, {"date": "sábado 26", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1170926, "margen_pct": 63.2, "costo": 362065}, {"date": "domingo 27", "month": "Abril 2025", "month_idx": 3, "venta_neta": 979296, "margen_pct": 64.2, "costo": 294549}, {"date": "lunes 28", "month": "Abril 2025", "month_idx": 3, "venta_neta": 603430, "margen_pct": 62.8, "costo": 188551}, {"date": "martes 29", "month": "Abril 2025", "month_idx": 3, "venta_neta": 774202, "margen_pct": 66.3, "costo": 219239}, {"date": "miércoles 30", "month": "Abril 2025", "month_idx": 3, "venta_neta": 1910161, "margen_pct": 66.0, "costo": 545626}, {"date": "jueves 1", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 2262148, "margen_pct": 67.2, "costo": 623122}, {"date": "viernes 2", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1330711, "margen_pct": 65.7, "costo": 383465}, {"date": "sábado 3", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1471936, "margen_pct": 72.0, "costo": 346298}, {"date": "domingo 4", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1800539, "margen_pct": 68.7, "costo": 473104}, {"date": "martes 6", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 917860, "margen_pct": 65.6, "costo": 265248}, {"date": "miércoles 7", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1008208, "margen_pct": 75.2, "costo": 210115}, {"date": "jueves 8", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1173815, "margen_pct": 67.5, "costo": 320821}, {"date": "viernes 9", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1364287, "margen_pct": 69.9, "costo": 345516}, {"date": "sábado 10", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1309048, "margen_pct": 72.4, "costo": 303377}, {"date": "domingo 11", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1286428, "margen_pct": 71.2, "costo": 311533}, {"date": "lunes 12", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 895624, "margen_pct": 73.0, "costo": 203447}, {"date": "martes 13", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 723220, "margen_pct": 67.0, "costo": 200377}, {"date": "jueves 15", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1442729, "margen_pct": 73.9, "costo": 315948}, {"date": "viernes 16", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1439562, "margen_pct": 69.1, "costo": 374046}, {"date": "sábado 17", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1654621, "margen_pct": 71.7, "costo": 393939}, {"date": "domingo 18", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1585465, "margen_pct": 71.1, "costo": 385619}, {"date": "martes 20", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1406960, "margen_pct": 72.1, "costo": 329835}, {"date": "miércoles 21", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1360418, "margen_pct": 71.8, "costo": 321993}, {"date": "jueves 22", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 809377, "margen_pct": 69.8, "costo": 205170}, {"date": "viernes 23", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1245764, "margen_pct": 65.4, "costo": 361916}, {"date": "sábado 24", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1505478, "margen_pct": 70.3, "costo": 375969}, {"date": "domingo 25", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1479837, "margen_pct": 73.9, "costo": 324759}, {"date": "lunes 26", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 880499, "margen_pct": 67.1, "costo": 243674}, {"date": "martes 27", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 781488, "margen_pct": 78.2, "costo": 143062}, {"date": "miércoles 28", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 3361213, "margen_pct": 63.9, "costo": 1019401}, {"date": "jueves 29", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1125903, "margen_pct": 68.4, "costo": 298659}, {"date": "viernes 30", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1562604, "margen_pct": 67.8, "costo": 422529}, {"date": "sábado 31", "month": "Mayo 2025", "month_idx": 4, "venta_neta": 1804750, "margen_pct": 68.3, "costo": 481024}, {"date": "domingo 1", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1980392, "margen_pct": 68.6, "costo": 522275}, {"date": "lunes 2", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1394210, "margen_pct": 66.1, "costo": 397494}, {"date": "martes 3", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1557219, "margen_pct": 65.2, "costo": 455183}, {"date": "miércoles 4", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1176796, "margen_pct": 66.0, "costo": 335822}, {"date": "jueves 5", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1284619, "margen_pct": 62.2, "costo": 408204}, {"date": "viernes 6", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1600420, "margen_pct": 68.5, "costo": 424057}, {"date": "sábado 7", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1618461, "margen_pct": 70.0, "costo": 407952}, {"date": "domingo 8", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1788770, "margen_pct": 73.1, "costo": 404753}, {"date": "lunes 9", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1036551, "margen_pct": 74.3, "costo": 223555}, {"date": "martes 10", "month": "Junio 2025", "month_idx": 5, "venta_neta": 919557, "margen_pct": 68.4, "costo": 244285}, {"date": "miércoles 11", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1324556, "margen_pct": 72.0, "costo": 312079}, {"date": "jueves 12", "month": "Junio 2025", "month_idx": 5, "venta_neta": 655542, "margen_pct": 69.4, "costo": 168500}, {"date": "viernes 13", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1454140, "margen_pct": 73.0, "costo": 329455}, {"date": "sábado 14", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1816710, "margen_pct": 73.0, "costo": 413009}, {"date": "domingo 15", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1317547, "margen_pct": 71.6, "costo": 314041}, {"date": "lunes 16", "month": "Junio 2025", "month_idx": 5, "venta_neta": 472240, "margen_pct": 73.1, "costo": 106590}, {"date": "martes 17", "month": "Junio 2025", "month_idx": 5, "venta_neta": 718592, "margen_pct": 71.5, "costo": 172209}, {"date": "miércoles 18", "month": "Junio 2025", "month_idx": 5, "venta_neta": 913993, "margen_pct": 75.5, "costo": 188012}, {"date": "jueves 19", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1386110, "margen_pct": 70.6, "costo": 342825}, {"date": "viernes 20", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1249131, "margen_pct": 68.0, "costo": 335848}, {"date": "sábado 21", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1369619, "margen_pct": 68.9, "costo": 358269}, {"date": "domingo 22", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1360203, "margen_pct": 67.9, "costo": 366929}, {"date": "lunes 23", "month": "Junio 2025", "month_idx": 5, "venta_neta": 912358, "margen_pct": 68.9, "costo": 238261}, {"date": "martes 24", "month": "Junio 2025", "month_idx": 5, "venta_neta": 836562, "margen_pct": 70.9, "costo": 204874}, {"date": "miércoles 25", "month": "Junio 2025", "month_idx": 5, "venta_neta": 840988, "margen_pct": 71.0, "costo": 205119}, {"date": "jueves 26", "month": "Junio 2025", "month_idx": 5, "venta_neta": 979170, "margen_pct": 66.5, "costo": 275891}, {"date": "viernes 27", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1019860, "margen_pct": 77.5, "costo": 192734}, {"date": "sábado 28", "month": "Junio 2025", "month_idx": 5, "venta_neta": 1557441, "margen_pct": 68.3, "costo": 414706}, {"date": "domingo 29", "month": "Junio 2025", "month_idx": 5, "venta_neta": 2070922, "margen_pct": 72.7, "costo": 475298}, {"date": "lunes 30", "month": "Junio 2025", "month_idx": 5, "venta_neta": 942585, "margen_pct": 71.5, "costo": 225626}, {"date": "martes 1", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1446680, "margen_pct": 67.9, "costo": 390727}, {"date": "miércoles 2", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1652147, "margen_pct": 70.8, "costo": 405318}, {"date": "jueves 3", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1900214, "margen_pct": 69.1, "costo": 493874}, {"date": "viernes 4", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1867140, "margen_pct": 64.0, "costo": 564047}, {"date": "sábado 5", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1740850, "margen_pct": 70.0, "costo": 439153}, {"date": "domingo 6", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1738785, "margen_pct": 69.5, "costo": 445428}, {"date": "lunes 7", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1490826, "margen_pct": 71.5, "costo": 356993}, {"date": "martes 8", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1502219, "margen_pct": 68.0, "costo": 404500}, {"date": "miércoles 9", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1385040, "margen_pct": 68.6, "costo": 364944}, {"date": "jueves 10", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1466016, "margen_pct": 75.4, "costo": 303077}, {"date": "viernes 11", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1485960, "margen_pct": 68.9, "costo": 388742}, {"date": "sábado 12", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1457078, "margen_pct": 70.5, "costo": 360824}, {"date": "domingo 13", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1255512, "margen_pct": 69.7, "costo": 319516}, {"date": "martes 15", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1156077, "margen_pct": 72.8, "costo": 263882}, {"date": "miércoles 16", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1425850, "margen_pct": 76.1, "costo": 286664}, {"date": "jueves 17", "month": "Julio 2025", "month_idx": 6, "venta_neta": 933879, "margen_pct": 74.8, "costo": 198051}, {"date": "viernes 18", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1322260, "margen_pct": 70.2, "costo": 331577}, {"date": "sábado 19", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1890878, "margen_pct": 73.5, "costo": 421742}, {"date": "domingo 20", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1669904, "margen_pct": 68.6, "costo": 440029}, {"date": "lunes 21", "month": "Julio 2025", "month_idx": 6, "venta_neta": 878238, "margen_pct": 68.9, "costo": 229835}, {"date": "martes 22", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1050100, "margen_pct": 70.5, "costo": 260623}, {"date": "miércoles 23", "month": "Julio 2025", "month_idx": 6, "venta_neta": 853890, "margen_pct": 74.2, "costo": 185345}, {"date": "jueves 24", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1042814, "margen_pct": 70.3, "costo": 260207}, {"date": "viernes 25", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1451902, "margen_pct": 72.3, "costo": 338493}, {"date": "sábado 26", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1616814, "margen_pct": 73.8, "costo": 355508}, {"date": "domingo 27", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1367199, "margen_pct": 68.8, "costo": 358324}, {"date": "lunes 28", "month": "Julio 2025", "month_idx": 6, "venta_neta": 832572, "margen_pct": 69.5, "costo": 213156}, {"date": "martes 29", "month": "Julio 2025", "month_idx": 6, "venta_neta": 806592, "margen_pct": 67.8, "costo": 218205}, {"date": "jueves 31", "month": "Julio 2025", "month_idx": 6, "venta_neta": 1094590, "margen_pct": 67.7, "costo": 297077}, {"date": "viernes 1", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 2165294, "margen_pct": 68.7, "costo": 570412}, {"date": "sábado 2", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 2127972, "margen_pct": 69.8, "costo": 539368}, {"date": "domingo 3", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 2007050, "margen_pct": 67.8, "costo": 543346}, {"date": "lunes 4", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1084320, "margen_pct": 68.1, "costo": 290803}, {"date": "martes 5", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1034050, "margen_pct": 70.2, "costo": 258736}, {"date": "miércoles 6", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1085320, "margen_pct": 69.0, "costo": 283074}, {"date": "jueves 7", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1296169, "margen_pct": 69.2, "costo": 335978}, {"date": "viernes 8", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1477318, "margen_pct": 67.5, "costo": 403121}, {"date": "sábado 9", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1340215, "margen_pct": 70.2, "costo": 335957}, {"date": "domingo 10", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 2521170, "margen_pct": 71.7, "costo": 600210}, {"date": "lunes 11", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1127320, "margen_pct": 66.7, "costo": 315756}, {"date": "martes 12", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1416843, "margen_pct": 70.0, "costo": 356985}, {"date": "miércoles 13", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1230515, "margen_pct": 72.8, "costo": 281638}, {"date": "jueves 14", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1324385, "margen_pct": 70.2, "costo": 331181}, {"date": "viernes 15", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1229050, "margen_pct": 73.0, "costo": 279244}, {"date": "sábado 16", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1601110, "margen_pct": 73.8, "costo": 353157}, {"date": "domingo 17", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 683340, "margen_pct": 62.6, "costo": 214561}, {"date": "lunes 18", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 762340, "margen_pct": 72.0, "costo": 179285}, {"date": "martes 19", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1033300, "margen_pct": 71.9, "costo": 244235}, {"date": "miércoles 20", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 922793, "margen_pct": 67.7, "costo": 250556}, {"date": "jueves 21", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 848370, "margen_pct": 69.1, "costo": 220244}, {"date": "viernes 22", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1292712, "margen_pct": 68.5, "costo": 342765}, {"date": "sábado 23", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1378632, "margen_pct": 66.3, "costo": 390702}, {"date": "domingo 24", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1497690, "margen_pct": 69.4, "costo": 384685}, {"date": "lunes 25", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 855302, "margen_pct": 73.3, "costo": 191658}, {"date": "martes 26", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 641900, "margen_pct": 69.3, "costo": 165822}, {"date": "miércoles 27", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 940750, "margen_pct": 71.4, "costo": 226163}, {"date": "jueves 28", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 873630, "margen_pct": 73.5, "costo": 194222}, {"date": "viernes 29", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1424526, "margen_pct": 68.6, "costo": 375875}, {"date": "sábado 30", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1838312, "margen_pct": 72.2, "costo": 429363}, {"date": "domingo 31", "month": "Agosto 2025", "month_idx": 7, "venta_neta": 1464732, "margen_pct": 70.6, "costo": 361648}, {"date": "lunes 1", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1717068, "margen_pct": 68.9, "costo": 448269}, {"date": "martes 2", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1549734, "margen_pct": 67.8, "costo": 419932}, {"date": "miércoles 3", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1611919, "margen_pct": 70.8, "costo": 395335}, {"date": "jueves 4", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1259783, "margen_pct": 64.0, "costo": 380699}, {"date": "viernes 5", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1711150, "margen_pct": 68.4, "costo": 454937}, {"date": "sábado 6", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1921360, "margen_pct": 66.4, "costo": 542623}, {"date": "domingo 7", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1471338, "margen_pct": 69.1, "costo": 381550}, {"date": "lunes 8", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 962225, "margen_pct": 71.3, "costo": 231903}, {"date": "martes 9", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 903977, "margen_pct": 65.2, "costo": 264399}, {"date": "miércoles 10", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1171715, "margen_pct": 68.0, "costo": 315489}, {"date": "jueves 11", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1285954, "margen_pct": 67.6, "costo": 350287}, {"date": "viernes 12", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1457924, "margen_pct": 66.6, "costo": 409180}, {"date": "sábado 13", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1654090, "margen_pct": 66.3, "costo": 468559}, {"date": "domingo 14", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1589524, "margen_pct": 70.6, "costo": 392799}, {"date": "lunes 15", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 971095, "margen_pct": 70.9, "costo": 237259}, {"date": "martes 16", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1057922, "margen_pct": 66.8, "costo": 294870}, {"date": "miércoles 17", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1208905, "margen_pct": 70.7, "costo": 297611}, {"date": "viernes 19", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1735894, "margen_pct": 71.3, "costo": 418677}, {"date": "sábado 20", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 992846, "margen_pct": 71.4, "costo": 238849}, {"date": "domingo 21", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1275144, "margen_pct": 73.5, "costo": 283765}, {"date": "lunes 22", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 569961, "margen_pct": 71.0, "costo": 138851}, {"date": "martes 23", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 835800, "margen_pct": 71.0, "costo": 203704}, {"date": "miércoles 24", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 787652, "margen_pct": 70.6, "costo": 194521}, {"date": "jueves 25", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 899060, "margen_pct": 68.8, "costo": 235429}, {"date": "viernes 26", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1339471, "margen_pct": 71.9, "costo": 316368}, {"date": "sábado 27", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 1210335, "margen_pct": 67.3, "costo": 332300}, {"date": "domingo 28", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 975572, "margen_pct": 71.0, "costo": 237929}, {"date": "lunes 29", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 647875, "margen_pct": 65.6, "costo": 187109}, {"date": "martes 30", "month": "Septiembre 2025", "month_idx": 8, "venta_neta": 810580, "margen_pct": 65.6, "costo": 234604}, {"date": "miércoles 1", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1836269, "margen_pct": 66.4, "costo": 518318}, {"date": "jueves 2", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1667277, "margen_pct": 65.3, "costo": 486654}, {"date": "viernes 3", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1953688, "margen_pct": 67.3, "costo": 537417}, {"date": "sábado 4", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1764856, "margen_pct": 68.9, "costo": 461460}, {"date": "domingo 5", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1748900, "margen_pct": 67.8, "costo": 473622}, {"date": "lunes 6", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 991470, "margen_pct": 66.0, "costo": 283502}, {"date": "martes 7", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 836722, "margen_pct": 69.5, "costo": 214278}, {"date": "miércoles 8", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1082401, "margen_pct": 67.1, "costo": 299581}, {"date": "jueves 9", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 885784, "margen_pct": 67.2, "costo": 243998}, {"date": "viernes 10", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1407500, "margen_pct": 70.4, "costo": 350012}, {"date": "sábado 11", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1221560, "margen_pct": 67.2, "costo": 337061}, {"date": "domingo 12", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1331215, "margen_pct": 72.3, "costo": 309724}, {"date": "lunes 13", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 922670, "margen_pct": 74.0, "costo": 201784}, {"date": "martes 14", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 963970, "margen_pct": 64.3, "costo": 289512}, {"date": "miércoles 15", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 883930, "margen_pct": 68.3, "costo": 235456}, {"date": "jueves 16", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 887310, "margen_pct": 71.2, "costo": 214474}, {"date": "viernes 17", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1399727, "margen_pct": 74.4, "costo": 301646}, {"date": "sábado 18", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1200514, "margen_pct": 73.3, "costo": 269470}, {"date": "domingo 19", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1552543, "margen_pct": 71.0, "costo": 378855}, {"date": "lunes 20", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 960427, "margen_pct": 72.3, "costo": 223457}, {"date": "martes 21", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 911870, "margen_pct": 69.6, "costo": 232758}, {"date": "miércoles 22", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 884520, "margen_pct": 64.3, "costo": 265570}, {"date": "jueves 23", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 804380, "margen_pct": 71.8, "costo": 190647}, {"date": "viernes 24", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1000912, "margen_pct": 72.6, "costo": 230625}, {"date": "sábado 25", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1225400, "margen_pct": 65.6, "costo": 354531}, {"date": "domingo 26", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1790049, "margen_pct": 72.3, "costo": 416649}, {"date": "lunes 27", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 566832, "margen_pct": 66.0, "costo": 161812}, {"date": "martes 28", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1055720, "margen_pct": 73.3, "costo": 236554}, {"date": "miércoles 29", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 958145, "margen_pct": 70.2, "costo": 240164}, {"date": "jueves 30", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1332670, "margen_pct": 70.5, "costo": 330621}, {"date": "viernes 31", "month": "Octubre 2025", "month_idx": 9, "venta_neta": 1688872, "margen_pct": 68.8, "costo": 442154}, {"date": "sábado 1", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1763318, "margen_pct": 68.4, "costo": 467898}, {"date": "domingo 2", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 577480, "margen_pct": 65.0, "costo": 170101}, {"date": "lunes 3", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1230518, "margen_pct": 69.0, "costo": 320325}, {"date": "martes 4", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1249320, "margen_pct": 71.8, "costo": 296221}, {"date": "miércoles 5", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1618520, "margen_pct": 69.0, "costo": 421565}, {"date": "jueves 6", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1431610, "margen_pct": 72.8, "costo": 327476}, {"date": "viernes 7", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1290070, "margen_pct": 68.3, "costo": 343924}, {"date": "sábado 8", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1549490, "margen_pct": 70.7, "costo": 380951}, {"date": "domingo 9", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1415264, "margen_pct": 73.2, "costo": 319046}, {"date": "lunes 10", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 989758, "margen_pct": 71.4, "costo": 237706}, {"date": "martes 11", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1069460, "margen_pct": 64.8, "costo": 316380}, {"date": "miércoles 12", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 833209, "margen_pct": 66.0, "costo": 238178}, {"date": "jueves 13", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1154587, "margen_pct": 71.2, "costo": 279618}, {"date": "viernes 14", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1540822, "margen_pct": 67.2, "costo": 424819}, {"date": "sábado 15", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1557146, "margen_pct": 65.8, "costo": 447390}, {"date": "domingo 16", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1362317, "margen_pct": 66.9, "costo": 378707}, {"date": "lunes 17", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 674920, "margen_pct": 65.5, "costo": 195666}, {"date": "martes 18", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 611638, "margen_pct": 63.1, "costo": 189767}, {"date": "miércoles 19", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 871565, "margen_pct": 69.9, "costo": 220458}, {"date": "jueves 20", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 734010, "margen_pct": 67.2, "costo": 202434}, {"date": "viernes 21", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1178710, "margen_pct": 70.5, "costo": 292193}, {"date": "sábado 22", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1258350, "margen_pct": 68.6, "costo": 331664}, {"date": "domingo 23", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1352524, "margen_pct": 66.2, "costo": 383766}, {"date": "lunes 24", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 661544, "margen_pct": 68.3, "costo": 176385}, {"date": "martes 25", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 731218, "margen_pct": 66.8, "costo": 204207}, {"date": "miércoles 26", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 962730, "margen_pct": 66.9, "costo": 268073}, {"date": "jueves 27", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 681201, "margen_pct": 68.0, "costo": 182903}, {"date": "viernes 28", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1473395, "margen_pct": 70.2, "costo": 368557}, {"date": "sábado 29", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1432507, "margen_pct": 71.1, "costo": 347772}, {"date": "domingo 30", "month": "Noviembre 2025", "month_idx": 10, "venta_neta": 1412090, "margen_pct": 72.7, "costo": 324126}, {"date": "lunes 1", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1506050, "margen_pct": 68.5, "costo": 398405}, {"date": "martes 2", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1347660, "margen_pct": 66.4, "costo": 380007}, {"date": "miércoles 3", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1364950, "margen_pct": 66.8, "costo": 380672}, {"date": "jueves 4", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1294402, "margen_pct": 72.3, "costo": 301340}, {"date": "viernes 5", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 2141976, "margen_pct": 64.9, "costo": 632296}, {"date": "sábado 6", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1350734, "margen_pct": 71.7, "costo": 321746}, {"date": "domingo 7", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1658714, "margen_pct": 70.1, "costo": 416199}, {"date": "lunes 8", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1214230, "margen_pct": 68.6, "costo": 320074}, {"date": "martes 9", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1036281, "margen_pct": 70.4, "costo": 257879}, {"date": "miércoles 10", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 919260, "margen_pct": 67.9, "costo": 247762}, {"date": "jueves 11", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1413836, "margen_pct": 67.0, "costo": 392698}, {"date": "viernes 12", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1182324, "margen_pct": 72.5, "costo": 273600}, {"date": "sábado 13", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1286450, "margen_pct": 65.7, "costo": 370936}, {"date": "domingo 14", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1766898, "margen_pct": 71.9, "costo": 417271}, {"date": "lunes 15", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 981847, "margen_pct": 68.5, "costo": 260128}, {"date": "miércoles 17", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 865808, "margen_pct": 67.2, "costo": 238833}, {"date": "jueves 18", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1146376, "margen_pct": 73.8, "costo": 252274}, {"date": "viernes 19", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1355744, "margen_pct": 70.8, "costo": 333209}, {"date": "sábado 20", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 821571, "margen_pct": 68.5, "costo": 217337}, {"date": "domingo 21", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 897638, "margen_pct": 64.1, "costo": 270464}, {"date": "lunes 22", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1175992, "margen_pct": 66.3, "costo": 333431}, {"date": "martes 23", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 788734, "margen_pct": 70.1, "costo": 198042}, {"date": "miércoles 24", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 212560, "margen_pct": 74.2, "costo": 46176}, {"date": "viernes 26", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1003546, "margen_pct": 71.0, "costo": 244368}, {"date": "sábado 27", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1358980, "margen_pct": 70.5, "costo": 336924}, {"date": "domingo 28", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1531882, "margen_pct": 71.0, "costo": 373221}, {"date": "lunes 29", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1043680, "margen_pct": 67.1, "costo": 288251}, {"date": "martes 30", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 1264845, "margen_pct": 68.5, "costo": 334239}, {"date": "miércoles 31", "month": "Diciembre 2025", "month_idx": 11, "venta_neta": 279285, "margen_pct": 66.0, "costo": 79874}, {"date": "jueves 1", "month": "Enero 2026", "month_idx": 12, "venta_neta": 2824275, "margen_pct": 66.4, "costo": 796908}, {"date": "viernes 2", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1400178, "margen_pct": 62.7, "costo": 438983}, {"date": "sábado 3", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1169980, "margen_pct": 68.3, "costo": 311330}, {"date": "domingo 4", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1509160, "margen_pct": 67.8, "costo": 408052}, {"date": "martes 6", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1095212, "margen_pct": 70.2, "costo": 273820}, {"date": "miércoles 7", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1080510, "margen_pct": 66.1, "costo": 307853}, {"date": "jueves 8", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1195390, "margen_pct": 67.8, "costo": 323630}, {"date": "viernes 9", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1101503, "margen_pct": 63.7, "costo": 336411}, {"date": "sábado 10", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1075762, "margen_pct": 69.6, "costo": 275191}, {"date": "domingo 11", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1234254, "margen_pct": 70.3, "costo": 308126}, {"date": "lunes 12", "month": "Enero 2026", "month_idx": 12, "venta_neta": 967070, "margen_pct": 68.9, "costo": 252943}, {"date": "martes 13", "month": "Enero 2026", "month_idx": 12, "venta_neta": 898864, "margen_pct": 66.4, "costo": 253501}, {"date": "miércoles 14", "month": "Enero 2026", "month_idx": 12, "venta_neta": 890250, "margen_pct": 67.5, "costo": 243185}, {"date": "jueves 15", "month": "Enero 2026", "month_idx": 12, "venta_neta": 967752, "margen_pct": 72.5, "costo": 223257}, {"date": "viernes 16", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1083519, "margen_pct": 65.2, "costo": 316914}, {"date": "sábado 17", "month": "Enero 2026", "month_idx": 12, "venta_neta": 806130, "margen_pct": 67.8, "costo": 218464}, {"date": "domingo 18", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1107250, "margen_pct": 69.3, "costo": 285245}, {"date": "lunes 19", "month": "Enero 2026", "month_idx": 12, "venta_neta": 752898, "margen_pct": 70.7, "costo": 185569}, {"date": "martes 20", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1100302, "margen_pct": 71.7, "costo": 261740}, {"date": "miércoles 21", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1010621, "margen_pct": 71.6, "costo": 241082}, {"date": "jueves 22", "month": "Enero 2026", "month_idx": 12, "venta_neta": 899804, "margen_pct": 67.1, "costo": 248883}, {"date": "viernes 23", "month": "Enero 2026", "month_idx": 12, "venta_neta": 982029, "margen_pct": 70.0, "costo": 247324}, {"date": "sábado 24", "month": "Enero 2026", "month_idx": 12, "venta_neta": 922400, "margen_pct": 73.2, "costo": 207965}, {"date": "domingo 25", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1432522, "margen_pct": 68.4, "costo": 380776}, {"date": "lunes 26", "month": "Enero 2026", "month_idx": 12, "venta_neta": 964072, "margen_pct": 71.4, "costo": 231700}, {"date": "martes 27", "month": "Enero 2026", "month_idx": 12, "venta_neta": 690810, "margen_pct": 73.7, "costo": 152871}, {"date": "miércoles 28", "month": "Enero 2026", "month_idx": 12, "venta_neta": 608368, "margen_pct": 64.5, "costo": 181579}, {"date": "jueves 29", "month": "Enero 2026", "month_idx": 12, "venta_neta": 982482, "margen_pct": 72.5, "costo": 227320}, {"date": "viernes 30", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1088751, "margen_pct": 70.7, "costo": 268500}, {"date": "sábado 31", "month": "Enero 2026", "month_idx": 12, "venta_neta": 1185922, "margen_pct": 71.5, "costo": 283907}, {"date": "domingo 1", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1234463, "margen_pct": 69.6, "costo": 315676}, {"date": "lunes 2", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 962780, "margen_pct": 74.5, "costo": 206672}, {"date": "martes 3", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1118356, "margen_pct": 70.7, "costo": 275327}, {"date": "miércoles 4", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1046926, "margen_pct": 68.7, "costo": 275696}, {"date": "jueves 5", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 775351, "margen_pct": 66.9, "costo": 215460}, {"date": "viernes 6", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 840747, "margen_pct": 71.4, "costo": 201973}, {"date": "sábado 7", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1705303, "margen_pct": 70.3, "costo": 425374}, {"date": "domingo 8", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1508540, "margen_pct": 67.6, "costo": 410934}, {"date": "lunes 9", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 953614, "margen_pct": 67.6, "costo": 259557}, {"date": "martes 10", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 601639, "margen_pct": 55.7, "costo": 223913}, {"date": "miércoles 11", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 893420, "margen_pct": 71.6, "costo": 213547}, {"date": "jueves 12", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 846817, "margen_pct": 68.2, "costo": 226673}, {"date": "viernes 13", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1120340, "margen_pct": 70.8, "costo": 274622}, {"date": "sábado 14", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1619890, "margen_pct": 72.1, "costo": 379952}, {"date": "domingo 15", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1016850, "margen_pct": 64.9, "costo": 299979}, {"date": "lunes 16", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 946342, "margen_pct": 70.6, "costo": 233937}, {"date": "martes 17", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 720870, "margen_pct": 68.8, "costo": 188939}, {"date": "miércoles 18", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1001550, "margen_pct": 73.8, "costo": 220517}, {"date": "jueves 19", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 879000, "margen_pct": 74.7, "costo": 186568}, {"date": "viernes 20", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 953728, "margen_pct": 71.4, "costo": 229031}, {"date": "sábado 21", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 1113840, "margen_pct": 69.9, "costo": 281907}, {"date": "domingo 22", "month": "Febrero 2026", "month_idx": 13, "venta_neta": 427930, "margen_pct": 72.4, "costo": 99397}]};
-const PRODUCT_SALES=[{"name": "Combo Tercio de Libra", "venta": 41486685, "qty": 6891, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 113.2, "weekly_venta": 681226, "avg_ticket": 6020}, {"name": "Fantastic Burger", "venta": 32792416, "qty": 4068, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 66.8, "weekly_venta": 538463, "avg_ticket": 8061}, {"name": "Bacon Master", "venta": 31036000, "qty": 3928, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 64.5, "weekly_venta": 509622, "avg_ticket": 7901}, {"name": "Chicken Fries", "venta": 29353598, "qty": 4183, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 68.7, "weekly_venta": 481997, "avg_ticket": 7017}, {"name": "Bebida Refil", "venta": 29324295, "qty": 12273, "cat": "bebidas", "is_modifier": false, "weekly_qty": 201.5, "weekly_venta": 481516, "avg_ticket": 2389}, {"name": "Onion Crunchy", "venta": 26148624, "qty": 2621, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 43.0, "weekly_venta": 429370, "avg_ticket": 9977}, {"name": "Tercio de Libra", "venta": 25147885, "qty": 3117, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 51.2, "weekly_venta": 412937, "avg_ticket": 8068}, {"name": "Crispy Chicken", "venta": 24095034, "qty": 2868, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 47.1, "weekly_venta": 395649, "avg_ticket": 8401}, {"name": "Slaw Chicken", "venta": 22109077, "qty": 2640, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 43.3, "weekly_venta": 363039, "avg_ticket": 8375}, {"name": "Street Box", "venta": 16638121, "qty": 824, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 13.5, "weekly_venta": 273204, "avg_ticket": 20192}, {"name": "Honey Mustang", "venta": 14455146, "qty": 2295, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 37.7, "weekly_venta": 237359, "avg_ticket": 6299}, {"name": "Cheese Burger", "venta": 13309708, "qty": 1833, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 30.1, "weekly_venta": 218550, "avg_ticket": 7261}, {"name": "Picky Meat", "venta": 12839519, "qty": 2704, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 44.4, "weekly_venta": 210830, "avg_ticket": 4748}, {"name": "The Lord of the Rings", "venta": 11793826, "qty": 1262, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 20.7, "weekly_venta": 193659, "avg_ticket": 9345}, {"name": "Picky Chicken", "venta": 10713603, "qty": 2175, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 35.7, "weekly_venta": 175921, "avg_ticket": 4926}, {"name": "Classic Chicken", "venta": 9218320, "qty": 1126, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 18.5, "weekly_venta": 151368, "avg_ticket": 8187}, {"name": "Ham. de Carne", "venta": 9124520, "qty": 4596, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 75.5, "weekly_venta": 149828, "avg_ticket": 1985}, {"name": "Blue Cheese Chicken", "venta": 8106174, "qty": 946, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 15.5, "weekly_venta": 133106, "avg_ticket": 8569}, {"name": "The Notorius Big", "venta": 6773935, "qty": 783, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 12.9, "weekly_venta": 111230, "avg_ticket": 8651}, {"name": "Avocado Chicken", "venta": 6577132, "qty": 739, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 12.1, "weekly_venta": 107999, "avg_ticket": 8900}, {"name": "Chicken Pop", "venta": 6271923, "qty": 1278, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 21.0, "weekly_venta": 102987, "avg_ticket": 4908}, {"name": "Chicken Salad", "venta": 6016830, "qty": 936, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 15.4, "weekly_venta": 98799, "avg_ticket": 6428}, {"name": "Empanadas x 8", "venta": 4975838, "qty": 1857, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 30.5, "weekly_venta": 81705, "avg_ticket": 2680}, {"name": "Papas Extra", "venta": 4511595, "qty": 4617, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 75.8, "weekly_venta": 74082, "avg_ticket": 977}, {"name": "Fries Corn", "venta": 4248745, "qty": 527, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 8.7, "weekly_venta": 69766, "avg_ticket": 8062}, {"name": "Meat Fries", "venta": 3940101, "qty": 514, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 8.4, "weekly_venta": 64698, "avg_ticket": 7666}, {"name": "Flaggy Box", "venta": 3900318, "qty": 464, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 7.6, "weekly_venta": 64045, "avg_ticket": 8406}, {"name": "Pepsi Lata", "venta": 3799289, "qty": 2221, "cat": "bebidas", "is_modifier": false, "weekly_qty": 36.5, "weekly_venta": 62386, "avg_ticket": 1711}, {"name": "Aros de Cebolla x8", "venta": 3462454, "qty": 1017, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 16.7, "weekly_venta": 56855, "avg_ticket": 3405}, {"name": "Empanadas x 16", "venta": 3245000, "qty": 875, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 14.4, "weekly_venta": 53284, "avg_ticket": 3709}, {"name": "Pop Corn x8", "venta": 3152865, "qty": 903, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 14.8, "weekly_venta": 51771, "avg_ticket": 3492}, {"name": "Chorri Street", "venta": 3130844, "qty": 454, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 7.5, "weekly_venta": 51410, "avg_ticket": 6896}, {"name": "Mac & Cheese", "venta": 2879115, "qty": 929, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 15.3, "weekly_venta": 47276, "avg_ticket": 3099}, {"name": "Fries Funghi", "venta": 2553727, "qty": 339, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 5.6, "weekly_venta": 41933, "avg_ticket": 7533}, {"name": "Bubba Gump x6", "venta": 2326102, "qty": 515, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 8.5, "weekly_venta": 38195, "avg_ticket": 4517}, {"name": "Pepsi Zero", "venta": 2243514, "qty": 1347, "cat": "bebidas", "is_modifier": false, "weekly_qty": 22.1, "weekly_venta": 36839, "avg_ticket": 1666}, {"name": "Pop Corn x16", "venta": 1948588, "qty": 285, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 4.7, "weekly_venta": 31997, "avg_ticket": 6837}, {"name": "Bolitas Jalapeño x6", "venta": 1643074, "qty": 419, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 6.9, "weekly_venta": 26980, "avg_ticket": 3921}, {"name": "Jugo Watts", "venta": 1505235, "qty": 1032, "cat": "bebidas", "is_modifier": false, "weekly_qty": 16.9, "weekly_venta": 24717, "avg_ticket": 1459}, {"name": "Shrimp Salad", "venta": 1460500, "qty": 195, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 3.2, "weekly_venta": 23982, "avg_ticket": 7490}, {"name": "Kem", "venta": 1350237, "qty": 778, "cat": "bebidas", "is_modifier": false, "weekly_qty": 12.8, "weekly_venta": 22171, "avg_ticket": 1736}, {"name": "Agua sin Gas", "venta": 1211172, "qty": 808, "cat": "bebidas", "is_modifier": false, "weekly_qty": 13.3, "weekly_venta": 19888, "avg_ticket": 1499}, {"name": "Limón Soda", "venta": 1198094, "qty": 690, "cat": "bebidas", "is_modifier": false, "weekly_qty": 11.3, "weekly_venta": 19673, "avg_ticket": 1736}, {"name": "Fries Supreme", "venta": 1134880, "qty": 132, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 2.2, "weekly_venta": 18635, "avg_ticket": 8598}, {"name": "Big Mick", "venta": 1107334, "qty": 113, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 1.9, "weekly_venta": 18183, "avg_ticket": 9799}, {"name": "Schop Budweiser", "venta": 1099266, "qty": 420, "cat": "bebidas", "is_modifier": false, "weekly_qty": 6.9, "weekly_venta": 18050, "avg_ticket": 2617}, {"name": "Shop Austral", "venta": 1028997, "qty": 272, "cat": "bebidas", "is_modifier": false, "weekly_qty": 4.5, "weekly_venta": 16897, "avg_ticket": 3783}, {"name": "Bolitas Jalapeño x10", "venta": 1022950, "qty": 209, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 3.4, "weekly_venta": 16797, "avg_ticket": 4894}, {"name": "Bubba Gump x12", "venta": 832610, "qty": 141, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 2.3, "weekly_venta": 13672, "avg_ticket": 5905}, {"name": "Bilz Zero", "venta": 809100, "qty": 462, "cat": "bebidas", "is_modifier": false, "weekly_qty": 7.6, "weekly_venta": 13286, "avg_ticket": 1751}, {"name": "Coca Cola", "venta": 781809, "qty": 412, "cat": "bebidas", "is_modifier": false, "weekly_qty": 6.8, "weekly_venta": 12838, "avg_ticket": 1898}, {"name": "Coca Cola Zero", "venta": 574423, "qty": 301, "cat": "bebidas", "is_modifier": false, "weekly_qty": 4.9, "weekly_venta": 9432, "avg_ticket": 1908}, {"name": "Black Burger", "venta": 572579, "qty": 62, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 1.0, "weekly_venta": 9402, "avg_ticket": 9235}, {"name": "Tocino", "venta": 540857, "qty": 412, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 6.8, "weekly_venta": 8881, "avg_ticket": 1313}, {"name": "BBQ", "venta": 511833, "qty": 1015, "cat": "otros", "is_modifier": false, "weekly_qty": 16.7, "weekly_venta": 8404, "avg_ticket": 504}, {"name": "Not Burger", "venta": 492535, "qty": 504, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 8.3, "weekly_venta": 8088, "avg_ticket": 977}, {"name": "Red Bull", "venta": 462999, "qty": 238, "cat": "bebidas", "is_modifier": false, "weekly_qty": 3.9, "weekly_venta": 7603, "avg_ticket": 1945}, {"name": "Street Sauce", "venta": 450914, "qty": 726, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 11.9, "weekly_venta": 7404, "avg_ticket": 621}, {"name": "Triple Hamburguesa", "venta": 417392, "qty": 121, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 2.0, "weekly_venta": 6854, "avg_ticket": 3450}, {"name": "Salsa Cheddar", "venta": 373287, "qty": 532, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 8.7, "weekly_venta": 6130, "avg_ticket": 702}, {"name": "Agua con Gas", "venta": 365180, "qty": 254, "cat": "bebidas", "is_modifier": false, "weekly_qty": 4.2, "weekly_venta": 5996, "avg_ticket": 1438}, {"name": "Pepsi Zero Grande", "venta": 310800, "qty": 159, "cat": "bebidas", "is_modifier": false, "weekly_qty": 2.6, "weekly_venta": 5103, "avg_ticket": 1955}, {"name": "Palta", "venta": 303762, "qty": 315, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 5.2, "weekly_venta": 4988, "avg_ticket": 964}, {"name": "Doble Pollo", "venta": 288467, "qty": 143, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 2.3, "weekly_venta": 4737, "avg_ticket": 2017}, {"name": "7up", "venta": 282467, "qty": 173, "cat": "bebidas", "is_modifier": false, "weekly_qty": 2.8, "weekly_venta": 4638, "avg_ticket": 1633}, {"name": "Not Chicken", "venta": 271065, "qty": 280, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 4.6, "weekly_venta": 4451, "avg_ticket": 968}, {"name": "Alioli", "venta": 264029, "qty": 926, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 15.2, "weekly_venta": 4335, "avg_ticket": 285}, {"name": "Crush", "venta": 248910, "qty": 153, "cat": "bebidas", "is_modifier": false, "weekly_qty": 2.5, "weekly_venta": 4087, "avg_ticket": 1627}, {"name": "Limón Soda Zero", "venta": 248210, "qty": 152, "cat": "bebidas", "is_modifier": false, "weekly_qty": 2.5, "weekly_venta": 4076, "avg_ticket": 1633}, {"name": "Sprite", "venta": 245939, "qty": 124, "cat": "bebidas", "is_modifier": false, "weekly_qty": 2.0, "weekly_venta": 4038, "avg_ticket": 1983}, {"name": "Chick Fill A", "venta": 217376, "qty": 336, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 5.5, "weekly_venta": 3569, "avg_ticket": 647}, {"name": "Mega Frambuesa", "venta": 186750, "qty": 77, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.3, "weekly_venta": 3067, "avg_ticket": 2425}, {"name": "Tercio de Libra Triple", "venta": 181900, "qty": 17, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 0.3, "weekly_venta": 2987, "avg_ticket": 10700}, {"name": "Mega Sahne Nuss", "venta": 173677, "qty": 76, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.2, "weekly_venta": 2852, "avg_ticket": 2285}, {"name": "Sweet Chipotle", "venta": 168640, "qty": 371, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 6.1, "weekly_venta": 2769, "avg_ticket": 455}, {"name": "Jalapeño Ranch", "venta": 168430, "qty": 255, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 4.2, "weekly_venta": 2766, "avg_ticket": 661}, {"name": "Crazy Flocos", "venta": 168000, "qty": 84, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.4, "weekly_venta": 2759, "avg_ticket": 2000}, {"name": "Champiñones", "venta": 155178, "qty": 161, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 2.6, "weekly_venta": 2548, "avg_ticket": 964}, {"name": "Cebolla Caramelizada", "venta": 144435, "qty": 159, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 2.6, "weekly_venta": 2372, "avg_ticket": 908}, {"name": "Korean Chicken", "venta": 132276, "qty": 32, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 0.5, "weekly_venta": 2172, "avg_ticket": 4134}, {"name": "Fanta", "venta": 132125, "qty": 69, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.1, "weekly_venta": 2170, "avg_ticket": 1915}, {"name": "Lechuga", "venta": 129426, "qty": 271, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 4.4, "weekly_venta": 2125, "avg_ticket": 478}, {"name": "Sangurucho", "venta": 128000, "qty": 67, "cat": "otros", "is_modifier": false, "weekly_qty": 1.1, "weekly_venta": 2102, "avg_ticket": 1910}, {"name": "Crazy Frambuesa", "venta": 120000, "qty": 60, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.0, "weekly_venta": 1970, "avg_ticket": 2000}, {"name": "Crazy Chirimoya", "venta": 116000, "qty": 59, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.0, "weekly_venta": 1905, "avg_ticket": 1966}, {"name": "Pepinillos", "venta": 115299, "qty": 166, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 2.7, "weekly_venta": 1893, "avg_ticket": 695}, {"name": "Coleslow", "venta": 110134, "qty": 116, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 1.9, "weekly_venta": 1808, "avg_ticket": 949}, {"name": "Tomate", "venta": 109279, "qty": 239, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 3.9, "weekly_venta": 1794, "avg_ticket": 457}, {"name": "Queso Cheddar", "venta": 109095, "qty": 135, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 2.2, "weekly_venta": 1791, "avg_ticket": 808}, {"name": "Empanada Day", "venta": 107730, "qty": 27, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 0.4, "weekly_venta": 1769, "avg_ticket": 3990}, {"name": "Sprite Zero", "venta": 102492, "qty": 57, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.9, "weekly_venta": 1683, "avg_ticket": 1798}, {"name": "Fanta Zero", "venta": 98125, "qty": 56, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.9, "weekly_venta": 1611, "avg_ticket": 1752}, {"name": "Jalapeños", "venta": 96695, "qty": 209, "cat": "salsas_extras", "is_modifier": false, "weekly_qty": 3.4, "weekly_venta": 1588, "avg_ticket": 463}, {"name": "Canada Dry Zero", "venta": 93000, "qty": 55, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.9, "weekly_venta": 1527, "avg_ticket": 1691}, {"name": "Ginger Ale", "venta": 90000, "qty": 50, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.8, "weekly_venta": 1478, "avg_ticket": 1800}, {"name": "Buffalo Chicken", "venta": 78465, "qty": 9, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 0.1, "weekly_venta": 1288, "avg_ticket": 8718}, {"name": "Nuggets Explosivos", "venta": 73290, "qty": 22, "cat": "acompañamientos", "is_modifier": false, "weekly_qty": 0.4, "weekly_venta": 1203, "avg_ticket": 3331}, {"name": "Chelado", "venta": 71280, "qty": 73, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.2, "weekly_venta": 1170, "avg_ticket": 976}, {"name": "Mega Frambueza", "venta": 67230, "qty": 29, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.5, "weekly_venta": 1104, "avg_ticket": 2318}, {"name": "Botellin Austral Calafate", "venta": 63000, "qty": 24, "cat": "otros", "is_modifier": false, "weekly_qty": 0.4, "weekly_venta": 1034, "avg_ticket": 2625}, {"name": "Mega Manjar", "venta": 62250, "qty": 25, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.4, "weekly_venta": 1022, "avg_ticket": 2490}, {"name": "Michelado", "venta": 61380, "qty": 64, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.1, "weekly_venta": 1008, "avg_ticket": 959}, {"name": "Café Mediano", "venta": 60656, "qty": 38, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.6, "weekly_venta": 996, "avg_ticket": 1596}, {"name": "Cola Trigre", "venta": 60200, "qty": 87, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.4, "weekly_venta": 989, "avg_ticket": 692}, {"name": "Centella", "venta": 59500, "qty": 89, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.5, "weekly_venta": 977, "avg_ticket": 669}, {"name": "Trululu", "venta": 51100, "qty": 76, "cat": "bebidas", "is_modifier": false, "weekly_qty": 1.2, "weekly_venta": 839, "avg_ticket": 672}, {"name": "Mega Cookie", "venta": 47310, "qty": 19, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.3, "weekly_venta": 777, "avg_ticket": 2490}, {"name": "Danky Sahne Nuss", "venta": 46000, "qty": 25, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.4, "weekly_venta": 755, "avg_ticket": 1840}, {"name": "Promo 14F Bebida", "venta": 44970, "qty": 3, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.0, "weekly_venta": 738, "avg_ticket": 14990}, {"name": "Chocolito", "venta": 38610, "qty": 39, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.6, "weekly_venta": 634, "avg_ticket": 990}, {"name": "Piscola Promo", "venta": 35000, "qty": 7, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.1, "weekly_venta": 575, "avg_ticket": 5000}, {"name": "Promo 14F Shop", "venta": 33980, "qty": 2, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.0, "weekly_venta": 558, "avg_ticket": 16990}, {"name": "Té Mediano", "venta": 30400, "qty": 19, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.3, "weekly_venta": 499, "avg_ticket": 1600}, {"name": "Crush Zero Lata", "venta": 27800, "qty": 16, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.3, "weekly_venta": 456, "avg_ticket": 1738}, {"name": "Crocanty..", "venta": 26730, "qty": 27, "cat": "otros", "is_modifier": false, "weekly_qty": 0.4, "weekly_venta": 439, "avg_ticket": 990}, {"name": "Danky 21", "venta": 26000, "qty": 13, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.2, "weekly_venta": 427, "avg_ticket": 2000}, {"name": "Café Grande", "venta": 24000, "qty": 12, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.2, "weekly_venta": 394, "avg_ticket": 2000}, {"name": "Pura Fruta Mango", "venta": 22410, "qty": 10, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.2, "weekly_venta": 368, "avg_ticket": 2241}, {"name": "Botellin Royal", "venta": 17500, "qty": 7, "cat": "otros", "is_modifier": false, "weekly_qty": 0.1, "weekly_venta": 287, "avg_ticket": 2500}, {"name": "Lollypop", "venta": 16800, "qty": 28, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.5, "weekly_venta": 276, "avg_ticket": 600}, {"name": "Mega Capuccino", "venta": 14940, "qty": 6, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.1, "weekly_venta": 245, "avg_ticket": 2490}, {"name": "Mega Vainilla", "venta": 14940, "qty": 6, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.1, "weekly_venta": 245, "avg_ticket": 2490}, {"name": "Trencito Helado", "venta": 14000, "qty": 7, "cat": "otros", "is_modifier": false, "weekly_qty": 0.1, "weekly_venta": 230, "avg_ticket": 2000}, {"name": "Xplori", "venta": 12750, "qty": 15, "cat": "otros", "is_modifier": false, "weekly_qty": 0.2, "weekly_venta": 209, "avg_ticket": 850}, {"name": "2Shop Austral", "venta": 8500, "qty": 1, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.0, "weekly_venta": 140, "avg_ticket": 8500}, {"name": "2X Shop Royal", "venta": 8000, "qty": 3, "cat": "otros", "is_modifier": false, "weekly_qty": 0.0, "weekly_venta": 131, "avg_ticket": 2667}, {"name": "Chicken Wings X 6 Small", "venta": 4990, "qty": 1, "cat": "hamburguesas", "is_modifier": false, "weekly_qty": 0.0, "weekly_venta": 82, "avg_ticket": 4990}, {"name": "Schop Promo 14 Feb", "venta": 4000, "qty": 48, "cat": "bebidas", "is_modifier": false, "weekly_qty": 0.8, "weekly_venta": 66, "avg_ticket": 83}, {"name": "Blue Cheese", "venta": 3450, "qty": 6, "cat": "otros", "is_modifier": false, "weekly_qty": 0.1, "weekly_venta": 57, "avg_ticket": 575}, {"name": "Kriko", "venta": 3000, "qty": 3, "cat": "otros", "is_modifier": false, "weekly_qty": 0.0, "weekly_venta": 49, "avg_ticket": 1000}, {"name": "Zoorpresa", "venta": 3000, "qty": 5, "cat": "otros", "is_modifier": false, "weekly_qty": 0.1, "weekly_venta": 49, "avg_ticket": 600}, {"name": "3 Aritos", "venta": 2970, "qty": 3, "cat": "otros", "is_modifier": false, "weekly_qty": 0.0, "weekly_venta": 49, "avg_ticket": 990}, {"name": "Kit Kat Paleta", "venta": 2490, "qty": 1, "cat": "otros", "is_modifier": false, "weekly_qty": 0.0, "weekly_venta": 41, "avg_ticket": 2490}];
-const DELIVERY_MONTHLY=[{"mes":"2025-08","pedidos":838,"rechazados":8,"ventas":7949492,"delivery":820,"pickup":18,"ticket_avg":9486},{"mes":"2025-09","pedidos":669,"rechazados":13,"ventas":7183259,"delivery":647,"pickup":22,"ticket_avg":10737},{"mes":"2025-10","pedidos":737,"rechazados":5,"ventas":7709384,"delivery":723,"pickup":14,"ticket_avg":10460},{"mes":"2025-11","pedidos":639,"rechazados":9,"ventas":6950826,"delivery":625,"pickup":14,"ticket_avg":10878},{"mes":"2025-12","pedidos":555,"rechazados":5,"ventas":6199966,"delivery":547,"pickup":8,"ticket_avg":11171},{"mes":"2026-01","pedidos":472,"rechazados":17,"ventas":5746677,"delivery":459,"pickup":13,"ticket_avg":12175}];
-const HEATMAP=[{"hora":0,"pedidos":0,"ingresos":0},{"hora":1,"pedidos":0,"ingresos":0},{"hora":2,"pedidos":0,"ingresos":0},{"hora":3,"pedidos":0,"ingresos":0},{"hora":4,"pedidos":0,"ingresos":0},{"hora":5,"pedidos":0,"ingresos":0},{"hora":6,"pedidos":0,"ingresos":0},{"hora":7,"pedidos":0,"ingresos":0},{"hora":8,"pedidos":0,"ingresos":0},{"hora":9,"pedidos":0,"ingresos":0},{"hora":10,"pedidos":1,"ingresos":10440},{"hora":11,"pedidos":3,"ingresos":31760},{"hora":12,"pedidos":155,"ingresos":1585298},{"hora":13,"pedidos":241,"ingresos":2577641},{"hora":14,"pedidos":220,"ingresos":2235478},{"hora":15,"pedidos":219,"ingresos":2091428},{"hora":16,"pedidos":183,"ingresos":1838033},{"hora":17,"pedidos":149,"ingresos":1536141},{"hora":18,"pedidos":257,"ingresos":3035805},{"hora":19,"pedidos":396,"ingresos":4538054},{"hora":20,"pedidos":557,"ingresos":6481654},{"hora":21,"pedidos":582,"ingresos":5942273},{"hora":22,"pedidos":521,"ingresos":5242660},{"hora":23,"pedidos":426,"ingresos":4592939}];
-const DISHES_6M=[{"name":"combo tercio de libra","qty":3561,"venta":33295300},{"name":"Slaw Chicken","qty":298,"venta":2794507},{"name":"Crispy Chicken","qty":235,"venta":2350059},{"name":"Fantastic Burger","qty":192,"venta":1841688},{"name":"Empanadas x 8","qty":182,"venta":637000},{"name":"CHICKEN FRIES","qty":171,"venta":1410750},{"name":"Chicken Pop","qty":157,"venta":940430},{"name":"Pepsi Lata","qty":123,"venta":270600},{"name":"Onion Crunchy","qty":120,"venta":1451677},{"name":"Pepsi Zero","qty":110,"venta":242000},{"name":"Cheese Burger","qty":105,"venta":918647},{"name":"Honey Mustang","qty":100,"venta":895194},{"name":"Tercio  De Libra","qty":92,"venta":873965},{"name":"Alioli","qty":92,"venta":73600},{"name":"Salsa Cheddar","qty":82,"venta":82000},{"name":"Aros De Cebolla x8","qty":74,"venta":288920},{"name":"kem","qty":72,"venta":158400},{"name":"Pop Corn x8","qty":69,"venta":307050},{"name":"Chicken Salad","qty":65,"venta":549250},{"name":"Slaw chicken","qty":61,"venta":573304},{"name":"Classic Chicken","qty":61,"venta":567252},{"name":"BBQ","qty":58,"venta":58000},{"name":"Mac & Cheese","qty":57,"venta":312930},{"name":"Bacon Master","qty":51,"venta":503494},{"name":"Bolitas Jalapeño x 6","qty":48,"venta":238050},{"name":"MEAT FRIES","qty":46,"venta":413540},{"name":"Blue Cheese Chicken","qty":44,"venta":440279},{"name":"empanadas x 8","qty":44,"venta":154000},{"name":"fantastic","qty":42,"venta":404253},{"name":"The Lord Of The Rings","qty":42,"venta":467080},{"name":"Avocado Chicken","qty":39,"venta":392530},{"name":"Bubba Gump Shrimp x6","qty":38,"venta":201730},{"name":"FRIES CORN","qty":37,"venta":372132},{"name":"Chicken pop","qty":36,"venta":215640},{"name":"Crispy chicken","qty":34,"venta":338460},{"name":"FRIES  FUNGHI","qty":33,"venta":333556},{"name":"CHORRI STREET","qty":30,"venta":258205},{"name":"Sweet Chipotle","qty":29,"venta":23200},{"name":"The Notorius Big","qty":29,"venta":286450},{"name":"Street Sauce","qty":28,"venta":22400},{"name":"Limon Soda","qty":28,"venta":61600},{"name":"aros de cebolla x8","qty":28,"venta":105610},{"name":"Street Box","qty":25,"venta":624750},{"name":"Flaggy Box","qty":25,"venta":262500},{"name":"Honey Mustard","qty":24,"venta":19200},{"name":"Chick Fill A","qty":23,"venta":18400},{"name":"Jalapeño Ranch","qty":21,"venta":16800},{"name":"Mac & cheese","qty":20,"venta":109800},{"name":"Cheese burger","qty":20,"venta":183730},{"name":"bubba gump shrimp x6","qty":18,"venta":94140}];
-const DISHES_RECENT=[{"name":"combo tercio de libra","qty":89,"venta":832150},{"name":"Crispy Chicken","qty":12,"venta":120700},{"name":"Slaw Chicken","qty":10,"venta":93000},{"name":"Empanadas x 8","qty":10,"venta":35000},{"name":"Onion Crunchy","qty":7,"venta":83930},{"name":"Cheese Burger","qty":5,"venta":42500},{"name":"Tercio  De Libra","qty":5,"venta":49250},{"name":"Street Sauce","qty":5,"venta":4000},{"name":"Coca Cola","qty":4,"venta":10400},{"name":"Honey Mustang","qty":4,"venta":37300},{"name":"Classic Chicken","qty":4,"venta":37000},{"name":"Blue Cheese Chicken","qty":4,"venta":39400},{"name":"Bubba Gump Shrimp x6","qty":3,"venta":17070},{"name":"Mac & Cheese","qty":3,"venta":16470},{"name":"Alioli","qty":3,"venta":2400},{"name":"Aros De Cebolla x8","qty":3,"venta":12720},{"name":"Bacon Master","qty":2,"venta":19178},{"name":"Shrimp salad","qty":2,"venta":18900},{"name":"Chicken Pop","qty":2,"venta":11980},{"name":"Coca Cola Zero","qty":2,"venta":5200},{"name":"MEAT FRIES","qty":2,"venta":17980},{"name":"CHICKEN FRIES","qty":2,"venta":16500},{"name":"Honey Mustard","qty":2,"venta":1600},{"name":"The Notorius Big","qty":1,"venta":9850},{"name":"Salsa Cheddar","qty":1,"venta":1000},{"name":"FRIES  FUNGHI","qty":1,"venta":11800},{"name":"Street Box","qty":1,"venta":24990},{"name":"Fantastic Burger","qty":1,"venta":9300},{"name":"Sweet Chipotle","qty":1,"venta":800},{"name":"FRIES CORN","qty":1,"venta":9990},{"name":"Flaggy Box","qty":1,"venta":10500},{"name":"Avocado Chicken","qty":1,"venta":9850},{"name":"Chicken Salad","qty":1,"venta":8450}];
-const DAY_PATTERNS={"lunes": 915092, "martes": 942487, "miércoles": 1064512, "jueves": 1087808, "viernes": 1332344, "sábado": 1380119, "domingo": 1379582};
+// Carga automática de ventas desde la memoria
+if (localStorage.getItem('app_sales')) {
+  SALES = JSON.parse(localStorage.getItem('app_sales'));
+}
+// ─── RUNTIME ───
+var INGR = JSON.parse(JSON.stringify(INGR_RAW));
+var GASTOS = JSON.parse(JSON.stringify(GASTOS_INIT));
+var CREDENCIALES = JSON.parse(JSON.stringify(CRED_INIT));
+var RECIPES = JSON.parse(JSON.stringify(RECIPES_RAW));
+var pendingUpload = null;
 
-const GASTOS_INIT = [
-  {id:'g_arriendo',name:'Arriendo local',cat:'arriendo',freq:'mensual',monto:1000000,prov:'',encargado:'',telefono:'',vencimiento:'',notes:'Costo fijo mensual.',historico:[]},
-  {id:'g_agua',name:'Agua potable',cat:'servicios',freq:'mensual',monto:82450,prov:'Aguas del Altiplano',encargado:'',telefono:'',vencimiento:'d\u00eda 6 de cada mes',cliente_num:'709701',notes:'N\u00b0 cliente 709701. Boleta vence el 6 de cada mes.',historico:[
-    {mes:'2025-01',label:'Enero 2025',monto:84900},
-    {mes:'2025-02',label:'Febrero 2025',monto:154350},
-    {mes:'2025-04',label:'Abril 2025',monto:82200},
-    {mes:'2025-05',label:'Mayo 2025',monto:79950},
-    {mes:'2025-06',label:'Junio 2025',monto:78650},
-    {mes:'2025-07',label:'Julio 2025',monto:90200},
-    {mes:'2025-08',label:'Agosto 2025',monto:80150},
-    {mes:'2025-09',label:'Septiembre 2025',monto:80900},
-    {mes:'2025-10',label:'Octubre 2025',monto:94000},
-    {mes:'2025-11',label:'Noviembre 2025',monto:177700},
-    {mes:'2025-12',label:'Diciembre 2025',monto:81150},
-    {mes:'2026-01',label:'Enero 2026',monto:166450},
-    {mes:'2026-02',label:'Febrero 2026',monto:77550},
-    {mes:'2026-03',label:'Marzo 2026',monto:82450,proximo:true}
-  ]},
-  {id:'g_gas',name:'Gas (cilindros)',cat:'gas',freq:'semanal',monto:304580,prov:'Abastible',encargado:'H\u00e9ctor',telefono:'+56 9 6258 9135',vencimiento:'',precio_carga:152290,cargas_semana:2,ultima_carga:'2026-02-24',notes:'2 cargas/semana. Precio $152.290/carga. \u00daltima carga lunes 24 feb.',historico:[]},
-  {id:'g_internet',name:'Internet',cat:'servicios',freq:'mensual',monto:42000,prov:'Movistar',encargado:'',telefono:'',vencimiento:'',monto_habitual:37500,notes:'Habitual $37.500/mes. \u00daltimo mes subi\u00f3 a $42.000.',historico:[
-    {mes:'2026-01',label:'Enero 2026',monto:37500},
-    {mes:'2026-02',label:'Febrero 2026',monto:42000}
-  ]},
-  {id:'g_aceite',name:'Aceite de fre\u00edr',cat:'insumos',freq:'semanal',monto:471000,prov:'',encargado:'',telefono:'',vencimiento:'',precio_caja:157000,cajas_semana:3,litros_caja:20,notes:'3 cajas/semana x $157.000. Cada caja: 2 bidones 10L.',historico:[]},
-  {id:'g_iva_sii',name:'IVA SII',cat:'otros',freq:'mensual',monto:0,prov:'SII',encargado:'',telefono:'',vencimiento:'',notes:'Pago mensual de IVA al SII. Monto variable seg\u00fan ventas.',historico:[{mes:'2026-01',label:'Enero 2026',monto:2188473,notas:'Pago IVA enero 2026'}]},
-  {id:'g_imposiciones',name:'Imposiciones (Previred)',cat:'personal',freq:'mensual',monto:0,prov:'Previred',encargado:'',telefono:'',vencimiento:'d\u00eda 13 de cada mes',previred_usuario:'18299865-6',previred_pass:'Streetflags.2026',notes:'Pagar el d\u00eda 13 en previred.com. Monto variable.',historico:[]}
-];
+// ─── HELPERS ───
+var $ = function(id){ return document.getElementById(id); };
+var fmt  = function(n){ return '$'+Math.round(Math.abs(n)).toLocaleString('es-CL'); };
+var fmtN = function(n,d){ d=d||1; return(+Math.abs(n).toFixed(d)).toLocaleString('es-CL'); };
+var fmtM = function(n){ return '$'+(Math.abs(n)/1e6).toFixed(2)+'M'; };
+var fmtB = function(n){ return '$'+(Math.abs(n)*1.19/1e6).toFixed(2)+'M'; }; // bruto c/IVA
 
-const CRED_INIT = [
-  {sistema:'Portal PedidosYa',usuario:'adm.streetflags@gmail.com',password:'Milonarios1902$',url:'https://www.pedidosya.cl',notes:''},
-  {sistema:'GOWIM PedidosYa', usuario:'adm.streetflags@gmail.com',password:'2955Street',    url:'',notes:''},
-  {sistema:'PIA ICB',          usuario:'adm.streetflags@gmail.com',password:'Figuerola1902$',url:'',notes:''},
-  {sistema:'Previred',         usuario:'18299865-6',               password:'Streetflags.2026',url:'https://www.previred.com',notes:''}
-];
+// ─── THEME ───
+var theme='dark';
+function toggleTheme(){
+  theme=theme==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',theme);
+  $('tog').textContent=theme==='dark'?'Claro':'Oscuro';
+}
+
+// ─── NAV ───
+function go(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
+  document.querySelectorAll('.nt').forEach(function(t){t.classList.remove('on')});
+  $('p-'+id).classList.add('on');
+  $('t-'+id).classList.add('on');
+  var tab=$('t-'+id); if(tab) tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  if(id==='ped') renderPed();
+  if(id==='ventas') renderV();
+  if(id==='delivery'){initDeliveryMesSel();initDelivery();}
+  if(id==='gastos'){renderGastos();}
+  if(id==='analisis'){initAnalisis();}
+  if(id==='obj'){renderObjetivos();}
+}
+function cm(id){ $(id).classList.remove('on'); }
+
+// ─── BAR CHART ───
+function mkBar(lbl,val,max,color,vFmt,lw){
+  var pct=max>0?(val/max*100).toFixed(1):0;
+  return '<div class="br"><div class="br-lbl" style="width:'+(lw||140)+'px">'+lbl+'</div>'
+    +'<div class="br-track"><div class="br-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'
+    +'<div class="br-val">'+(vFmt?vFmt(val):fmtN(val))+'</div></div>';
+}
+function barChart(id,items,color,vFmt,lw){
+  var el=$(id); if(!el||!items.length) return;
+  var C=['#00d4ff','#ff3fa4','#00e5a0','#ffb020','#33ddff','#ff70c0','#66efc0','#ffd060'];
+  var max=Math.max.apply(null,items.map(function(i){return i.v}));
+  el.innerHTML=items.map(function(it,i){
+    return mkBar(it.l,it.v,max,typeof color==='string'?color:C[i%C.length],vFmt,lw);
+  }).join('');
+}
+
+// ════ DASHBOARD ════
+function initDashSel(){
+  var M=SALES.monthly;
+  var now=new Date();
+  var mN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var cur=mN[now.getMonth()]+' '+now.getFullYear();
+  var html='<option value="all">Todos los meses</option>';
+  M.forEach(function(m){ html+='<option value="'+m.month+'"'+(m.month===cur?' selected':'')+'>'+m.month+'</option>'; });
+  $('dash-mes-sel').innerHTML=html;
+}
+
+function initDash(){
+  var sel=$('dash-mes-sel'); var sv=sel?sel.value:'all';
+  var M=SALES.monthly;
+  var sm=sv==='all'?M:M.filter(function(m){return m.month===sv});
+  if(!sm.length) sm=M;
+  
+  var tvn=sm.reduce(function(s,m){return s+m.venta_neta},0);
+  var tco=INGR.reduce(function(s,i){return s+i.total_cost},0);
+  var amg=sm.reduce(function(s,m){return s+m.margen_pct},0)/sm.length;
+  var pk=sm.slice().sort(function(a,b){return b.venta_neta-a.venta_neta})[0];
+  var lbl=sv==='all'?'Ene 25–Feb 26':sv;
+  
+  $('kpi-dash').innerHTML=[
+    {l:'Venta neta (c/IVA)',v:fmtM(tvn),                       f:lbl},
+    {l:'Base imponible',   v:fmtM(Math.round(tvn/1.19)),       f:'Sin IVA real · '+lbl, m:1},
+    {l:sv==='all'?'Mejor mes':'Días activos', v:sv==='all'?pk.month.split(' ')[0]:sm[0].days_active+'d', f:sv==='all'?fmtM(pk.venta_neta):''},
+    {l:'Margen neto prom.',v:amg.toFixed(1)+'%',               f:'Sin IVA'},
+    {l:'Costo insumos',    v:fmtM(tco),                        f:'Histórico acumulado', m:1},
+  ].map(function(k){
+    return '<div class="kpi'+(k.m?' m':'')+'"><div class="kpi-lbl">'+k.l+'</div>'
+      +'<div class="kpi-val">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
+  }).join('');
+  
+  var totalVenta=M.reduce(function(s,m){return s+m.venta_neta;},0);
+  var monthRatio=totalVenta>0?tvn/totalVenta:1;
+  
+  // 1. Gráfico Principal (Línea)
+  var cardHd=$('ch-vn').previousElementSibling; 
+  if(sv==='all'){
+    if(cardHd) cardHd.textContent='Venta neta mensual';
+    // Abreviamos el mes (Ene, Feb) para que no se amontone el texto
+    lineChart('ch-vn',sm.map(function(m){return{l:m.month.split(' ')[0].slice(0,3),v:m.venta_sin_iva||(Math.round(m.venta_neta/1.19))};}), '#00d4ff', fmtM);
+  } else {
+    if(cardHd) cardHd.textContent='Venta diaria — '+sv;
+    // Buscamos los datos diarios del mes específico
+    var sd=SALES.daily.filter(function(d){return d.month===sv && d.venta_neta>0;});
+    if(sd.length>0){
+      lineChart('ch-vn',sd.map(function(d){
+         var num=d.date.replace(/[^\d]/g,''); // Sacamos solo el número del día
+         return{l:num, v:Math.round(d.venta_neta/1.19)};
+      }), '#00d4ff', fmtM);
+    } else {
+      $('ch-vn').innerHTML='<div class="empty" style="padding:40px 0">Sin datos diarios para este mes</div>';
+    }
+  }
+  
+  var ya_t=sm.reduce(function(s,m){return s+(m.delivery_ya||0);},0);
+  var ub_t=sm.reduce(function(s,m){return s+(m.delivery_uber||0);},0);
+  var tr_t=sm.reduce(function(s,m){return s+(m.delivery_transferencia||0);},0);
+  var lc_t=Math.max(0,tvn-ya_t-ub_t-tr_t);
+  var canalData=[{l:'Local',v:lc_t},{l:'PedidosYa',v:ya_t},{l:'Del. interno',v:tr_t},{l:'Uber Eats',v:ub_t}].filter(function(x){return x.v>0;});
+  setTimeout(function(){pieChart('ch-ci', canalData, 'Canales de venta');},50);
+  
+  // 2. Gráficos de Ranking pasados a horizontales (texto 100% legible)
+  var topDishes=PRODUCT_SALES.filter(function(p){return p.weekly_qty>0&&p.venta>0&&!p.is_modifier})
+    .map(function(p){return{l:p.name,v:Math.round(p.weekly_qty*monthRatio*4.33)};})
+    .sort(function(a,b){return b.v-a.v;}).slice(0,8);
+  setTimeout(function(){
+    barChart('ch-pv',topDishes,['#00e5a0','#00d4ff','#ff3fa4','#ffb020','#a78bfa'],function(v){return v+'u';}, 160);
+  },80);
+  
+  var topRec=RECIPES.filter(function(r){return r.cost>200&&r.cost<9000;}).sort(function(a,b){return b.cost-a.cost;}).slice(0,8).map(function(r){return{l:r.name,v:r.cost};});
+  barChart('ch-rc',topRec, '#00d4ff', fmt, 160);
+}
+// ════ VENTAS ════
+var aM='all';
+var vCanal='all'; // all | local | intern | ya | uber
+
+function initMonthSel(){
+  var M=SALES.monthly;
+  var sel=$('v-mes-sel'); if(!sel) return;
+  var now=new Date();
+  var mN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var cur=mN[now.getMonth()]+' '+now.getFullYear();
+  var html='<option value="all">Todos los meses</option>';
+  M.forEach(function(m){ html+='<option value="'+m.month+'"'+(m.month===cur?' selected':'')+'>'+m.month+'</option>'; });
+  sel.innerHTML=html;
+  var exists=M.find(function(m){return m.month===cur;});
+  aM=exists?cur:'all';
+  if(!exists) sel.value='all';
+}
+
+function setMonth(val){ aM=val; renderV(); }
+
+function setVCanal(val,el){
+  vCanal=val;
+  document.querySelectorAll('[id^="vch-"]').forEach(function(b){b.classList.remove('on')});
+  el.classList.add('on');
+  renderV();
+}
+
+// Returns the venta value for a monthly row depending on canal
+// Build PedidosYa lookup from DELIVERY_MONTHLY for fallback
+var DM_BY_LABEL=(function(){
+  var mN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var map={};
+  DELIVERY_MONTHLY.forEach(function(dm){
+    var p=dm.mes.split('-');
+    var label=mN[parseInt(p[1])-1]+' '+p[0];
+    map[label]=dm.ventas;
+  });
+  return map;
+})();
+
+function getVenta(m){
+  var dy=(m.delivery_ya||0), du=(m.delivery_uber||0), dt=(m.delivery_transferencia||0);
+  var platforms=dy+du;
+  var local=Math.max(0,m.venta_neta-platforms-dt);
+  if(vCanal==='all')       return m.venta_neta;
+  if(vCanal==='local')     return local;
+  if(vCanal==='intern')    return dt;
+  if(vCanal==='platforms') return platforms;
+  if(vCanal==='ya')        return dy;
+  if(vCanal==='uber')      return du;
+  return m.venta_neta;
+}
+
+function canalLabel(){
+  var labels={'all':'Total','local':'Local','intern':'Del. interno (transf.)','platforms':'Plataformas ext.','ya':'PedidosYa','uber':'Uber Eats'};
+  return labels[vCanal]||vCanal;
+}
+
+
+function renderV(){
+  var M=SALES.monthly, D=SALES.daily;
+  var sm=aM==='all'?M:M.filter(function(m){return m.month===aM;});
+  var sd=aM==='all'?D:D.filter(function(d){return d.month===aM;});
+  if(!sm.length) sm=M;
+
+  var tvn=sm.reduce(function(s,m){return s+getVenta(m);},0);
+  var amg=sm.reduce(function(s,m){return s+m.margen_pct;},0)/sm.length;
+  var ad=sd.filter(function(d){return d.venta_neta>0;});
+  var canalRatio=sm.reduce(function(s,m){return s+m.venta_neta;},0);
+  var canalTotal=sm.reduce(function(s,m){return s+getVenta(m);},0);
+  var ratio=canalRatio>0?canalTotal/canalRatio:1;
+  var avgd=ad.length?ad.reduce(function(s,d){return s+d.venta_neta*ratio;},0)/ad.length:0;
+  var lbl=(aM==='all'?'Ene 25–Feb 26':aM)+' · '+canalLabel();
+
+  var totalIntern=sm.reduce(function(s,m){return s+(m.delivery_ya||0)+(m.delivery_uber||0);},0);
+  var delPct=sm.reduce(function(s,m){return s+m.venta_neta;},0)>0?(totalIntern/sm.reduce(function(s,m){return s+m.venta_neta;},0)*100):0;
+
+  $('kpi-v').innerHTML=[
+    {l:'Venta '+canalLabel(),      v:fmtM(tvn),  f:'Sin IVA · '+lbl},
+    {l:'Venta bruta c/IVA',        v:'$'+(tvn*1.19/1e6).toFixed(2)+'M', f:'IVA incluido', m:1},
+    {l:'Margen neto',              v:amg.toFixed(1)+'%', f:'Sin IVA'},
+    {l:'Delivery interno',         v:fmtM(totalIntern), f:delPct.toFixed(1)+'% del total', m:1},
+    {l:'Promedio diario',          v:fmt(avgd), f:ad.length+' días activos'},
+  ].map(function(k){
+    return '<div class="kpi'+(k.m?' m':'')+'"><div class="kpi-lbl">'+k.l+'</div>'
+      +'<div class="kpi-val">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
+  }).join('');
+
+  // --- GRÁFICO 1: MES VS MES (Horizontal) o LÍNEA (Todos) ---
+  $('vt1').textContent=(aM==='all'?'Venta mensual':'Este mes vs Año anterior')+' · '+canalLabel();
+  if(aM!=='all'&&sm.length===1){
+    var cur=sm[0];
+    var ns2=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var pts2=aM.split(' ');var mi2=ns2.indexOf(pts2[0]);
+    var prevLbl=mi2>=0?ns2[mi2]+' '+(parseInt(pts2[1])-1):null;
+    var prev=prevLbl?M.find(function(x){return x.month===prevLbl;}):null;
+    var cdata=[{l:cur.days_active<26?aM+'*':aM,v:getVenta(cur)}];
+    if(prev) cdata.push({l:prevLbl,v:getVenta(prev)});
+    
+    // Gráfico de barras horizontales sutil para comparar 2 elementos (no más contenedores gigantes)
+    barChart('ch-vm', cdata, ['#00d4ff','rgba(0,212,255,.25)'], fmtM, 140);
+  } else {
+    // Si son todos los meses, dibujamos la línea
+    lineChart('ch-vm', sm.map(function(m){return{l:m.month.split(' ')[0].slice(0,3),v:getVenta(m)};}), '#00d4ff', fmtM);
+  }
+
+  // --- GRÁFICO 2: DÍAS (Convertido a Línea Dinámica) ---
+  $('vt2').textContent=aM==='all'?'Último mes — días':'Días de '+aM;
+  var ds=aM==='all'?D.filter(function(d){return d.month===M[M.length-1].month;}):sd;
+  var vd=ds.filter(function(d){return d.venta_neta>0;});
+  
+  lineChart('ch-vd', vd.map(function(d){
+    return {l:d.date.replace(/[^\d]/g,''), v:Math.round(d.venta_neta*ratio)};
+  }), '#00e5a0', fmtM);
+
+  // --- DESGLOSE DE CANALES ---
+  if(vCanal==='all'&&sm.length>0){
+    var yaT=sm.reduce(function(s,m){return s+(m.delivery_ya||0);},0);
+    var ubT=sm.reduce(function(s,m){return s+(m.delivery_uber||0);},0);
+    var dtT=sm.reduce(function(s,m){return s+(m.delivery_transferencia||0);},0);
+    var locT=sm.reduce(function(s,m){return s+m.venta_neta;},0)-yaT-ubT-dtT;
+    var tot=yaT+ubT+dtT+locT;
+    
+    // Se inserta de manera limpia debajo del lineChart
+    $('ch-vd').innerHTML+='<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--b)">'
+      +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:12px">Desglose por canal</div>'
+      +[{l:'Local',v:locT,c:'#00d4ff'},{l:'Del. interno',v:dtT,c:'#00e5a0'},{l:'PedidosYa',v:yaT,c:'#ff3fa4'},{l:'Uber Eats',v:ubT,c:'#a78bfa'}]
+      .filter(function(x){return x.v>0;})
+      .map(function(x){return mkBar(x.l,x.v,tot,x.c,fmtM,120);}).join('')
+      +'</div>';
+      
+    pieChart('ch-vd-pie',[{l:'Local',v:locT},{l:'Del. interno',v:dtT},{l:'PedidosYa',v:yaT},{l:'Uber Eats',v:ubT}].filter(function(x){return x.v>0;}));
+  }
+}
+
+
+// ════ ANÁLISIS INTELIGENTE ════
+function initAnalisis(){
+  var sel=$('an-mes-sel');
+  if(sel&&!sel.options.length){
+    sel.innerHTML='<option value="all">Todo el período</option>'
+      +SALES.monthly.map(function(m){return '<option value="'+m.month+'">'+m.month+'</option>';}).join('');
+    // Reparamos el selector para que reaccione al cambio
+    sel.onchange = initAnalisis; 
+  }
+  var sv=sel?sel.value:'all';
+  var totalVenta=SALES.monthly.reduce(function(s,m){return s+m.venta_neta;},0);
+  var selMo=sv==='all'?null:SALES.monthly.find(function(m){return m.month===sv;});
+  var monthRatio=selMo&&totalVenta>0?selMo.venta_neta/totalVenta:1;
+  var weeksInPeriod=sv==='all'?SALES.monthly.length*4.33:selMo?selMo.days_active/7:4.33;
+
+  var ctx=$('an-context');
+  if(ctx){
+    if(selMo) ctx.textContent=selMo.days_active+' días activos · venta '+fmtM(selMo.venta_neta);
+    else ctx.textContent=SALES.monthly.length+' meses analizados';
+  }
+
+  // --- NUEVO DASHBOARD DE PROGRESO Y PROYECCIÓN ---
+  if ($('ch-vp')) {
+    var M = SALES.monthly;
+    var activeM = M.filter(function(m){return m.days_active>0;});
+    // Apuntamos al mes seleccionado, o al último si es "Todos"
+    var targetMonth = sv === 'all' ? activeM[activeM.length-1] : activeM.find(function(m){return m.month === sv;});
+    
+    if (targetMonth) {
+        var targetIdx = activeM.indexOf(targetMonth);
+        var histM = activeM.slice(0, targetIdx + 1).slice(-6); 
+        var wSum=0, wRate=0;
+        var weights=[1,1,2,2,3,3].slice(-histM.length); 
+        histM.forEach(function(mo,i){
+            var w = weights[i]||1; wSum+=w; wRate+=(mo.venta_neta/mo.days_active)*w;
+        });
+        var baseRate = wSum>0 ? wRate/wSum : 0;
+        
+        var trendPct = 0; 
+        if(histM.length >= 4) {
+            var mid = Math.floor(histM.length/2);
+            var h1 = histM.slice(0, mid), h2 = histM.slice(mid);
+            var r1 = h1.reduce(function(s,m){return s+(m.venta_neta/m.days_active);},0)/h1.length;
+            var r2 = h2.reduce(function(s,m){return s+(m.venta_neta/m.days_active);},0)/h2.length;
+            if(r1>0) trendPct = (r2-r1)/r1;
+        }
+
+        var mArr=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        var mPts=targetMonth.month.split(' ');
+        var mI=mArr.indexOf(mPts[0]); var yr=parseInt(mPts[1]);
+        var dim=new Date(yr,mI+1,0).getDate();
+
+        var currentActual=targetMonth.venta_neta;
+        var currentProj = targetMonth.days_active >= dim - 2 ? currentActual : Math.round((currentActual / targetMonth.days_active) * dim);
+
+        var pctMonth=Math.min(100, Math.round((targetMonth.days_active/dim)*100));
+        var pctVenta=currentProj>0 ? Math.min(100, Math.round((currentActual/currentProj)*100)) : 0;
+
+        var nextMonthsHtml = '';
+        var maxProj = currentProj;
+        var futureData = [];
+        for(var i=1; i<=3; i++){
+            var nxI = (mI + i) % 12;
+            var nxY = yr + Math.floor((mI + i) / 12);
+            var nxDim = new Date(nxY, nxI+1, 0).getDate();
+            var projRate = baseRate * Math.pow(1+trendPct, i);
+            var projV = Math.round(projRate * nxDim);
+            futureData.push({l: mArr[nxI].slice(0,3)+' '+nxY, v: projV});
+            if(projV > maxProj) maxProj = projV;
+        }
+
+        futureData.forEach(function(d){
+            var wPct = maxProj > 0 ? (d.v/maxProj*100) : 0;
+            nextMonthsHtml += '<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">'
+                +'<span style="width:65px;font-size:11.5px;color:var(--sub);font-weight:600">'+d.l+'</span>'
+                +'<div style="flex:1;height:6px;background:var(--s3);border-radius:4px">'
+                +'<div style="width:'+wPct+'%;background:rgba(0,212,255,.35);height:100%;border-radius:4px"></div>'
+                +'</div>'
+                +'<span style="width:65px;text-align:right;font-size:12px;font-family:var(--mono);color:var(--t)">'+fmtM(d.v)+'</span>'
+                +'</div>';
+        });
+
+        $('ch-vp').innerHTML = '<div style="display:flex;flex-direction:column;gap:20px;padding-top:6px">'
+            +'<div style="background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:18px;position:relative;box-shadow:0 4px 12px rgba(0,0,0,.3)">'
+            +'<div style="display:flex;justify-content:space-between;margin-bottom:12px">'
+            +'<span style="font-size:11px;font-weight:700;color:var(--t);text-transform:uppercase;letter-spacing:.08em">Progreso '+targetMonth.month+'</span>'
+            +'<span style="font-size:11px;font-weight:800;color:var(--a)">'+pctMonth+'% del mes</span>'
+            +'</div>'
+            +'<div style="height:12px;background:rgba(255,176,32,.15);border-radius:6px;display:flex;overflow:hidden;margin-bottom:10px">'
+            +'<div style="width:'+pctVenta+'%;background:var(--a);height:100%;border-radius:6px;transition:width .8s ease"></div>'
+            +'</div>'
+            +'<div style="display:flex;justify-content:space-between;font-size:11.5px;font-family:var(--mono)">'
+            +'<span style="color:var(--t);font-weight:700">Llevamos: '+fmtM(currentActual)+'</span>'
+            +'<span style="color:var(--sub)">Meta est: '+fmtM(currentProj)+'</span>'
+            +'</div>'
+            +'</div>'
+            +'<div style="padding:0 8px">'
+            +'<div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;border-bottom:1px solid var(--b);padding-bottom:8px">Siguientes 3 meses ('+(trendPct>0?'+':'')+ (trendPct*100).toFixed(1) +'%)</div>'
+            + nextMonthsHtml
+            +'</div>'
+            +'</div>';
+    }
+  }
+
+  // --- PLATOS EN HORIZONTAL ---
+  var topD=PRODUCT_SALES.filter(function(p){return p.weekly_qty>0&&p.venta>0&&!p.is_modifier})
+    .map(function(p){
+      var periodQty=sv==='all'?p.weekly_qty:(p.weekly_qty*weeksInPeriod);
+      return{name:p.name,cat:p.cat,qty:periodQty,venta:p.venta*monthRatio,weekly_qty:p.weekly_qty,avg_ticket:p.avg_ticket,weekly_venta:p.weekly_venta};
+    }).sort(function(a,b){return b.qty-a.qty}).slice(0,10);
+    
+  setTimeout(function(){
+      barChart('ch-platos', topD.map(function(p){return {l:p.name, v:p.qty}}), '#00d4ff', function(v){return Math.round(v)+'u';}, 160);
+  }, 50);
+
+  // --- GRÁFICO PATRÓN DÍAS ---
+  var days=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+  var dayLabels=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  var dayVals=days.map(function(d){return DAY_PATTERNS[d]||0;});
+  var maxDay2=Math.max.apply(null,dayVals)||1;
+  var dH=140, dPadB=32, dPadT=8, dBW=34, dGap=12;
+  var dTotalW=(dBW+dGap)*7+dGap;
+  var dColors=['#00d4ff','#00d4ff','#00d4ff','#00d4ff','#ff3fa4','#ff3fa4','#ff3fa4'];
+  var dBars=dayVals.map(function(v,i){
+    var bh=Math.max(4,Math.round((v/maxDay2)*(dH-dPadT-dPadB)));
+    var x=dGap+i*(dBW+dGap);
+    var y=dH-dPadB-bh;
+    var c=dColors[i];
+    return '<g style="cursor:pointer" onmouseenter="showDayTip(this,event)" onmouseleave="hideDayTip()" data-v="'+v+'" data-l="'+dayLabels[i]+'">'
+      +'<rect x="'+x+'" y="'+(dH-dPadB)+'" width="'+dBW+'" height="1" rx="4" fill="'+c+'" opacity=".2"/>'
+      +'<rect class="anim-bar" x="'+x+'" y="'+(dH-dPadB)+'" width="'+dBW+'" height="0" rx="4" fill="'+c+'" data-ty="'+y+'" data-th="'+bh+'"/>'
+      +'<text x="'+(x+dBW/2)+'" y="'+(dH-dPadB+14)+'" text-anchor="middle" font-size="11" fill="var(--sub)" font-family="system-ui">'+dayLabels[i]+'</text>'
+      +'<text class="day-val-txt" x="'+(x+dBW/2)+'" y="'+(y-5)+'" text-anchor="middle" font-size="9" fill="'+c+'" font-family="var(--mono)" opacity="0">'+fmtM(v)+'</text>'
+      +'</g>';
+  }).join('');
+  $('day-chart').innerHTML='<div id="day-tooltip" style="position:fixed;background:var(--s2);border:1px solid var(--b);border-radius:6px;padding:8px 12px;font-size:11px;pointer-events:none;z-index:200;display:none">'
+    +'<div id="dtt-label" style="font-weight:700;color:var(--t);margin-bottom:2px"></div>'
+    +'<div id="dtt-val" style="color:var(--m);font-family:var(--mono)"></div>'
+    +'<div id="dtt-pct" style="font-size:10px;color:var(--sub)"></div></div>'
+    +'<div style="display:flex;justify-content:center;width:100%"><svg width="100%" viewBox="0 0 '+dTotalW+' '+dH+'" style="overflow:visible;display:block;max-width:400px">'+dBars+'</svg></div>'
+    +'<div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--sub);justify-content:center">'
+    +'<span><span style="display:inline-block;width:8px;height:8px;background:#00d4ff;border-radius:2px;margin-right:4px"></span>Semana</span>'
+    +'<span><span style="display:inline-block;width:8px;height:8px;background:#ff3fa4;border-radius:2px;margin-right:4px"></span>Fin de semana</span>'
+    +'</div>';
+  requestAnimationFrame(function(){
+    document.querySelectorAll('#day-chart .anim-bar').forEach(function(bar,i){
+      setTimeout(function(){
+        var ty=bar.getAttribute('data-ty'), th=bar.getAttribute('data-th');
+        bar.style.transition='y .45s cubic-bezier(.34,1.56,.64,1), height .45s cubic-bezier(.34,1.56,.64,1)';
+        bar.setAttribute('y',ty); bar.setAttribute('height',th);
+        var txt=bar.parentElement.querySelector('.day-val-txt');
+        if(txt) setTimeout(function(){txt.style.transition='opacity .3s';txt.setAttribute('opacity','1');},350);
+      }, i*70);
+    });
+  });
+
+  // --- DETALLE POR PLATO ---
+  var cards=PRODUCT_SALES.filter(function(p){return p.weekly_qty>1&&p.venta>0&&!p.is_modifier})
+    .map(function(p){
+      return{name:p.name,cat:p.cat,qty:p.weekly_qty*weeksInPeriod,
+        venta:p.venta*monthRatio,avg_ticket:p.avg_ticket,
+        weekly_venta:p.weekly_venta*monthRatio*4.33/SALES.monthly.length};
+    }).sort(function(a,b){return b.venta-a.venta}).slice(0,12);
+    
+  var topPie=cards.slice(0,6).map(function(p){return{l:p.name,v:Math.round(p.venta)};});
+  setTimeout(function(){pieChart('insight-pie', topPie, 'Top platos por venta');},100);
+  
+  var maxV2=cards[0]?cards[0].venta:1;
+  var th='padding:14px 16px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);border-bottom:2px solid var(--b)';
+  var td='padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.03);font-size:14px';
+  var rowsHtml=cards.map(function(p,i){
+    var rec=RECIPES.find(function(r){return r.name.toLowerCase()===p.name.toLowerCase();});
+    var pct=maxV2>0?p.venta/maxV2*100:0;
+    var barC=i<3?'#00d4ff':i<6?'#ff3fa4':'#00e5a0';
+    var bg=i%2===0?'transparent':'rgba(255,255,255,.015)';
+    return '<tr style="background:'+bg+'">'
+      +'<td style="'+td+';color:var(--sub);font-family:var(--mono)">'+(i+1)+'</td>'
+      +'<td style="'+td+';font-weight:700;color:var(--t)">'+p.name+'</td>'
+      +'<td style="'+td+';color:var(--sub)">'+p.cat+'</td>'
+      +'<td style="'+td+';text-align:right;font-family:var(--mono);font-weight:800;color:var(--m)">'+fmtM(p.venta)+'</td>'
+      +'<td style="'+td+';text-align:right;font-family:var(--mono);color:var(--sub)">'+fmt(p.avg_ticket)+'</td>'
+      +'<td style="'+td+';text-align:right;font-family:var(--mono);color:'+(rec?'#00e5a0':'var(--sub)')+'">'+(rec?fmt(rec.cost):'—')+'</td>'
+      +'<td style="'+td+'"><div style="background:var(--s3);border-radius:5px;height:8px;min-width:90px"><div style="background:'+barC+';height:8px;border-radius:5px;width:'+pct.toFixed(1)+'%"></div></div></td>'
+      +'</tr>';
+  }).join('');
+  
+  $('insight-cards').innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+    +'<thead><tr>'
+    +'<th style="'+th+'">#</th><th style="'+th+';text-align:left">Plato</th><th style="'+th+';text-align:left">Categoría</th>'
+    +'<th style="'+th+';text-align:right">Venta</th><th style="'+th+';text-align:right">Ticket</th>'
+    +'<th style="'+th+';text-align:right">Costo</th><th style="'+th+'">Dist.</th>'
+    +'</tr></thead><tbody>'+rowsHtml+'</tbody></table></div>';
+}
+// ════ INVENTARIO ════
+var IS={q:'',cat:'',uso:'',sort:'total_cost',dir:-1};
+var IP={page:0,per:20};
+
+function getIRows(){
+  var r=INGR.slice();
+  if(IS.q){var q=IS.q.toLowerCase();r=r.filter(function(i){return i.name.toLowerCase().indexOf(q)>=0||(i.brand||'').toLowerCase().indexOf(q)>=0||(i.proveedor||'').toLowerCase().indexOf(q)>=0})}
+  if(IS.cat) r=r.filter(function(i){return i.category===IS.cat});
+  if(IS.uso==='hi') r=r.filter(function(i){return i.weekly_avg>20});
+  else if(IS.uso==='md') r=r.filter(function(i){return i.weekly_avg>=1&&i.weekly_avg<=20});
+  else if(IS.uso==='lo') r=r.filter(function(i){return i.weekly_avg<1});
+  var k=IS.sort,d=IS.dir;
+  r.sort(function(a,b){var av=a[k]||0,bv=b[k]||0;return typeof av==='string'?d*av.localeCompare(bv):d*(bv-av)});
+  return r;
+}
+
+function renderIngr(){
+  var rows=getIRows(),total=rows.length,pages=Math.max(1,Math.ceil(total/IP.per));
+  IP.page=Math.min(IP.page,pages-1);
+  var sl=rows.slice(IP.page*IP.per,(IP.page+1)*IP.per);
+  $('i-cnt').textContent=total+' ingredientes';
+  $('i-body').innerHTML=sl.map(function(i){
+    var cr=(i.weekly_avg*2).toFixed(1);
+    var lv=i.weekly_avg>20?'r':i.weekly_avg>5?'a':'g';
+    var dc=lv==='r'?'#ff4455':lv==='a'?'#ffb020':'#00e5a0';
+    var br=i.brand?'<div style="font-size:10.5px;color:var(--sub);margin-top:2px">'+i.brand+(i.proveedor?' · <em>'+i.proveedor+'</em>':'')+'</div>':'';
+    return '<tr>'
+      +'<td><span class="dot" style="background:'+dc+'"></span><strong>'+i.name+'</strong>'+br+'</td>'
+      +'<td class="hide-sm" style="color:var(--sub);font-size:12px">'+(i.brand||'—')+'</td>'
+      +'<td class="hide-sm" style="color:var(--sub);font-size:12px">'+(i.proveedor||'—')+'</td>'
+      +'<td class="r mono">'+fmt(i.cost)+'</td>'
+      +'<td class="hide-xs"><span class="tag t-n">'+i.unit+'</span></td>'
+      +'<td class="r mono">'+(i.weekly_avg>0?fmtN(i.weekly_avg)+' '+i.unit:'<span style="color:var(--sub)">—</span>')+'</td>'
+      +'<td class="r mono hide-sm">'+(i.total_cost>0?fmt(i.total_cost):'<span style="color:var(--sub)">—</span>')+'</td>'
+      +'<td class="r hide-xs"><span class="tag t-'+lv+'">'+(i.weekly_avg>0?cr+' '+i.unit:'—')+'</span></td>'
+      +'<td><button class="btn-tbl" onclick="openEdit(\''+i.code+'\')">Editar</button></td>'
+      +'</tr>';
+  }).join('');
+  renderPag('i-pag',total,IP.page,IP.per,function(p){IP.page=p;renderIngr()});
+}
+
+function filterI(){IS.q=$('iq').value;IS.cat=$('ic').value;IS.uso=$('iu').value;IP.page=0;renderIngr()}
+function sI(k){if(IS.sort===k)IS.dir*=-1;else{IS.sort=k;IS.dir=-1}IP.page=0;renderIngr()}
+
+function openAddIngr(){
+  $('mi-title').textContent='Nuevo ingrediente';$('mi-sub').textContent='Agrega al inventario';
+  $('mi-code').value='CUSTOM_'+Date.now();
+  ['mi-name','mi-brand','mi-prov','mi-notes','mi-cost','mi-wk','mi-min','mi-tc','mi-pqty','mi-punit','mi-conv','mi-convunit'].forEach(function(id){$(id).value='';});
+  $('mi-unit').value='kg';$('mi-cat').value='IC.010';
+  $('conv-hint').textContent='';
+  $('mi-del').style.display='none';
+  $('m-ingr').classList.add('on');
+}
+function openEdit(code){
+  var i=INGR.find(function(x){return x.code===code}); if(!i) return;
+  $('mi-title').textContent='Editar ingrediente';$('mi-sub').textContent=i.name;
+  $('mi-code').value=i.code;$('mi-name').value=i.name;$('mi-brand').value=i.brand||'';
+  $('mi-prov').value=i.proveedor||'';$('mi-notes').value=i.notes||'';
+  $('mi-cost').value=i.cost;$('mi-unit').value=i.unit;$('mi-cat').value=i.category||'IC.010';
+  $('mi-wk').value=i.weekly_avg||'';$('mi-min').value=i.stock_min||'';$('mi-tc').value=i.total_cost||'';
+  $('mi-pqty').value=i.purchase_qty||'';$('mi-punit').value=i.purchase_unit||'';
+  $('mi-conv').value=i.conv_qty||'';$('mi-convunit').value=i.conv_unit||'';
+  updateConvHint();
+  $('mi-del').style.display='inline-flex';
+  $('m-ingr').classList.add('on');
+}
+function saveIngr(){
+  var code=$('mi-code').value;
+  var obj={code:code,name:$('mi-name').value.trim(),brand:$('mi-brand').value.trim(),
+    proveedor:$('mi-prov').value.trim(),notes:$('mi-notes').value.trim(),
+    cost:parseFloat($('mi-cost').value)||0,unit:$('mi-unit').value,
+    category:$('mi-cat').value,weekly_avg:parseFloat($('mi-wk').value)||0,
+    stock_min:parseFloat($('mi-min').value)||0,
+    total_cost:parseFloat($('mi-tc').value)||0,total_used:0,
+    purchase_qty:parseFloat($('mi-pqty').value)||0,
+    purchase_unit:$('mi-punit').value.trim(),
+    conv_qty:parseFloat($('mi-conv').value)||0,
+    conv_unit:$('mi-convunit').value.trim()};
+  if(!obj.name){alert('Ingresa un nombre.');return}
+  var idx=INGR.findIndex(function(x){return x.code===code});
+  if(idx>=0) INGR[idx]=obj; else INGR.push(obj);
+  cm('m-ingr');renderIngr();initDash();syncRecetasCost();
+}
+function delIngr(){
+  if(!confirm('¿Eliminar?')) return;
+  INGR=INGR.filter(function(i){return i.code!==$('mi-code').value});
+  cm('m-ingr');renderIngr();initDash();
+}
+
+// ─── PAGINATION ───
+function renderPag(id,total,page,per,cb){
+  var pages=Math.max(1,Math.ceil(total/per));
+  var st=page*per+1,en=Math.min((page+1)*per,total);
+  var h='<span class="pag-info">'+st+'–'+en+' de '+total+'</span><div class="pag-btns">';
+  h+='<button class="pag-btn" '+(page===0?'disabled':'')+' onclick="('+cb+')('+Math.max(0,page-1)+')">‹</button>';
+  var lo=Math.max(0,page-2),hi=Math.min(pages-1,page+2);
+  if(lo>0)h+='<button class="pag-btn" onclick="('+cb+')(0)">1</button>'+(lo>1?'<span style="color:var(--sub);padding:0 3px">…</span>':'');
+  for(var p=lo;p<=hi;p++)h+='<button class="pag-btn'+(p===page?' on':'')+'" onclick="('+cb+')('+p+')">'+(p+1)+'</button>';
+  if(hi<pages-1)h+=(hi<pages-2?'<span style="color:var(--sub);padding:0 3px">…</span>':'')+'<button class="pag-btn" onclick="('+cb+')('+(pages-1)+')">'+pages+'</button>';
+  h+='<button class="pag-btn" '+(page>=pages-1?'disabled':'')+' onclick="('+cb+')('+Math.min(pages-1,page+1)+')">›</button>';
+  h+='</div>';
+  $(id).innerHTML=h;
+}
+
+
+
+// ─── MOTOR DE LECTURA CSV (DEFINICIÓN ÚNICA — borrar la otra) ───
+function parseCSVRow(text, delimiter) {
+  var ret = [], val = '', inQ = false;
+  for(var i=0; i<text.length; i++) {
+    var c = text[i];
+    if(c === '"') inQ = !inQ;
+    else if(c === delimiter && !inQ) { ret.push(val.replace(/^"|"$/g,'').trim()); val=''; }
+    else val += c;
+  }
+  ret.push(val.replace(/^"|"$/g,'').trim()); 
+  return ret;
+}
+
+// ─── EXTRACCIÓN NUMÉRICA ROBUSTA (formato chileno $1.234.567) ───
+function extractNumFromCell(arr, index) {
+  if (!arr || index >= arr.length) return 0;
+  var val = arr[index];
+  if (val == null) return 0;
+  var s = String(val).trim();
+  if (s === '' || s === '-') return 0;
+  // Quitar $ y espacios
+  s = s.replace(/[$\s]/g, '');
+  // Formato chileno: puntos = miles, coma = decimal
+  if (s.indexOf(',') > -1) {
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else {
+    // Si hay múltiples puntos → son separadores de miles
+    var dotCount = (s.match(/\./g) || []).length;
+    if (dotCount > 1) {
+      s = s.replace(/\./g, '');
+    } else if (dotCount === 1) {
+      // Un solo punto con 3 dígitos después → es separador de miles (ej: 1.234)
+      var afterDot = s.split('.')[1];
+      if (afterDot && afterDot.length === 3 && /^\d+$/.test(afterDot)) {
+        s = s.replace('.', '');
+      }
+    }
+  }
+  var num = parseFloat(s);
+  return isNaN(num) ? 0 : Math.round(num);
+}
+
+function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFileImp(f);}
+
+// ════════════════════════════════════════════════════════════════
+// handleFileImp — VERSIÓN ÚNICA CORREGIDA (14 fixes aplicados)
+// ════════════════════════════════════════════════════════════════
+function handleFileImp(file){
+  if(!file) return;
+  $('imp-st').textContent='Procesando: '+file.name+'...';
+  
+  window.importFileName = file.name.toLowerCase(); 
+  
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var text = e.target.result;
+      var rows = [];
+      
+      // Detectar HTML (export Excel) vs texto plano
+      if(text.toLowerCase().includes('<tr') || text.toLowerCase().includes('<table')){
+        var doc=new DOMParser().parseFromString(text,'text/html');
+        doc.querySelectorAll('tr').forEach(function(tr){
+          var cells=[];
+          tr.querySelectorAll('td,th').forEach(function(td){cells.push(td.textContent.trim());});
+          if(cells.some(function(c){return c;})) rows.push(cells);
+        });
+      } else {
+        var tabs = (text.match(/\t/g) || []).length;
+        var semis = (text.match(/;/g) || []).length;
+        var commas = (text.match(/,/g) || []).length;
+        var delimiter = ','; 
+        if (tabs > semis && tabs > commas) delimiter = '\t';
+        else if (semis > commas && semis > tabs) delimiter = ';';
+        var lines = text.split(/\r\n|\n|\r/); 
+        lines.forEach(function(l){
+          if(l.trim()){
+            var cells = parseCSVRow(l, delimiter);
+            if(cells.some(function(c){return c;})) rows.push(cells);
+          }
+        });
+      }
+      
+      if(rows.length<2){$('imp-st').textContent='Archivo vacío.';return;}
+
+      window.toteatRows = rows; 
+      importPending = rows; 
+
+      // ── MODO INVENTARIO ──
+      if(typeof importMode !== 'undefined' && importMode === 'inv') {
+          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Inventario detectado</span>';
+          $('imp-act').style.display='flex';
+          return;
+      }
+          
+      // ── MODO VENTAS ──
+      var findRow = function(keyword) { 
+          return rows.findIndex(function(r){ 
+              return r.some(function(c){ return String(c).toLowerCase().includes(keyword); }); 
+          }); 
+      };
+
+      var vIdx = findRow('venta neta');
+
+      if(vIdx === -1) {
+          $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró "Venta Neta" en el archivo</span>';
+          $('imp-act').style.display='none';
+          return;
+      }
+
+      // Buscar la fila de días (lunes, martes, etc.) antes de Venta Neta
+      var dayRowIdx = -1;
+      for(var r = 0; r < vIdx; r++) {
+          var isDayRow = rows[r].some(function(c) {
+              var val = String(c).toLowerCase();
+              return val.includes('lunes') || val.includes('martes') || val.includes('miércoles') || val.includes('miercoles') || val.includes('jueves') || val.includes('viernes') || val.includes('sábado') || val.includes('sabado') || val.includes('domingo');
+          });
+          if(isDayRow) { dayRowIdx = r; break; }
+      }
+
+      var dayRow = dayRowIdx >= 0 ? rows[dayRowIdx] : [];
+      var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var sums = {}; 
+      
+      // Inicio anclado a Enero 2025
+      var currentYear = 2025;
+      var currentMonthIdx = 0; 
+      var prevDayNum = 0;
+      
+      for (var i = 0; i < dayRow.length; i++) {
+          var dCell = String(dayRow[i]).toLowerCase().trim();
+          if (!dCell || dCell.includes('total') || dCell.includes('sem')) continue;
+
+          var dayMatch = dCell.match(/\d+/);
+          if (!dayMatch) continue; 
+          
+          var dayNum = parseInt(dayMatch[0]);
+          if (dayNum < 1 || dayNum > 31) continue; 
+
+          // Si cae de fin de mes a inicio → cambio de mes
+          if (dayNum < prevDayNum - 10) {
+              currentMonthIdx++;
+              if (currentMonthIdx > 11) { currentMonthIdx = 0; currentYear++; }
+          }
+          prevDayNum = dayNum;
+
+          var label = mNames[currentMonthIdx] + ' ' + currentYear;
+          
+          // FIX: Estructura con TODOS los canales reales del SALES.monthly
+          if(!sums[label]) sums[label] = { 
+            venta_neta: 0, delivery_ya: 0, delivery_uber: 0, 
+            delivery_transferencia: 0, delivery_rappi: 0,
+            local_efectivo: 0, local_credito: 0, local_debito: 0, 
+            local_convenio: 0, local_junaeb: 0, otros: 0
+          };
+
+          // Extraer Venta Neta de esta columna
+          sums[label].venta_neta += extractNumFromCell(rows[vIdx], i);
+
+          // ════ MOTOR DE CLASIFICACIÓN DE PAGOS (CORREGIDO) ════
+          // FIX CRÍTICO: Antes decía: if(m.includes('efectivo') || 'crédito' || 'débito')
+          //   → 'crédito' como string suelto SIEMPRE es truthy → TODO caía en local
+          // Ahora cada keyword se verifica con includes() individual
+          for (var rowIdx = vIdx + 1; rowIdx < rows.length; rowIdx++) {
+              var metodoStr = String(rows[rowIdx][0] || '').trim();
+              if (!metodoStr || metodoStr === 'Total') continue;
+
+              var monto = extractNumFromCell(rows[rowIdx], i);
+              if (monto === 0) continue; 
+
+              var mLower = metodoStr.toLowerCase();
+
+              // Plataformas delivery
+              if (mLower.includes('pedidosya') || mLower.includes('pedidos ya')) {
+                  sums[label].delivery_ya += monto;
+              } 
+              else if (mLower.includes('uber')) {
+                  sums[label].delivery_uber += monto;
+              } 
+              else if (mLower.includes('rappi')) {
+                  sums[label].delivery_rappi += monto;
+              } 
+              // Delivery interno (transferencias)
+              else if (mLower.includes('transferencia')) {
+                  sums[label].delivery_transferencia += monto;
+              } 
+              // Pagos locales (cada uno verificado individualmente)
+              else if (mLower.includes('efectivo')) {
+                  sums[label].local_efectivo += monto;
+              }
+              else if (mLower.includes('crédito') || mLower.includes('credito') || mLower.includes('credit')) {
+                  sums[label].local_credito += monto;
+              }
+              else if (mLower.includes('débito') || mLower.includes('debito') || mLower.includes('debit')) {
+                  sums[label].local_debito += monto;
+              }
+              else if (mLower.includes('convenio')) {
+                  sums[label].local_convenio += monto;
+              }
+              else if (mLower.includes('junaeb')) {
+                  sums[label].local_junaeb += monto;
+              }
+              // Todo lo demás
+              else {
+                  sums[label].otros += monto;
+              }
+          }
+      }
+
+      window.pendingSalesSum = sums;
+
+      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Carga exitosa. Totales detectados:</span>';
+      
+      // ── PREVIEW (usa los campos reales) ──
+      var prevHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:300px;overflow-y:auto;padding-right:5px">';
+      var hasData = false;
+      var fmtPrev = function(v){ return typeof formatMoney==='function'?formatMoney(v):'$'+Math.round(v).toLocaleString('es-CL'); };
+      
+      for(var k in sums) {
+          var d = sums[k];
+          var localTotal = (d.local_efectivo||0) + (d.local_credito||0) + (d.local_debito||0) + (d.local_convenio||0) + (d.local_junaeb||0);
+          var sumaTotal = localTotal + (d.delivery_ya||0) + (d.delivery_uber||0) + (d.delivery_transferencia||0) + (d.delivery_rappi||0) + (d.otros||0);
+
+          if(sumaTotal > 0) { 
+              prevHtml += '<div style="padding:12px;background:var(--s2);border:1px solid var(--b2);border-left:3px solid var(--c);border-radius:6px;">'
+                        +'<div style="font-weight:800;color:var(--t);margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;">'
+                            +'<span>'+k+'</span>'
+                            +'<span style="color:var(--g);font-family:var(--mono)">'+fmtPrev(d.venta_neta)+'</span>'
+                        +'</div>'
+                        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">';
+
+              // Canales principales
+              if (d.delivery_ya > 0)              prevHtml += '<div style="font-size:11px;color:var(--sub)">PedidosYa: <span style="color:var(--m);font-family:var(--mono)">'+fmtPrev(d.delivery_ya)+'</span></div>';
+              if (d.delivery_uber > 0)            prevHtml += '<div style="font-size:11px;color:var(--sub)">Uber Eats: <span style="color:var(--c);font-family:var(--mono)">'+fmtPrev(d.delivery_uber)+'</span></div>';
+              if (d.delivery_rappi > 0)           prevHtml += '<div style="font-size:11px;color:var(--sub)">Rappi: <span style="color:var(--c);font-family:var(--mono)">'+fmtPrev(d.delivery_rappi)+'</span></div>';
+              if (d.delivery_transferencia > 0)   prevHtml += '<div style="font-size:11px;color:var(--sub)">Del. Interno: <span style="color:var(--t);font-family:var(--mono)">'+fmtPrev(d.delivery_transferencia)+'</span></div>';
+              if (localTotal > 0)                 prevHtml += '<div style="font-size:11px;color:var(--sub)">Local: <span style="color:var(--t);font-family:var(--mono)">'+fmtPrev(localTotal)+'</span></div>';
+              if (d.otros > 0)                    prevHtml += '<div style="font-size:11px;color:var(--sub)">Otros: <span style="color:var(--t);font-family:var(--mono)">'+fmtPrev(d.otros)+'</span></div>';
+
+              // Detalle local expandible
+              if (localTotal > 0) {
+                  prevHtml += '<details style="grid-column:1/-1;margin-top:4px"><summary style="font-size:10px;color:var(--sub);cursor:pointer">Detalle local</summary>'
+                    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:4px 0">';
+                  if(d.local_efectivo>0)  prevHtml += '<div style="font-size:10px;color:var(--sub)">Efectivo: '+fmtPrev(d.local_efectivo)+'</div>';
+                  if(d.local_credito>0)   prevHtml += '<div style="font-size:10px;color:var(--sub)">Crédito: '+fmtPrev(d.local_credito)+'</div>';
+                  if(d.local_debito>0)    prevHtml += '<div style="font-size:10px;color:var(--sub)">Débito: '+fmtPrev(d.local_debito)+'</div>';
+                  if(d.local_convenio>0)  prevHtml += '<div style="font-size:10px;color:var(--sub)">Convenio: '+fmtPrev(d.local_convenio)+'</div>';
+                  if(d.local_junaeb>0)    prevHtml += '<div style="font-size:10px;color:var(--sub)">Junaeb: '+fmtPrev(d.local_junaeb)+'</div>';
+                  prevHtml += '</div></details>';
+              }
+
+              prevHtml += '</div></div>';
+              hasData = true;
+          }
+      }
+      prevHtml += '</div>';
+      
+      if(!hasData) {
+          prevHtml = '<div class="notice warn">El archivo parece vacío o sin montos reconocidos. Verifica el formato de exportación de Toteat.</div>';
+      }
+      
+      $('imp-prev').innerHTML = prevHtml;
+      $('imp-act').style.display='flex';
+
+    }catch(err){$('imp-st').textContent='Error crítico: '+err.message;}
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// applyImport — CORREGIDO: Mapea a los campos REALES de SALES.monthly
+// ════════════════════════════════════════════════════════════════
+// FIX: Antes guardaba en .local, .ya, .uber (NO EXISTEN en data.js)
+// Ahora guarda en .delivery_ya, .delivery_uber, .delivery_transferencia, .venta_neta
+// y calcula .venta_sin_iva y .avg_daily_sin_iva automáticamente.
+// ════════════════════════════════════════════════════════════════
+function applyImport(){
+  if(importMode === 'inv'){
+    if(!importPending) return;
+    var updated=0, skipped=0;
+    importPending.forEach(function(r){
+      if(r.length<2) return;
+      var name=r[0]; var cost=parseFloat((r[1]||'').replace(/[^0-9.]/g,''))||0;
+      var unit=r[2]||''; var wk=parseFloat(r[3])||0;
+      var idx=INGR.findIndex(function(i){return i.name.toLowerCase().trim()===name.toLowerCase().trim();});
+      if(idx>=0){
+        if(cost>0) INGR[idx].cost=cost;
+        if(unit) INGR[idx].unit=unit;
+        if(wk>0) INGR[idx].weekly_avg=wk;
+        updated++;
+      } else { skipped++; }
+    });
+    
+    localStorage.setItem('app_ingr', JSON.stringify(INGR));
+    if(typeof syncRecetasCost === 'function') syncRecetasCost();
+
+    cm('m-import'); renderIngr(); initDash();
+    alert('✓ Inventario actualizado: '+updated+' ingredientes. Costo de recetas sincronizado.');
+    importPending = null;
+    
+  } else {
+    // ════ GUARDADO DE VENTAS — MAPEO CORRECTO ════
+    if(!window.pendingSalesSum) return;
+    
+    var sums = window.pendingSalesSum;
+    var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var updatedCount = 0, createdCount = 0;
+
+    for (var monthLabel in sums) {
+        var data = sums[monthLabel];
+        var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
+        
+        // Si el mes no existe, lo creamos
+        if (!targetMonth) {
+            // Calcular days_active del label
+            var pts = monthLabel.split(' ');
+            var mIdx = mNames.indexOf(pts[0]);
+            var yr = parseInt(pts[1]);
+            var daysInMonth = (mIdx>=0 && yr) ? new Date(yr, mIdx+1, 0).getDate() : 30;
+
+            targetMonth = { 
+              month: monthLabel, 
+              venta_bruta: 0, venta_neta: 0, venta_sin_iva: 0,
+              costo: 0, margen_pct: 0,
+              days_active: daysInMonth, avg_daily_sin_iva: 0,
+              delivery_ya: 0, delivery_uber: 0, delivery_transferencia: 0
+            };
+            SALES.monthly.push(targetMonth);
+            createdCount++;
+        } else {
+            updatedCount++;
+        }
+
+        // ═══ MAPEO A CAMPOS REALES DE SALES.monthly ═══
+        if (data.venta_neta > 0)              targetMonth.venta_neta = data.venta_neta;
+        if (data.delivery_ya > 0)             targetMonth.delivery_ya = data.delivery_ya;
+        if (data.delivery_uber > 0)           targetMonth.delivery_uber = data.delivery_uber;
+        if (data.delivery_transferencia > 0)  targetMonth.delivery_transferencia = data.delivery_transferencia;
+        
+        // Calcular campos derivados
+        targetMonth.venta_sin_iva = Math.round(targetMonth.venta_neta / 1.19);
+        if (targetMonth.days_active > 0) {
+            targetMonth.avg_daily_sin_iva = Math.round(targetMonth.venta_sin_iva / targetMonth.days_active);
+        }
+        // Venta bruta (si no existía, estimamos desde venta_neta)
+        if (!targetMonth.venta_bruta || targetMonth.venta_bruta === 0) {
+            targetMonth.venta_bruta = Math.round(targetMonth.venta_neta * 1.03); // ~3% descuentos
+        }
+    }
+
+    // Ordenar meses cronológicamente
+    SALES.monthly.sort(function(a,b){
+      var pa = a.month.split(' '), pb = b.month.split(' ');
+      var ya = parseInt(pa[1]), yb = parseInt(pb[1]);
+      if (ya !== yb) return ya - yb;
+      return mNames.indexOf(pa[0]) - mNames.indexOf(pb[0]);
+    });
+
+    localStorage.setItem('app_sales', JSON.stringify(SALES));
+    
+    // Refrescar dashboard
+    if(typeof initDash === 'function') initDash();
+    if(typeof initDashSel === 'function') initDashSel();
+    if(typeof initMonthSel === 'function') initMonthSel();
+    if(typeof renderV === 'function') renderV();
+    if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
+
+    cm('m-import'); 
+    window.pendingSalesSum = null;
+    
+    var msg = '✓ Ventas guardadas: ' + updatedCount + ' mes(es) actualizados';
+    if (createdCount > 0) msg += ', ' + createdCount + ' mes(es) nuevos creados';
+    alert(msg);
+  }
+}
+
+
+
+
+
+// ════ UPLOAD ════
+function openUpload(){pendingUpload=null;$('up-st').textContent='';$('up-prev').innerHTML='';$('up-act').style.display='none';$('m-up').classList.add('on')}
+function handleDrop(e){e.preventDefault();$('dz').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFile(f)}
+
+
+
+
+function applyUpload(){
+  if(!pendingUpload)return;
+  var u=0,a=0;
+  pendingUpload.forEach(function(p){
+    var idx=INGR.findIndex(function(i){return i.code===p.code});
+    if(idx>=0){INGR[idx].name=p.name;INGR[idx].brand=p.brand;INGR[idx].cost=p.cost;INGR[idx].unit=p.unit;u++}
+    else{INGR.push({code:p.code,name:p.name,brand:p.brand,cost:p.cost,unit:p.unit,category:'IC.010',weekly_avg:0,total_cost:0,total_used:0});a++}
+  });
+  pendingUpload=null;cm('m-up');renderIngr();initDash();
+  alert('✓ Actualizado: '+u+' existentes, '+a+' nuevos.');
+}
+
+// ════ RECETAS ════
+var CAT_LABELS={'hamburguesas':'Hamburguesas','pollo':'Pollo','acompañamientos':'Acompañam.','bebidas':'Bebidas','salsas':'Salsas','otros':'Otros'};
+var RS={q:'',cost:'',cat:'',sort:'weekly_units',dir:-1};var RP={page:0,per:20};
+function getRRows(){
+  var r=RECIPES.filter(function(x){return x.cost>0});
+  if(RS.q){var q=RS.q.toLowerCase();r=r.filter(function(x){return x.name.toLowerCase().indexOf(q)>=0})}
+  if(RS.cost==='lo')r=r.filter(function(x){return x.cost<1500});
+  else if(RS.cost==='md')r=r.filter(function(x){return x.cost>=1500&&x.cost<=3000});
+  else if(RS.cost==='hi')r=r.filter(function(x){return x.cost>3000});
+  if(RS.cat)r=r.filter(function(x){return x.cat===RS.cat});
+  var k=RS.sort,d=RS.dir;
+  r.sort(function(a,b){var av=a[k]||0,bv=b[k]||0;return typeof av==='string'?d*av.localeCompare(bv):d*(bv-av)});
+  return r;
+}
+function renderRec(){
+  var rows=getRRows(),total=rows.length;
+  var pages=Math.max(1,Math.ceil(total/RP.per));RP.page=Math.min(RP.page,pages-1);
+  var sl=rows.slice(RP.page*RP.per,(RP.page+1)*RP.per);
+  $('r-cnt').textContent=total+' recetas';
+  $('r-body').innerHTML=sl.map(function(r){
+    var wu=r.weekly_units>0?'<span class="tag t-c">'+r.weekly_units+' u/sem</span>':'<span class="tag t-n">\u2014</span>';
+    var catLbl=CAT_LABELS[r.cat]||r.cat||'\u2014';
+    return '<tr><td><strong>'+r.name+'</strong></td>'
+      +'<td class="hide-sm"><span class="tag t-n" style="font-size:10px">'+catLbl+'</span></td>'
+      +'<td class="r mono">'+fmt(r.cost)+'</td>'
+      +'<td class="r hide-sm">'+wu+'</td>'
+      +'<td class="r hide-sm" style="color:var(--sub)">'+r.ingredients.length+'</td>'
+      +'<td><button class="btn-tbl" onclick="openRec(\''+r.id+'\')">Editar</button></td></tr>';
+  }).join('');
+  renderPag('r-pag',total,RP.page,RP.per,function(p){RP.page=p;renderRec()});
+}
+function filterR(){RS.q=$('rq').value;RS.cost=$('rc').value;RS.cat=$('rcat').value;RP.page=0;renderRec()}
+function sR(k){if(RS.sort===k)RS.dir*=-1;else{RS.sort=k;RS.dir=-1}RP.page=0;renderRec()}
+// ════ RECETAS — EDITOR ════
+var editingRecId=null;
+
+function openRec(id){
+  var r=RECIPES.find(function(x){return x.id===id}); if(!r) return;
+  editingRecId=id;
+  $('mr-t').textContent='Editar receta';
+  $('mr-s').textContent=r.weekly_units?'~'+r.weekly_units+' u/sem estimadas · vía '+r.via_ingredient:'';
+  $('mr-name').value=r.name;
+  renderRecEditor(r.ingredients);
+  $('m-rec').classList.add('on');
+}
+
+function renderRecEditor(ings){
+  var ingNames=INGR.map(function(i){return i.name}).sort();
+  var opts=ingNames.map(function(n){return'<option value="'+n+'">'+n+'</option>'}).join('');
+  $('mr-ings').innerHTML=ings.map(function(ing,i){
+    return '<div class="ing-editor-row" id="ier_'+i+'" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--b)">'
+      +'<div style="flex:1;min-width:0">'
+      +'<select class="f-inp" style="margin-bottom:0;width:100%;height:36px;font-size:12.5px" '
+      +'onchange="recalcRecIng('+i+')" id="ier_n_'+i+'">'
+      +'<option value="'+ing.name+'">'+ing.name+'</option>'+opts+'</select>'
+      +'</div>'
+      +'<input type="number" class="f-inp" style="width:72px;margin-bottom:0;height:36px;text-align:center;font-size:13px" '
+      +'id="ier_q_'+i+'" value="'+ing.qty+'" min="0" step="0.1" oninput="recalcRecIng('+i+')" placeholder="Qty">'
+      +'<select class="f-inp" style="width:64px;margin-bottom:0;height:36px;font-size:12px" id="ier_u_'+i+'" oninput="recalcRecIng('+i+')">'
+      +['g','kg','mL','L','UN','CAN','tbsp','tsp'].map(function(u){return'<option'+(u===ing.unit?' selected':'')+'>'+u+'</option>'}).join('')
+      +'</select>'
+      +'<span style="font-family:var(--mono);font-size:12px;color:var(--sub);min-width:64px;text-align:right" id="ier_c_'+i+'">'+fmt(ing.cost)+'</span>'
+      +'<button onclick="removeRecIng('+i+')" style="width:28px;height:28px;background:none;border:1px solid var(--b2);color:var(--r);border-radius:5px;cursor:pointer;font-size:14px;flex-shrink:0">×</button>'
+      +'</div>';
+  }).join('');
+  updateRecTotal();
+}
+
+function recalcRecIng(i){
+  var name=document.getElementById('ier_n_'+i);
+  var qinp=document.getElementById('ier_q_'+i);
+  var uinp=document.getElementById('ier_u_'+i);
+  var costel=document.getElementById('ier_c_'+i);
+  if(!name||!qinp||!costel) return;
+  var ingData=INGR.find(function(x){return x.name===name.value});
+  if(!ingData){costel.textContent='—';updateRecTotal();return;}
+  var qty=parseFloat(qinp.value)||0;
+  var unit=uinp?uinp.value:ingData.unit;
+  // Convert qty to ingredient's unit for cost calc
+  var costPerUnit=ingData.cost; // cost per ingData.unit
+  var qtyInBaseUnit=qty;
+  if(ingData.unit==='kg'&&unit==='g') qtyInBaseUnit=qty/1000;
+  else if(ingData.unit==='g'&&unit==='kg') qtyInBaseUnit=qty*1000;
+  else if(ingData.unit==='L'&&unit==='mL') qtyInBaseUnit=qty/1000;
+  else if(ingData.unit==='mL'&&unit==='L') qtyInBaseUnit=qty*1000;
+  var lineCost=Math.round(qtyInBaseUnit*costPerUnit);
+  costel.textContent=fmt(lineCost);
+  updateRecTotal();
+}
+
+function updateRecTotal(){
+  var total=0;
+  document.querySelectorAll('[id^="ier_c_"]').forEach(function(el){
+    var v=parseInt(el.textContent.replace(/[^0-9]/g,''))||0;
+    total+=v;
+  });
+  $('mr-total').textContent=fmt(total);
+}
+
+function addRecIng(){
+  var r=RECIPES.find(function(x){return x.id===editingRecId}); if(!r) return;
+  r.ingredients.push({name:'Pan',qty:1,unit:'UN',cost:0});
+  renderRecEditor(r.ingredients);
+}
+
+function removeRecIng(i){
+  var r=RECIPES.find(function(x){return x.id===editingRecId}); if(!r) return;
+  r.ingredients.splice(i,1);
+  renderRecEditor(r.ingredients);
+}
+
+function saveRec(){
+  var r=RECIPES.find(function(x){return x.id===editingRecId}); if(!r) return;
+  r.name=$('mr-name').value.trim()||r.name;
+  // Read all ingredient rows
+  var newIngs=[];
+  var rows=document.querySelectorAll('[id^="ier_n_"]');
+  rows.forEach(function(el,i){
+    var name=el.value;
+    var qty=parseFloat(document.getElementById('ier_q_'+i).value)||0;
+    var unit=document.getElementById('ier_u_'+i).value;
+    var costTxt=(document.getElementById('ier_c_'+i).textContent||'0').replace(/[^0-9]/g,'');
+    var cost=parseInt(costTxt)||0;
+    if(name&&qty>0) newIngs.push({name:name,qty:qty,unit:unit,cost:cost});
+  });
+  if(!newIngs.length){alert('Agrega al menos un ingrediente.');return;}
+  r.ingredients=newIngs;
+  r.cost=newIngs.reduce(function(s,ing){return s+ing.cost},0);
+  cm('m-rec');
+  renderRec();
+  initDash();
+  alert('✓ Receta guardada.');
+}
+
+// ════ PEDIDO ════
+var CL={'IC.020':'Carnes','IC.030':'Frutas/Verduras','IC.010':'Abarrotes','IC.060':'Congelados','IC.040':'Bebidas','IC.070':'Descartables'};
+
+function renderPed(){
+  var sem=parseInt($('psem').value)||2;
+  var cat=$('pcat-sel').value;
+  $('p-seml').textContent=sem+' sem.';
+  var groups={};Object.keys(CL).forEach(function(k){groups[k]=[]});
+  var tc=0,ti=0;
+  INGR.filter(function(i){return i.weekly_avg>0}).forEach(function(i){
+    if(cat!=='all'&&i.category!==cat)return;
+    var q=i.weekly_avg*sem,c=q*i.cost;tc+=c;ti++;
+    var safeCode=(i.code||i.name).replace(/[^a-zA-Z0-9]/g,'_');
+    if(groups[i.category])groups[i.category].push({name:i.name,brand:i.brand||'',prov:i.proveedor||'',unit:i.unit,wk:i.weekly_avg,qty:q,cost:c,unit_cost:i.cost,smin:i.stock_min||0,pid:'ped_'+safeCode});
+  });
+  $('p-cost').textContent=fmt(tc);$('p-items').textContent=ti;
+  var html='';
+  Object.keys(CL).forEach(function(k){
+    var its=groups[k];if(!its.length)return;
+    its.sort(function(a,b){return b.cost-a.cost});
+    var sub=its.reduce(function(s,i){return s+i.cost},0);
+    html+='<div class="ped-sec"><div class="ped-hd"><span class="ped-hl">'+CL[k]+'</span>'
+      +'<span class="ped-hr"><span style="font-family:var(--mono);font-size:12px;color:var(--sub)">'+fmt(sub)+'</span>'
+      +'<span class="tag t-c">'+its.length+'</span></span></div><div class="ped-body">';
+    its.forEach(function(i){
+      var warn=i.smin>0&&i.qty<i.smin?'<span class="tag t-r" style="margin-left:6px">\u26A0 bajo m\u00EDn.</span>':'';
+      var pid=i.pid;
+      html+='<div class="ped-row" id="row_'+pid+'">'
+        +'<div style="flex:1"><div class="ped-nm">'+i.name+warn+'</div>'
+        +'<div class="ped-meta">'+(i.brand||i.unit)+(i.prov?' · '+i.prov:'')+' · proy. '+fmtN(i.qty)+' '+i.unit+'</div></div>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<input type="number" class="ped-inp" id="'+pid+'" step="0.1" min="0" '
+        +'value="'+parseFloat(i.qty.toFixed(1))+'" '
+        +'data-unit_cost="'+i.unit_cost+'" data-unit="'+i.unit+'" '
+        +'oninput="recalcPedRow(\''+pid+'\')" '
+        +'style="width:80px;height:40px;text-align:center;font-family:var(--mono);font-size:14px;font-weight:600;color:var(--c);background:var(--s2);border:1px solid var(--b2);border-radius:var(--rad-s);outline:none;padding:0 8px">'
+        +'<span style="font-size:12px;color:var(--sub);min-width:24px">'+i.unit+'</span>'
+        +'<span class="ped-c" id="cost_'+pid+'" style="min-width:70px;text-align:right">'+fmt(i.unit_cost*i.qty)+'</span>'
+        +'</div></div>';
+    });
+    html+='</div></div>';
+  });
+  $('p-secs').innerHTML=html||'<div class="empty">Sin datos para esta categoría</div>';
+}
+
+function recalcPedRow(pid){
+  var inp=document.getElementById(pid);
+  if(!inp) return;
+  var qty=parseFloat(inp.value)||0;
+  var unit_cost=parseFloat(inp.dataset.unit_cost)||0;
+  var cel=document.getElementById('cost_'+pid);
+  if(cel) cel.textContent=fmt(qty*unit_cost);
+  recalcPedTotals();
+}
+
+function recalcPedTotals(){
+  var total=0,items=0;
+  document.querySelectorAll('.ped-inp').forEach(function(inp){
+    var qty=parseFloat(inp.value)||0;
+    var uc=parseFloat(inp.dataset.unit_cost)||0;
+    if(qty>0){total+=qty*uc;items++;}
+  });
+  $('p-cost').textContent=fmt(total);
+  $('p-items').textContent=items;
+}
+
+function copyPed(){
+  var sem=parseInt($('psem').value)||2;
+  var cat=$('pcat-sel').value;
+  var lines=['PEDIDO STREET FLAGS — '+sem+' SEMANA(S)','Fecha: '+new Date().toLocaleDateString('es-CL'),''];
+  // Group inputs by category using INGR lookup
+  var bycat={};
+  document.querySelectorAll('.ped-inp').forEach(function(inp){
+    var qty=parseFloat(inp.value)||0; if(qty<=0) return;
+    var pid=inp.id;
+    // Find matching INGR by pid pattern (ped_ + safe code)
+    var ingArr=INGR.filter(function(i){
+      return 'ped_'+(i.code||i.name).replace(/[^a-zA-Z0-9]/g,'_')===pid;
+    });
+    var ing=ingArr[0]; if(!ing) return;
+    var k=ing.category;
+    if(!bycat[k]) bycat[k]=[];
+    bycat[k].push({name:ing.name,brand:ing.brand||'',prov:ing.proveedor||'',unit:inp.dataset.unit,qty:qty});
+  });
+  Object.keys(CL).forEach(function(k){
+    if(cat!=='all'&&k!==cat) return;
+    var its=bycat[k]; if(!its||!its.length) return;
+    lines.push(CL[k]);
+    its.forEach(function(i){
+      lines.push('• '+i.name+(i.brand?' ('+i.brand+')':'')+(i.prov?' ['+i.prov+']':'')+': '+i.qty.toFixed(1)+' '+i.unit);
+    });
+    lines.push('');
+  });
+  var txt=lines.join('\n');
+  navigator.clipboard.writeText(txt).then(function(){alert('Pedido copiado para WhatsApp.')})
+    .catch(function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copiado.')});
+}
+
+// ════ CONTEO ════
+function renderCnt(){
+  var cat=$('c-cat').value;
+  var its=INGR.filter(function(i){return i.weekly_avg>0&&(!cat||i.category===cat)}).sort(function(a,b){return a.name.localeCompare(b.name)});
+  $('c-grid').innerHTML=its.map(function(i){
+    return '<div class="cnt-card"><div style="flex:1;min-width:0"><div class="cnt-nm">'+i.name+'</div>'
+      +'<div class="cnt-su">'+(i.brand?i.brand+' · ':'')+fmtN(i.weekly_avg)+' '+i.unit+'/sem</div></div>'
+      +'<input class="q-inp" type="number" step="0.1" min="0" placeholder="0" data-n="'+i.name+'" data-u="'+i.unit+'"></div>';
+  }).join('');
+}
+function clearCnt(){document.querySelectorAll('.q-inp').forEach(function(i){i.value=''})}
+function exportCnt(){
+  var f=$('c-fecha').value||'—',r=$('c-resp').value||'N/A',t=$('c-turno').value||'';
+  var its=[];
+  document.querySelectorAll('.q-inp').forEach(function(inp){if(inp.value!=='')its.push('• '+inp.dataset.n+': '+inp.value+' '+inp.dataset.u)});
+  if(!its.length){alert('Ingresa al menos una cantidad.');return}
+  var txt=['CONTEO STREET FLAGS',f+' — '+t,'Resp: '+r,'—————————————'].concat(its).concat(['—————————————','Total: '+its.length+' items']).join('\n');
+  navigator.clipboard.writeText(txt).then(function(){alert('Copiado para WhatsApp.')})
+    .catch(function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copiado.')});
+}
+
+
+// ════ CONVERSION HINT ════
+function updateConvHint(){
+  var pqty=parseFloat($('mi-pqty').value)||0;
+  var punit=$('mi-punit').value.trim();
+  var conv=parseFloat($('mi-conv').value)||0;
+  var convunit=$('mi-convunit').value.trim();
+  var h='';
+  if(pqty>0&&punit&&conv>0&&convunit){
+    h='1 '+punit+' de '+pqty+' → rinde '+conv+' '+convunit;
+  } else if(conv>0&&convunit){
+    h='1 unidad rinde '+conv+' '+convunit;
+  }
+  $('conv-hint').textContent=h;
+}
+
+// ════ IMPORT ════
+var importMode='inv';
+var importPending=null;
+
+function openImport(mode){
+  importMode=mode; importPending=null;
+  $('imp-st').textContent=''; $('imp-prev').innerHTML=''; $('imp-act').style.display='none';
+  if(mode==='inv'){
+    $('imp-title').textContent='Importar Inventario';
+    $('imp-sub').textContent='Actualiza costo unit., unidad y uso/semana';
+    $('imp-format').innerHTML='<strong>Columnas esperadas (con encabezado):</strong><br>'
+      +'<code style="font-family:var(--mono);font-size:11px;color:var(--c)">Ingrediente &middot; Costo unit &middot; Unidad &middot; Uso/sem &middot; Cr&iacute;tico</code><br>'
+      +'<span style="display:block;margin-top:4px">Separado por tabulaciones. La columna Ingrediente debe coincidir con el nombre exacto.</span>';
+  } else {
+    $('imp-title').textContent='Importar Ventas por Producto';
+    $('imp-sub').textContent='Reemplaza el ranking de productos vendidos';
+    $('imp-format').innerHTML='<strong>Columnas esperadas:</strong><br>'
+      +'<code style="font-family:var(--mono);font-size:11px;color:var(--c)">Producto &middot; Venta &middot; Cantidad</code><br>'
+      +'<span style="display:block;margin-top:4px">Formato de exportaci&oacute;n directa de Toteat. Separado por tabs.</span>';
+  }
+  $('m-import').classList.add('on');
+}
+
+
+
+
+
+
+// ════ DELIVERY ════
+var delSrc='all'; // all | intern | ya
+
+function initDeliveryMesSel(){
+  var sel=$('del-mes-sel'); if(!sel) return;
+  var html='<option value="all">Todos los meses</option>';
+  var months={};
+  DELIVERY_MONTHLY.forEach(function(m){ months[m.mes]=1; });
+  var mNms=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  SALES.monthly.forEach(function(mo){
+    var pts=mo.month.split(' '); var mi=mNms.indexOf(pts[0]);
+    if(mi>=0) months[pts[1]+'-'+(mi+1<10?'0':'')+(mi+1)]=1;
+  });
+  Object.keys(months).sort().forEach(function(k){
+    var sh=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    var p=k.split('-');
+    html+='<option value="'+k+'">'+sh[parseInt(p[1])-1]+' '+p[0]+'</option>';
+  });
+  sel.innerHTML=html;
+}
+
+function setDelSrc(src,el){
+  delSrc=src;
+  document.querySelectorAll('[id^="del-src-"]').forEach(function(b){b.classList.remove('on')});
+  el.classList.add('on');
+  initDelivery();
+}
+
+function initDelivery(){
+  var sel=$('del-mes-sel'); var sv=sel?sel.value:'all';
+
+  // PedidosYa data (CSV — Ago2025-Ene2026)
+  var DM=sv==='all'?DELIVERY_MONTHLY:DELIVERY_MONTHLY.filter(function(m){return m.mes===sv;});
+  var hasDM=DM.length>0;
+  var total_ya_ped=DM.reduce(function(s,m){return s+m.pedidos;},0);
+  var total_ya_vta=DM.reduce(function(s,m){return s+m.ventas;},0);
+  var avg_tkt_ya=total_ya_ped>0?Math.round(total_ya_vta/total_ya_ped):0;
+  var avg_rej=DM.length?DM.reduce(function(s,m){return s+(m.rechazados/Math.max(m.pedidos,1));},0)/DM.length*100:0;
+
+  // Toteat data (XLS mensual)
+  var mNames=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var SM_all=SALES.monthly;
+  var SM=(function(){
+    if(sv==='all') return SM_all;
+    var p2=sv.split('-'); var mName=mNames[parseInt(p2[1])-1]+' '+p2[0];
+    return SM_all.filter(function(m){return m.month===mName;});
+  })();
+  var intern_transf=SM.reduce(function(s,m){return s+(m.delivery_transferencia||0);},0);
+  var ya_toteat=SM.reduce(function(s,m){return s+(m.delivery_ya||0);},0);
+  var uber_toteat=SM.reduce(function(s,m){return s+(m.delivery_uber||0);},0);
+  var local=SM.reduce(function(s,m){return s+Math.max(0,m.venta_neta-(m.delivery_ya||0)-(m.delivery_uber||0)-(m.delivery_transferencia||0));},0);
+
+  // KPIs
+  var kpis;
+  if(delSrc==='ya'){
+    if(!hasDM){
+      kpis=[
+        {l:'Pedidos PedidosYa',v:'—',f:'Sin datos CSV para este mes'},
+        {l:'Venta PedidosYa',v:fmtM(ya_toteat),f:'Registrado en Toteat (POS)',m:1},
+        {l:'Ticket promedio',v:'—',f:'Sin datos plataforma'},
+        {l:'Tasa rechazo',v:'—',f:'Sin datos plataforma',m:1}
+      ];
+    } else {
+      kpis=[
+        {l:'Pedidos PedidosYa',v:total_ya_ped.toLocaleString('es-CL'),f:sv==='all'?'Ago 2025\u2013Ene 2026':''},
+        {l:'Venta PedidosYa',v:fmtM(total_ya_vta),f:'Datos plataforma',m:1},
+        {l:'Ticket promedio',v:'$'+avg_tkt_ya.toLocaleString('es-CL'),f:'Por pedido'},
+        {l:'Tasa rechazo',v:avg_rej.toFixed(1)+'%',f:'Prom. mensual',m:1}
+      ];
+    }
+  } else if(delSrc==='intern'){
+    kpis=[
+      {l:'Delivery interno',v:fmtM(intern_transf),f:'Transferencias Toteat',m:1},
+      {l:'Pedidos est.',v:intern_transf>0?Math.round(intern_transf/9500).toLocaleString('es-CL'):'—',f:'~$9.500 ticket prom.'},
+      {l:'Local presencial',v:fmtM(local),f:'Efectivo + tarjetas'},
+      {l:'Total venta neta',v:fmtM(SM.reduce(function(s,m){return s+m.venta_neta;},0)),f:sv==='all'?'Todo el per\u00EDodo':'',m:1}
+    ];
+  } else if(delSrc==='uber'){
+    var vtaTotal=SM.reduce(function(s,m){return s+m.venta_neta;},0);
+    var pctUber=vtaTotal>0?(uber_toteat/vtaTotal*100):0;
+    kpis=[
+      {l:'Venta Uber Eats',v:fmtM(uber_toteat),f:'Registrado en Toteat (POS)',m:1},
+      {l:'Participación',v:pctUber.toFixed(1)+'%',f:'Del total de ventas'},
+      {l:'Local presencial',v:fmtM(local),f:'Efectivo + tarjetas'},
+      {l:'Total venta neta',v:fmtM(vtaTotal),f:sv==='all'?'Todo el per\u00EDodo':'',m:1}
+    ];
+  } else {
+    kpis=[
+      {l:'PedidosYa',v:fmtM(ya_toteat),f:'Registrado en Toteat'},
+      {l:'Uber Eats',v:fmtM(uber_toteat),f:'Registrado en Toteat',m:1},
+      {l:'Del. interno (transf)',v:fmtM(intern_transf),f:'Transferencias'},
+      {l:'Local presencial',v:fmtM(local),f:'Efectivo + tarjeta',m:1}
+    ];
+  }
+
+  $('kpi-del').innerHTML=kpis.map(function(k){
+    return '<div class="kpi'+(k.m?' m':'')+'"><div class="kpi-lbl">'+k.l+'</div>'
+      +'<div class="kpi-val">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
+  }).join('');
+
+  // Setup de colores: Ya = rosado, Interno = morado, Uber = celeste
+  var delColor=delSrc==='ya'?'#ff3fa4':delSrc==='intern'?'#a78bfa':delSrc==='uber'?'#00d4ff':'#00e5a0';
+
+  // ── Chart 1: tendencia mensual ──
+  var ch=$('ch-del-mes');
+  if(ch){
+    if(delSrc==='ya'){
+      if(!hasDM&&sv!=='all'){
+        lineChart('ch-del-mes',SM.map(function(m){return{l:m.month.split(' ')[0].slice(0,3),v:m.delivery_ya||0};}), delColor,fmtM);
+      } else {
+        lineChart('ch-del-mes',(sv==='all'?DELIVERY_MONTHLY:DM).map(function(d){
+          return{l:mNames[parseInt(d.mes.split('-')[1])-1].slice(0,3)+' '+d.mes.split('-')[0].slice(2),v:d.ventas};
+        }),delColor,fmtM);
+      }
+    } else {
+      var smData=SM.map(function(m){
+        var v=delSrc==='intern'?(m.delivery_transferencia||0):delSrc==='uber'?(m.delivery_uber||0):((m.delivery_ya||0)+(m.delivery_uber||0)+(m.delivery_transferencia||0));
+        return{l:m.month.split(' ')[0].slice(0,3),v:v};
+      });
+      if(smData.length===1) smData=[{l:'',v:0},smData[0],{l:'',v:0}];
+      lineChart('ch-del-mes',smData,delColor,fmtM);
+    }
+  }
+
+  // ── Chart 2: comparación año anterior (ch-del-t) ──
+  var ch2=$('ch-del-t');
+  var ch2hd=$('del-ch2-title');
+  if(ch2){
+    var getDelVal=function(m){ return delSrc==='intern'?(m.delivery_transferencia||0):delSrc==='ya'?(m.delivery_ya||0):delSrc==='uber'?(m.delivery_uber||0):m.venta_neta; };
+    if(sv==='all'){
+      if(ch2hd) ch2hd.textContent='Venta mensual';
+      lineChart('ch-del-t', SM.map(function(m){return{l:m.month.split(' ')[0].slice(0,3),v:getDelVal(m)};}), delColor, fmtM);
+    } else {
+      var p2x=sv.split('-'), mIdx2=parseInt(p2x[1])-1, yrX=parseInt(p2x[0]);
+      var prevMes=(yrX-1)+'-'+(mIdx2+1<10?'0':'')+(mIdx2+1);
+      var prevSM2=SM_all.filter(function(m){return m.month===mNames[mIdx2]+' '+(yrX-1);});
+      var curV=delSrc==='ya'?(hasDM?total_ya_vta:ya_toteat):delSrc==='intern'?intern_transf:delSrc==='uber'?uber_toteat:SM.reduce(function(s,m){return s+m.venta_neta;},0);
+      var prevV2=prevSM2.length?getDelVal(prevSM2[0]):0;
+      if(ch2hd) ch2hd.textContent=mNames[mIdx2]+' '+yrX+' vs '+mNames[mIdx2]+' '+(yrX-1);
+      if(prevV2>0 || curV>0){
+        barChart('ch-del-t',[
+          {l:mNames[mIdx2].slice(0,3)+' '+yrX,v:curV},
+          {l:mNames[mIdx2].slice(0,3)+' '+(yrX-1),v:prevV2}
+        ],[delColor,'rgba(255,255,255,.1)'],fmtM, 140);
+      } else {
+        ch2.innerHTML='<div class="empty" style="padding:20px 0;font-size:12px">Sin datos</div>';
+      }
+    }
+  }
+
+  // ── Chart 3: desglose por días (cuando hay mes seleccionado) ──
+  var chDW=$('del-dias-wrap');
+  var chD=$('ch-del-dias');
+  if(chDW) chDW.style.display=(sv!=='all')?'block':'none';
+  if(chD&&sv!=='all'){
+    var mNomX=mNames[parseInt(sv.split('-')[1])-1]+' '+sv.split('-')[0];
+    var dayRecs=SALES.daily.filter(function(d){return d.month===mNomX;});
+    if(dayRecs.length>0){
+      var dayVals=dayRecs.map(function(d){
+        var v=delSrc==='intern'?(d.delivery_transferencia||d.venta_neta*0.09)
+              :delSrc==='ya'?(d.delivery_ya||d.venta_neta*0.20)
+              :delSrc==='uber'?(d.delivery_uber||d.venta_neta*0.06)
+              :d.venta_neta;
+        return{l:d.date.replace(/[^\d]/g,''),v:Math.round(v)||0};
+      }).filter(function(d){return d.v>0;});
+      
+      if(dayVals.length) lineChart('ch-del-dias',dayVals,delColor,fmtM);
+    } else {
+      if(chD) chD.innerHTML='<div class="empty" style="padding:20px 0;font-size:12px;color:var(--sub)">Sin datos diarios</div>';
+    }
+  }
+
+  // ── Heatmap (Solo muestra en Todos o Pedidos Ya) ──
+  var hm=$('del-heatmap');
+  if(hm){
+    var totalPedPY=HEATMAP.reduce(function(s,h){return s+h.pedidos;},0);
+    if(!totalPedPY || delSrc==='uber' || delSrc==='intern'){
+      hm.innerHTML='<div class="empty">Mapa de calor exclusivo de PedidosYa</div>';
+    }
+    else{
+      var maxPed=Math.max.apply(null,HEATMAP.map(function(h){return h.pedidos;}));
+      hm.innerHTML='<div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em">Pedidos PedidosYa por hora (Ago\u2013Ene)</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:4px">'
+        +HEATMAP.filter(function(h){return h.pedidos>0;}).map(function(h){
+          var pct=maxPed>0?h.pedidos/maxPed:0;
+          return '<div style="background:rgba(255,63,164,'+(0.1+pct*0.9).toFixed(2)+');border-radius:6px;padding:6px 4px;text-align:center;cursor:default;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform=\'scale(1.1)\';this.style.boxShadow=\'0 0 8px rgba(255,63,164,.4)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'" title="'+h.hora+'h: '+h.pedidos+' pedidos">'
+            +'<div style="font-size:11px;font-weight:700;color:'+(pct>0.5?'#fff':'var(--t)')+'">'+h.hora+'h</div>'
+            +'<div style="font-size:10px;color:'+(pct>0.5?'rgba(255,255,255,.8)':'var(--sub)')+'">'+h.pedidos+'</div>'
+            +'</div>';
+        }).join('')+'</div>'
+        +'<div style="margin-top:10px;font-size:10px;color:var(--sub)">Total: '+totalPedPY.toLocaleString('es-CL')+' pedidos</div>';
+    }
+  }
+
+  // ── Top platos (Ocultos si estás mirando específicamente otra plataforma, enfocados en PedidosYa) ──
+  var tp=$('del-top-platos');
+  if(tp){
+    if (delSrc === 'uber' || delSrc === 'intern') {
+        tp.innerHTML='<div class="empty">Datos de platos exclusivos de PedidosYa</div>';
+    } else {
+        var src2=sv==='all'?DISHES_6M:DISHES_RECENT;
+        var maxQ=src2.length?src2[0].qty:1;
+        tp.innerHTML='<div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase">'+(sv==='all'?'Top platos Ago25\u2013Ene26':'Top platos recientes')+'</div>'
+          +src2.slice(0,10).filter(function(d){return d.qty>0;}).map(function(d){
+            return mkBar(d.name,d.qty,maxQ,'#ff3fa4',function(v){return v+' un';},160);
+          }).join('');
+    }
+  }
+}
+// ════ GASTOS FIJOS ════
+var GCAT_LABELS={'arriendo':'&#127968; Arriendo','servicios':'&#9889; Servicios','gas':'&#128293; Gas','personal':'&#128104;&#8205;&#127859; Personal','marketing':'&#128227; Marketing','mantencion':'&#128296; Mantención','software':'&#128187; Software','insumos':'&#127859; Insumos','otros':'&#128230; Otros'};
+var gTab='resumen';
+var gCatFilter='all';
+var credUnlocked=false;
+
+function setGTab(tab,el){
+  gTab=tab;
+  // 1. Quitar la clase 'on' de todos los botones de Gasto
+  document.querySelectorAll('[id^="gtab-"]').forEach(function(b){b.classList.remove('on');});
+  if(el) el.classList.add('on');
+  
+  // 2. Ocultar todas las vistas usando la clase compartida 'gview'
+  document.querySelectorAll('.gview').forEach(function(v){
+    v.style.display = 'none';
+  });
+  
+  // 3. Mostrar la vista seleccionada
+  var activeView = $('gview-'+tab);
+  if(activeView) activeView.style.display = 'block';
+  
+  // 4. Renderizar contenido dinámico
+  if(tab==='resumen')   renderGastos();
+  if(tab==='historial') renderGHistSel();
+  if(tab==='flujo')     renderFlujoCaja();
+  if(tab==='alertas')   renderAlertas();
+  if(tab==='cred')      {credUnlocked=false;renderCreds();}
+}
+function setGCatFilter(cat,el){
+  gCatFilter=cat;
+  document.querySelectorAll('[id^="gcf-"]').forEach(function(b){b.classList.remove('on');});
+  if(el) el.classList.add('on');
+  renderGastos();
+}
+
+function toSem(g){ return g.freq==='semanal'?g.monto:g.freq==='mensual'?g.monto/4.33:g.monto/52; }
+function toMes(g){ return g.freq==='mensual'?g.monto:g.freq==='semanal'?g.monto*4.33:g.monto/12; }
+function toAno(g){ return g.freq==='anual'?g.monto:g.freq==='semanal'?g.monto*52:g.monto*12; }
+function gAvg(g){
+  var r=(g.historico||[]).filter(function(h){return !h.proyectado&&!h.proximo;});
+  return r.length?r.reduce(function(s,h){return s+h.monto;},0)/r.length:toMes(g);
+}
+
+function renderGastos(){
+  var filtG=gCatFilter==='all'?GASTOS:GASTOS.filter(function(g){return g.cat===gCatFilter;});
+  var tSem=0,tMes=0,tAno=0;
+  filtG.forEach(function(g){tSem+=toSem(g);tMes+=toMes(g);tAno+=toAno(g);});
+  var avgV=SALES.monthly.length?SALES.monthly.reduce(function(s,m){return s+m.venta_neta;},0)/SALES.monthly.length:1;
+  var pct=tMes/avgV*100;
+  var kv=$('kpi-gastos'); if(!kv) return;
+  kv.innerHTML=[
+    {l:'Total semanal', v:fmt(Math.round(tSem)), f:'Gastos recurrentes'},
+    {l:'Total mensual', v:fmt(Math.round(tMes)), f:'Proyectado', m:1},
+    {l:'Total anual',   v:fmt(Math.round(tAno)), f:'Proyectado'},
+    {l:'% sobre venta', v:pct.toFixed(1)+'%',   f:'vs venta prom. mensual', m:1}
+  ].map(function(k){
+    return '<div class="kpi'+(k.m?' m':'')+'"><div class="kpi-lbl">'+k.l+'</div>'
+      +'<div class="kpi-val">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';
+  }).join('');
+
+  // category bars
+  var byCat={};
+  GASTOS.forEach(function(g){byCat[g.cat]=(byCat[g.cat]||0)+toMes(g);});
+  var cats=Object.keys(byCat).map(function(k){return{l:GCAT_LABELS[k]||k,v:byCat[k]};}).sort(function(a,b){return b.v-a.v;});
+  var mx=cats[0]?cats[0].v:1;
+  var cgcat=$('ch-gcat'); if(cgcat) cgcat.innerHTML=cats.map(function(c){return mkBar(c.l,c.v,mx,'#ff3fa4',fmt,180);}).join('');
+
+  // impact gauge
+  var gi=$('gasto-impact'); if(gi){
+    var ppct=Math.min(pct,100).toFixed(1);
+    gi.innerHTML='<div style="margin-bottom:10px;font-size:13px;color:var(--sub)">De cada <strong style="color:var(--t)">$1.000</strong> de venta, <strong style="color:var(--m)">$'+Math.round(pct*10)+'</strong> son gastos fijos</div>'
+      +'<div style="background:var(--s3);border-radius:6px;overflow:hidden;height:18px;margin-bottom:6px"><div style="height:100%;background:var(--m);border-radius:6px;width:'+ppct+'%;transition:width .6s"></div></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub)"><span>'+pct.toFixed(1)+'%</span><span>Venta prom: '+fmtM(avgV)+'</span></div>';
+  }
+
+  // table rows
+  var now=new Date();
+  var gb=$('g-body'); if(!gb) return;
+  var filteredGastos=gCatFilter==='all'?GASTOS:GASTOS.filter(function(g){return g.cat===gCatFilter;});
+  gb.innerHTML=filteredGastos.map(function(g,gi2){
+    // vencimiento alert
+    var badge='';
+    if(g.vencimiento){
+      var dn=parseInt((g.vencimiento.match(/\d+/)||['0'])[0]);
+      if(dn){
+        var nxt=new Date(now.getFullYear(),now.getMonth(),dn);
+        if(nxt<=now) nxt=new Date(now.getFullYear(),now.getMonth()+1,dn);
+        var df=Math.ceil((nxt-now)/86400000);
+        if(df<=7) badge='<span style="background:'+(df<=2?'var(--r)':'#ffb020')+';color:#000;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:5px">Vence '+df+'d</span>';
+      }
+    }
+    var prov=(g.prov||'')
+      +(g.encargado?'<div style="font-size:10px;color:var(--sub)">'+g.encargado+(g.telefono?' &middot; '+g.telefono:'')+'</div>':'')
+      +(g.cliente_num?'<div style="font-size:10px;color:var(--sub)">N&deg;cl: '+g.cliente_num+'</div>':'');
+    var venc=g.vencimiento?'<span style="font-size:11px;color:var(--sub)">'+g.vencimiento+'</span>':'';
+    if(g.previred_usuario) venc='<span style="font-size:10px;color:var(--sub)">d&iacute;a 13<br>'+g.previred_usuario+'</span>';
+    var avg2=gAvg(g);
+    return '<tr>'
+      +'<td><strong>'+g.name+'</strong>'+badge+(g.notes?'<div style="font-size:10px;color:var(--sub)">'+g.notes+'</div>':'')+'</td>'
+      +'<td class="hide-sm"><span class="tag t-n" style="font-size:10px">'+(GCAT_LABELS[g.cat]||g.cat)+'</span></td>'
+      +'<td class="hide-sm" style="font-size:11.5px">'+prov+'</td>'
+      +'<td class="r mono">'+fmt(Math.round(toSem(g)))+'</td>'
+      +'<td class="r mono hide-xs">'+fmt(Math.round(toMes(g)))+'</td>'
+      +'<td class="r mono hide-xs">'+fmt(Math.round(toAno(g)))+'</td>'
+      +'<td class="hide-xs">'+venc+'</td>'
+      +'<td><button class="btn-tbl" onclick="openEditGastoIdx('+GASTOS.indexOf(g)+')">Editar</button></td>'
+      +'</tr>';
+  }).join('')||'<tr><td colspan="8" class="empty">Sin gastos</td></tr>';
+
+  var gt=$('g-totrow'); if(gt) gt.innerHTML='Totales &nbsp;&#8594;&nbsp; <strong style="color:var(--t)">'+fmt(Math.round(tSem))+'/sem</strong> &nbsp;&middot;&nbsp; <strong style="color:var(--m)">'+fmt(Math.round(tMes))+'/mes</strong> &nbsp;&middot;&nbsp; '+fmt(Math.round(tAno))+'/a&ntilde;o';
+}
+
+// ── HISTORIAL ──
+function renderGHistSel(){
+  var sel=$('ghist-sel'); if(!sel) return;
+  sel.innerHTML=GASTOS.filter(function(g){return g.historico&&g.historico.length;}).map(function(g,i){
+    return '<option value="'+GASTOS.indexOf(g)+'">'+g.name+'</option>';
+  }).join('');
+  if(!sel.options.length) sel.innerHTML=GASTOS.map(function(g,i){return '<option value="'+i+'">'+g.name+'</option>';}).join('');
+  renderGHistorial();
+}
+function renderGHistorial(){
+  var sel=$('ghist-sel'); if(!sel) return;
+  var idx=parseInt(sel.value)||0;
+  var g=GASTOS[idx]; if(!g) return;
+  var ght=$('ghist-title'); if(ght) ght.textContent='Historial \u2014 '+g.name;
+  var hist=(g.historico||[]).slice().sort(function(a,b){return a.mes<b.mes?-1:1;});
+  var real=hist.filter(function(h){return !h.proyectado&&!h.proximo;});
+  var avg=real.length?real.reduce(function(s,h){return s+h.monto;},0)/real.length:0;
+  var minv=real.length?Math.min.apply(null,real.map(function(h){return h.monto;})):0;
+  var maxv=real.length?Math.max.apply(null,real.map(function(h){return h.monto;})):0;
+  var gkpis=$('ghist-kpis');
+  if(gkpis) gkpis.innerHTML=[
+    {l:'Promedio',v:fmt(Math.round(avg)),f:real.length+' meses reales'},
+    {l:'M\u00ednimo',v:fmt(minv),f:''},
+    {l:'M\u00e1ximo',v:fmt(maxv),f:''}
+  ].map(function(k){return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>';}).join('');
+  var cgh=$('ch-ghist');
+  if(cgh){
+    if(hist.length){
+      var maxH=Math.max.apply(null,hist.map(function(h){return h.monto;}));
+      cgh.innerHTML=hist.map(function(h){
+        var c=h.proximo?'#ffb020':h.proyectado?'rgba(0,212,255,.35)':h.monto>avg*1.4?'#ff4455':'#00d4ff';
+        return mkBar(h.label||h.mes,h.monto,maxH,c,fmt,140);
+      }).join('');
+    } else { cgh.innerHTML='<div class="empty">Sin historial</div>'; }
+  }
+  var mN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var ghb=$('ghist-body');
+  if(ghb) ghb.innerHTML=hist.slice().reverse().map(function(h,hi){
+    var b=h.proximo?'<span class="tag" style="background:rgba(255,176,32,.15);color:#ffb020;font-size:9px">Pr\u00f3ximo</span>'
+      :h.proyectado?'<span class="tag t-n" style="font-size:9px">Proyectado</span>'
+      :'<span class="tag" style="background:rgba(0,229,160,.1);color:#00e5a0;font-size:9px">Pagado</span>';
+    var realIdx=hist.length-1-hi;
+    return '<tr><td>'+(h.label||h.mes)+(h.notas?'<div style="font-size:10px;color:var(--sub)">'+h.notas+'</div>':'')+'</td>'
+      +'<td class="r mono">'+fmt(h.monto)+'</td><td class="hide-sm">'+b+'</td>'
+      +'<td><button class="btn-tbl" onclick="delHist('+idx+','+realIdx+')">\u2715</button></td></tr>';
+  }).join('')||'<tr><td colspan="4" class="empty">Sin pagos</td></tr>';
+}
+function openAddHist(){
+  var sel=$('ghist-sel'); if(!sel) return;
+  $('mhp-idx').value=sel.value||0;
+  $('mhp-mes').value='';$('mhp-monto').value='';$('mhp-notas').value='';$('mhp-estado').value='pagado';
+  $('m-histpago').classList.add('on');
+}
+function saveHist(){
+  var idx=parseInt($('mhp-idx').value);
+  var g=GASTOS[idx]; if(!g) return;
+  var mes=$('mhp-mes').value, monto=parseFloat($('mhp-monto').value)||0;
+  if(!mes||!monto){alert('Completa mes y monto.');return;}
+  var mN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var parts=mes.split('-'), label=mN[parseInt(parts[1])-1]+' '+parts[0];
+  var estado=$('mhp-estado').value;
+  if(!g.historico) g.historico=[];
+  // remove existing same month
+  g.historico=g.historico.filter(function(h){return h.mes!==mes;});
+  g.historico.push({mes:mes,label:label,monto:monto,proyectado:estado==='proyectado',proximo:estado==='pendiente',notas:$('mhp-notas').value.trim()});
+  g.historico.sort(function(a,b){return a.mes<b.mes?-1:1;});
+  cm('m-histpago'); renderGHistorial();
+}
+function delHist(gIdx,hIdx){
+  var g=GASTOS[gIdx]; if(!g||!g.historico) return;
+  if(!confirm('\u00bfEliminar este registro?')) return;
+  g.historico.splice(hIdx,1); renderGHistorial();
+}
+
+// ── ALERTAS ──
+function renderAlertas(){
+  var now=new Date(), alerts=[];
+  GASTOS.forEach(function(g){
+    // vencimiento alerts
+    if(g.vencimiento){
+      var dn=parseInt((g.vencimiento.match(/\d+/)||['0'])[0]);
+      if(dn){
+        var nxt=new Date(now.getFullYear(),now.getMonth(),dn);
+        if(nxt<=now) nxt=new Date(now.getFullYear(),now.getMonth()+1,dn);
+        var df=Math.ceil((nxt-now)/86400000);
+        alerts.push({u:df<=2?'r':df<=7?'m':'c',ico:'&#128467;',
+          titulo:g.name+' &mdash; vence en '+df+' d&iacute;a'+(df!==1?'s':''),
+          desc:(g.prov?g.prov+' &mdash; ':'')+g.vencimiento,monto:fmt(Math.round(toMes(g)))});
+      }
+    }
+    // gas: next purchase
+    if(g.id==='g_gas'&&g.ultima_carga){
+      var ult=new Date(g.ultima_carga), prox=new Date(ult);
+      prox.setDate(ult.getDate()+7);
+      var df2=Math.ceil((prox-now)/86400000);
+      alerts.push({u:df2<=0?'r':df2<=2?'m':'c',ico:'&#128706;',
+        titulo:'Gas &mdash; '+(df2<=0?'&#128680; Compra pendiente!':'Pr&oacute;xima compra en '+df2+' d&iacute;a'+(df2!==1?'s':'')),
+        desc:'Llamar a H&eacute;ctor: '+g.telefono+' (Abastible) &mdash; 2 cilindros',monto:fmt(g.monto)});
+    }
+    // previred
+    if(g.id==='g_imposiciones'){
+      var d13=new Date(now.getFullYear(),now.getMonth(),13);
+      if(d13<=now) d13=new Date(now.getFullYear(),now.getMonth()+1,13);
+      var df3=Math.ceil((d13-now)/86400000);
+      alerts.push({u:df3<=2?'r':df3<=7?'m':'c',ico:'&#128179;',
+        titulo:'Previred &mdash; en '+df3+' d&iacute;a'+(df3!==1?'s':''),
+        desc:'D&iacute;a 13 en previred.com &mdash; usuario: '+g.previred_usuario,monto:'Variable'});
+    }
+  });
+  alerts.sort(function(a,b){return ({r:0,m:1,c:2}[a.u])-({r:0,m:1,c:2}[b.u]);});
+  var col={r:'#ff4455',m:'#ffb020',c:'#00d4ff'};
+  var ab=$('alertas-body'); if(!ab) return;
+  ab.innerHTML=alerts.map(function(a){
+    var c=col[a.u];
+    return '<div style="background:var(--s2);border:1px solid var(--b);border-left:3px solid '+c+';border-radius:8px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start">'
+      +'<div style="font-size:22px;flex-shrink:0">'+a.ico+'</div>'
+      +'<div style="flex:1"><div style="font-weight:700;color:'+c+';font-size:13px;margin-bottom:4px">'+a.titulo+'</div>'
+      +'<div style="font-size:12px;color:var(--sub);margin-bottom:6px">'+a.desc+'</div>'
+      +'<span style="font-family:var(--mono);font-size:12px;color:var(--t)">Monto: '+a.monto+'</span></div></div>';
+  }).join('')||'<div style="color:var(--sub);padding:20px;font-size:13px">&#9989; Sin alertas urgentes</div>';
+}
+
+// ── CREDENCIALES ──
+function renderCreds(){
+  var cb=$('cred-body'); if(!cb) return;
+  if(!credUnlocked){
+    cb.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 20px;text-align:center">'
+      +'<div style="font-size:40px">&#128272;</div>'
+      +'<div style="font-weight:700;font-size:15px">Acceso protegido</div>'
+      +'<div style="font-size:12px;color:var(--sub)">Ingresa la clave para continuar</div>'
+      +'<div style="display:flex;gap:8px">'
+      +'<input type="password" id="cred-pw" class="f-inp" placeholder="Clave..." style="width:150px;margin:0">'
+      +'<button class="btn btn-c btn-sm" onclick="checkCredPw()">Entrar</button>'
+      +'</div>'
+      +'<div id="cred-pw-err" style="font-size:11px;color:var(--r);min-height:14px"></div>'
+      +'</div>';
+    setTimeout(function(){var p=$('cred-pw');if(p)p.focus();},100);
+    return;
+  }
+  cb.innerHTML=CREDENCIALES.map(function(c,ci){
+    return '<div style="background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:16px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+      +'<strong style="font-size:13px">'+c.sistema+'</strong>'
+      +'<button class="btn-tbl" onclick="openEditCred('+ci+')">Editar</button></div>'
+      +(c.url?'<a href="'+c.url+'" target="_blank" style="display:block;font-size:10px;color:var(--c);margin-bottom:8px">'+c.url+'</a>':'')
+      +'<div style="display:flex;flex-direction:column;gap:6px">'
+      +'<div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;color:var(--sub);min-width:55px">Usuario</span>'
+      +'<code style="font-family:var(--mono);font-size:11px;background:var(--s3);padding:2px 7px;border-radius:4px;flex:1;word-break:break-all">'+c.usuario+'</code>'
+      +'<button class="btn-tbl" onclick="cpTxt(\''+c.usuario+'\')" title="Copiar">&#x29c9;</button></div>'
+      +'<div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;color:var(--sub);min-width:55px">Clave</span>'
+      +'<code style="font-family:var(--mono);font-size:11px;background:var(--s3);padding:2px 7px;border-radius:4px;flex:1;word-break:break-all">'+c.password+'</code>'
+      +'<button class="btn-tbl" onclick="cpTxt(\''+c.password+'\')" title="Copiar">&#x29c9;</button></div>'
+      +(c.notes?'<div style="font-size:10.5px;color:var(--sub);margin-top:4px">'+c.notes+'</div>':'')
+      +'</div></div>';
+  }).join('')||'<div class="empty">Sin credenciales</div>';
+}
+function showDayTip(el,ev){
+  var tip=$('day-tooltip'); if(!tip) return;
+  var v=parseFloat(el.getAttribute('data-v')), l=el.getAttribute('data-l');
+  var allV=Object.values(DAY_PATTERNS); var total=allV.reduce(function(s,x){return s+x;},0);
+  $('dtt-label').textContent=l;
+  $('dtt-val').textContent=fmtM(v)+' prom.';
+  $('dtt-pct').textContent=total>0?(v/total*100).toFixed(1)+'% del total semanal':'';
+  tip.style.display='block';
+  tip.style.left=(ev.clientX+12)+'px';
+  tip.style.top=(ev.clientY-40)+'px';
+}
+function hideDayTip(){
+  var tip=$('day-tooltip'); if(tip) tip.style.display='none';
+}
+function checkCredPw(){
+  var pw=$('cred-pw'); if(!pw) return;
+  if(pw.value==='2026'){credUnlocked=true;renderCreds();}
+  else{var e=$('cred-pw-err');if(e)e.textContent='Clave incorrecta';pw.value='';pw.focus();}
+}
+function cpTxt(t){
+  if(navigator.clipboard) navigator.clipboard.writeText(t).then(function(){toast('\u2713 Copiado');});
+}
+function toast(msg){
+  var el=document.createElement('div');
+  el.innerHTML=msg;
+  el.style.cssText='position:fixed;bottom:24px;right:24px;background:#00e5a0;color:#000;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700;z-index:9999;transition:opacity .5s';
+  document.body.appendChild(el);
+  setTimeout(function(){el.style.opacity='0';setTimeout(function(){el.remove();},500);},1800);
+}
+function openAddCred(){
+  $('mcred-title').textContent='Nueva credencial';$('mcred-idx').value='-1';
+  ['mcred-sistema','mcred-url','mcred-user','mcred-pass','mcred-notes'].forEach(function(id){$(id).value='';});
+  $('mcred-del').style.display='none';$('m-cred').classList.add('on');
+}
+function openEditCred(ci){
+  var c=CREDENCIALES[ci]; if(!c) return;
+  $('mcred-title').textContent='Editar credencial';$('mcred-idx').value=ci;
+  $('mcred-sistema').value=c.sistema||'';$('mcred-url').value=c.url||'';
+  $('mcred-user').value=c.usuario||'';$('mcred-pass').value=c.password||'';
+  $('mcred-notes').value=c.notes||'';
+  $('mcred-del').style.display='inline-flex';$('m-cred').classList.add('on');
+}
+function saveCred(){
+  var ci=parseInt($('mcred-idx').value);
+  var obj={sistema:$('mcred-sistema').value.trim(),url:$('mcred-url').value.trim(),
+    usuario:$('mcred-user').value.trim(),password:$('mcred-pass').value.trim(),notes:$('mcred-notes').value.trim()};
+  if(ci>=0) CREDENCIALES[ci]=obj; else CREDENCIALES.push(obj);
+  cm('m-cred'); renderCreds();
+}
+function delCred(){
+  var ci=parseInt($('mcred-idx').value);
+  if(!confirm('\u00bfEliminar?')) return;
+  CREDENCIALES.splice(ci,1); cm('m-cred'); renderCreds();
+}
+
+// ── GASTO MODAL ──
+function recalcGastoHint(){
+  var m=parseFloat($('mg-monto').value)||0, f=$('mg-freq').value;
+  if(!m){$('gasto-hint').textContent='';return;}
+  var s=f==='semanal'?m:f==='mensual'?m/4.33:m/52;
+  var mo=f==='mensual'?m:f==='semanal'?m*4.33:m/12;
+  var a=f==='anual'?m:f==='semanal'?m*52:m*12;
+  $('gasto-hint').textContent='= '+fmt(Math.round(s))+'/sem \u00b7 '+fmt(Math.round(mo))+'/mes \u00b7 '+fmt(Math.round(a))+'/a\u00f1o';
+}
+function openAddGasto(){
+  $('mg-title').textContent='Nuevo gasto';$('mg-sub').textContent='';
+  $('mg-id').value='g_'+Date.now();
+  ['mg-name','mg-monto','mg-prov','mg-notes'].forEach(function(id){$(id).value='';});
+  $('mg-cat').value='servicios';$('mg-freq').value='mensual';
+  $('mg-del').style.display='none';$('gasto-hint').textContent='';$('m-gasto').classList.add('on');
+}
+function openEditGastoIdx(i){openEditGasto(GASTOS[i]&&GASTOS[i].id);}
+function openEditGasto(id){
+  var g=GASTOS.find(function(x){return x.id===id;}); if(!g) return;
+  $('mg-title').textContent='Editar';$('mg-sub').textContent=g.name;
+  $('mg-id').value=g.id;$('mg-name').value=g.name;$('mg-cat').value=g.cat;
+  $('mg-freq').value=g.freq;$('mg-monto').value=g.monto;
+  $('mg-prov').value=g.prov||'';$('mg-notes').value=g.notes||'';
+  $('mg-del').style.display='inline-flex';recalcGastoHint();$('m-gasto').classList.add('on');
+}
+function saveGasto(){
+  var id=$('mg-id').value, name=$('mg-name').value.trim();
+  if(!name){alert('Ingresa un nombre.');return;}
+  var obj={id:id,name:name,cat:$('mg-cat').value,freq:$('mg-freq').value,
+    monto:parseFloat($('mg-monto').value)||0,prov:$('mg-prov').value.trim(),notes:$('mg-notes').value.trim(),historico:[]};
+  var i=GASTOS.findIndex(function(x){return x.id===id;});
+  if(i>=0){obj.historico=GASTOS[i].historico||[];GASTOS[i]=obj;}else GASTOS.push(obj);
+  cm('m-gasto'); renderGastos();
+}
+function delGasto(){
+  var id=$('mg-id').value;
+  if(!confirm('\u00bfEliminar este gasto?')) return;
+  GASTOS=GASTOS.filter(function(g){return g.id!==id;}); cm('m-gasto'); renderGastos();
+}
+
+
+
+
+// ════ OBJETIVOS SEMANALES ════
+var OBJ_KEY = 'sf_objetivos';
+var OBJETIVOS = (function(){
+  try {
+    var s = localStorage.getItem(OBJ_KEY);
+    return s ? JSON.parse(s) : {};
+  } catch(e) { return {}; }
+})();
+function saveObj(){ try{localStorage.setItem(OBJ_KEY,JSON.stringify(OBJETIVOS));}catch(e){} }
+
+function iconSVG(name){
+  var ic={
+    'export':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    'plus':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    'x':'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    'refresh':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15A9 9 0 1 1 5.64 5.64"/></svg>',
+    'download':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    'pdf':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    'alert':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    'target':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    'chart':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  };
+  return '<span style="display:inline-flex;align-items:center;margin-right:4px;vertical-align:middle;opacity:.9">'+(ic[name]||'')+'</span>';
+}
+
+// ── OBJETIVOS STORAGE ──
+var OBJETIVOS = (function(){
+  try{ return JSON.parse(localStorage.getItem('sf_objetivos')||'{}'); }
+  catch(e){ return {}; }
+})();
+function saveObjetivos(){ try{localStorage.setItem('sf_objetivos',JSON.stringify(OBJETIVOS));}catch(e){} }
+
+function updateObj(wk,k,v){ if(!OBJETIVOS[wk]) OBJETIVOS[wk]={}; OBJETIVOS[wk][k]=v; saveObjetivos(); }
+function deleteObj(wk,k){ if(OBJETIVOS[wk]) delete OBJETIVOS[wk][k]; saveObjetivos(); renderObjetivos(); }
+function addCustomObj(){
+  var lbl=prompt('Nombre del objetivo:'); if(!lbl||!lbl.trim()) return;
+  var val=parseFloat(prompt('Valor objetivo ($):')||'0');
+  var now=new Date(); var ws=new Date(now); ws.setDate(now.getDate()-now.getDay()+1);
+  var wk=ws.toISOString().slice(0,10);
+  var k='custom_'+Date.now();
+  if(!OBJETIVOS[wk]) OBJETIVOS[wk]={};
+  OBJETIVOS[wk][k]={label:lbl.trim(),target:val||0,custom:true};
+  saveObjetivos(); renderObjetivos();
+}
+
+function renderObjetivos(){
+  var now=new Date();
+  var ws=new Date(now); ws.setDate(now.getDate()-now.getDay()+1);
+  var wk=ws.toISOString().slice(0,10);
+  var saved=OBJETIVOS[wk]||{};
+  var D=SALES.daily, thisMo=SALES.monthly.slice(-1)[0];
+  var dailyAvg=thisMo?thisMo.avg_daily:1000000;
+  var last7=D.slice(-7);
+  var weekActual=last7.reduce(function(s,d){return s+d.venta_neta;},0);
+  var gastosSem=GASTOS.reduce(function(s,g){return s+toSem(g);},0);
+  var ob=$('obj-body'); if(!ob) return;
+
+  var defaults={
+    venta:{label:'Venta neta semana',target:Math.round(dailyAvg*7/100000)*100000,actual:weekActual,inverse:false},
+    pedidosya:{label:'PedidosYa semana',target:0,actual:0,inverse:false},
+    local:{label:'Venta local semana',target:0,actual:0,inverse:false},
+    gastos:{label:'Gastos semanales',target:Math.round(gastosSem),actual:gastosSem,inverse:true},
+  };
+
+  function pct(a,t,inv){ var p=t>0?a/t*100:0; return inv?Math.max(0,200-p):Math.min(p,100); }
+  function clr(p){ return p>=100?'#00e5a0':p>=70?'#ffb020':'#ff4455'; }
+  function actualVal(k){ return defaults[k]?defaults[k].actual:( saved[k]&&saved[k].actual||0); }
+
+  // Build items: fixed + custom
+  var items=[];
+  Object.keys(defaults).forEach(function(k){
+    var def=defaults[k];
+    var target=saved[k]!==undefined?(typeof saved[k]==='object'?saved[k].target:saved[k]):def.target;
+    items.push({k:k,label:def.label,target:target,actual:def.actual,inverse:def.inverse,custom:false});
+  });
+  // Custom items
+  Object.keys(saved).forEach(function(k){
+    if(k.indexOf('custom_')===0&&saved[k]&&saved[k].custom){
+      items.push({k:k,label:saved[k].label,target:saved[k].target||0,actual:0,inverse:false,custom:true});
+    }
+  });
+
+  var weekLabel=ws.toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+
+  ob.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">'
+    +'<div style="font-size:12px;color:var(--sub)">Semana del '+weekLabel+'</div>'
+    +'<button onclick="addCustomObj()" style="display:flex;align-items:center;gap:6px;background:var(--m);color:#000;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">'
+    +iconSVG('plus')+'Agregar objetivo</button>'
+    +'</div>'
+    +'<div style="display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr))">'
+    +items.map(function(it){
+      var p=pct(it.actual,it.target,it.inverse);
+      var c=clr(p);
+      var pLabel=it.target>0?p.toFixed(0)+'%':'—';
+      var showBar=it.target>0;
+      var barW=Math.min(p,100);
+      return '<div style="background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:16px;position:relative">'
+        +(it.custom?'<button onclick="deleteObj(\''+wk+'\',\''+it.k+'\')" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--sub);cursor:pointer;padding:2px;line-height:1">'+iconSVG('x')+'</button>':'')
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+          +'<span style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;padding-right:24px">'+it.label+'</span>'
+          +'<span style="font-size:13px;font-weight:800;color:'+c+';flex-shrink:0">'+pLabel+'</span>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px">'
+          +'<div>'
+            +'<div style="font-size:22px;font-weight:700;color:var(--t);font-family:var(--mono)">'+(it.actual>0?fmt(it.actual):'—')+'</div>'
+            +'<div style="font-size:10px;color:var(--sub);margin-top:1px">real</div>'
+          +'</div>'
+          +'<div style="text-align:right">'
+            +'<div style="font-size:14px;font-weight:600;color:var(--sub);font-family:var(--mono)">'+(it.target>0?fmt(it.target):'sin meta')+'</div>'
+            +'<div style="font-size:10px;color:var(--sub)">objetivo</div>'
+          +'</div>'
+        +'</div>'
+        +(showBar?'<div style="background:var(--s3);border-radius:4px;height:5px;margin-bottom:10px"><div style="height:5px;border-radius:4px;background:'+c+';width:'+barW.toFixed(1)+'%;transition:width .6s ease"></div></div>':'<div style="height:15px"></div>')
+        +'<div style="display:flex;align-items:center;gap:8px">'
+          +'<label style="font-size:10px;color:var(--sub);white-space:nowrap">Meta:</label>'
+          +'<input type="number" value="'+(it.target||'')+'" placeholder="0" style="flex:1;min-width:0;background:var(--s3);border:1px solid var(--b);border-radius:6px;padding:5px 8px;color:var(--t);font-size:12px;font-family:var(--mono)" oninput="updateObj(\''+wk+'\',\''+it.k+'\',+this.value);this.parentElement.parentElement.querySelector(\'span:last-of-type\').textContent=+this.value>0?(Math.min('+it.actual+'/+this.value*100,100)|0)+\'%\':\'—\'">'
+        +'</div>'
+      +'</div>';
+    }).join('')
+    +'</div>';
+}
+
+
+function updateObj(weekKey,key,val){
+  if(!OBJETIVOS[weekKey]) OBJETIVOS[weekKey]={};
+  OBJETIVOS[weekKey][key]=val;
+  saveObj();
+}
+
+// ════ EXPORT MODAL ════
+function openExport(){
+  var sel=$('exp-mes');
+  if(sel&&sel.options.length<=1){
+    SALES.monthly.forEach(function(mo){
+      var opt=document.createElement('option');
+      opt.value=mo.month; opt.textContent=mo.month;
+      sel.appendChild(opt);
+    });
+  }
+  var m=$('m-export'); if(m) m.classList.add('on');
+}
+function exportSection(){
+  var sec=$('exp-section').value;
+  var fmt2=$('exp-fmt').value;
+  var mo=$('exp-mes').value;
+  if(fmt2==='print') exportPrint(sec,mo);
+  else if(fmt2==='excel') exportExcel(sec,mo);
+}
+
+function exportPrint(sec,mo){
+  var M=SALES.monthly;
+  var sm=mo==='all'?M:M.filter(function(m){return m.month===mo;});
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Street Flags — Export</title>'
+    +'<style>body{font-family:system-ui,sans-serif;color:#111;padding:30px;max-width:900px;margin:0 auto} table{width:100%;border-collapse:collapse;margin-top:20px;font-size:12px} th{background:#111;color:#fff;padding:8px;text-align:left} td{padding:8px;border-bottom:1px solid #ddd} .r{text-align:right} @media print{body{padding:0}}</style></head><body>'
+    +'<h1>Street Flags Reporte</h1><h2>Fecha: '+new Date().toLocaleDateString('es-CL')+'</h2>';
+
+  if(sec==='ventas'||sec==='all'){
+    var tvn=sm.reduce(function(s,m){return s+m.venta_neta;},0);
+    html+='<h3>Ventas</h3><table><thead><tr><th>Mes</th><th>Venta neta</th><th>Sin IVA</th><th>PedidosYa</th><th>Del. interno</th></tr></thead><tbody>'
+      +sm.map(function(m){return '<tr><td>'+m.month+'</td><td class="r">'+fmtM(m.venta_neta)+'</td><td class="r">'+fmtM(m.venta_neta/1.19)+'</td><td class="r">'+fmtM(m.delivery_ya||0)+'</td><td class="r">'+fmtM(m.delivery_transferencia||0)+'</td></tr>';}).join('')
+      +'<tr style="font-weight:700;background:#f5f5f5"><td>TOTAL</td><td class="r">'+fmtM(tvn)+'</td><td class="r">'+fmtM(tvn/1.19)+'</td><td class="r">—</td><td class="r">—</td></tr></tbody></table>';
+  }
+  if(sec==='gastos'||sec==='all'){
+    html+='<h3>Gastos Fijos</h3><table><thead><tr><th>Gasto</th><th>Categoría</th><th>Frecuencia</th><th>Monto/mes</th></tr></thead><tbody>'
+      +GASTOS.map(function(g){return '<tr><td>'+g.name+'</td><td>'+g.cat+'</td><td>'+g.freq+'</td><td class="r">'+fmt(Math.round(toMes(g)))+'</td></tr>';}).join('')+'</tbody></table>';
+  }
+  if(sec==='inventario'||sec==='all'){
+    html+='<h3>Inventario</h3><table><thead><tr><th>Ingrediente</th><th>Categoría</th><th>Costo Unit.</th><th>Uso/Sem</th></tr></thead><tbody>'
+      +INGR.map(function(i){return '<tr><td>'+i.name+'</td><td>'+i.category+'</td><td class="r">'+fmt(i.cost)+'</td><td class="r">'+i.weekly_avg+' '+i.unit+'</td></tr>';}).join('')+'</tbody></table>';
+  }
+  if(sec==='recetas'||sec==='all'){
+    html+='<h3>Recetas</h3><table><thead><tr><th>Receta</th><th>Categoría</th><th>Costo Total</th></tr></thead><tbody>'
+      +RECIPES.map(function(r){return '<tr><td>'+r.name+'</td><td>'+r.cat+'</td><td class="r">'+fmt(r.cost)+'</td></tr>';}).join('')+'</tbody></table>';
+  }
+  html+='</body></html>';
+  var w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},500);}
+  cm('m-export');
+}
+
+function exportExcel(sec,mo){
+  var M=SALES.monthly;
+  var sm=mo==='all'?M:M.filter(function(m){return m.month===mo;});
+  var rows=[];
+  
+  if(sec==='ventas'||sec==='all'){
+    rows.push(['VENTAS','','','','','','','','']);
+    rows.push(['Mes','Venta neta','Sin IVA','Margen %','Días activos','PedidosYa','Uber Eats','Del. interno','Local']);
+    sm.forEach(function(m){
+      var dy=m.delivery_ya||0, du=m.delivery_uber||0, dt=m.delivery_transferencia||0;
+      rows.push([m.month, m.venta_neta, Math.round(m.venta_neta/1.19), m.margen_pct, m.days_active, dy, du, dt, Math.max(0,m.venta_neta-dy-du-dt)]);
+    });
+    rows.push([]);
+  }
+  if(sec==='gastos'||sec==='all'){
+    rows.push(['GASTOS FIJOS','','','','','']);
+    rows.push(['Nombre','Categoría','Proveedor','Frecuencia','Monto/mes','Monto/año']);
+    GASTOS.forEach(function(g){ rows.push([g.name, g.cat, g.prov||'', g.freq, Math.round(toMes(g)), Math.round(toAno(g))]); });
+    rows.push([]);
+  }
+  if(sec==='inventario'||sec==='all'){
+    rows.push(['INVENTARIO','','','','']);
+    rows.push(['Código','Nombre','Categoría','Costo','Uso Semanal']);
+    INGR.forEach(function(i){ rows.push([i.code, i.name, i.category, i.cost, i.weekly_avg]); });
+    rows.push([]);
+  }
+  if(sec==='recetas'||sec==='all'){
+    rows.push(['RECETAS','','','']);
+    rows.push(['ID','Nombre','Categoría','Costo Insumos']);
+    RECIPES.forEach(function(r){ rows.push([r.id, r.name, r.cat, r.cost]); });
+  }
+
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='StreetFlags_Export.csv';
+  a.click(); URL.revokeObjectURL(url);
+  cm('m-export');
+}
+
+function lineChart(elId,dataArr,color,vFmt){
+  var el=$(elId); if(!el||!dataArr.length) return;
+  var vals=dataArr.map(function(d){return d.v;});
+  var maxV=Math.max.apply(null,vals)||1,minV=Math.min.apply(null,vals);
+  var range=maxV-minV||maxV||1;
+  var W=520,H=148,pL=52,pR=16,pT=20,pB=28,n=dataArr.length;
+  if(n<2){verticalBarChart(elId,dataArr,color,vFmt);return;}
+  var c=color||'#00d4ff';
+  var xS=(W-pL-pR)/(n-1),yR=H-pT-pB;
+  var uid='lc'+Math.random().toString(36).slice(2,6);
+  var gId=uid+'_gr';
+  var pts=dataArr.map(function(d,i){
+    return{x:+(pL+i*xS).toFixed(1),y:+(pT+yR-(d.v-minV)/range*yR).toFixed(1),v:d.v,l:d.l};
+  });
+  var path=pts.map(function(p,i){return(i?'L':'M')+p.x+','+p.y;}).join(' ');
+  var area='M'+pts[0].x+','+(pT+yR)+' '+pts.map(function(p){return'L'+p.x+','+p.y;}).join(' ')+' L'+pts[pts.length-1].x+','+(pT+yR)+' Z';
+  
+  var grid=[0,.5,1].map(function(t){
+    var v=minV+range*t, y=+(pT+yR-t*yR).toFixed(1);
+    return '<line x1="'+pL+'" y1="'+y+'" x2="'+(W-pR)+'" y2="'+y+'" stroke="rgba(255,255,255,.05)" stroke-width="1"/>'
+      +'<text x="'+(pL-4)+'" y="'+(y+4)+'" text-anchor="end" font-size="8.5" fill="var(--sub)" font-family="var(--mono)">'+(vFmt?vFmt(v).replace('$',''):Math.round(v))+'</text>';
+  }).join('');
+  
+  // SOLUCIÓN: Rotar el texto -35 grados para que nunca se pise
+  var xlbls=pts.map(function(p){
+    return '<text x="'+p.x+'" y="'+(H-4)+'" text-anchor="end" transform="rotate(-35 '+p.x+','+(H-4)+')" font-size="9" fill="var(--sub)">'+p.l+'</text>';
+  }).join('');
+  
+  var dots=pts.map(function(p,i){
+    var ttId=uid+'_tt'+i, lnId=uid+'_ln'+i;
+    var tx=Math.max(0,Math.min(p.x-34,W-74));
+    var ty=Math.max(4,p.y-36);
+    var lbl=vFmt?vFmt(p.v):p.v;
+    return '<g>'
+      +'<circle cx="'+p.x+'" cy="'+p.y+'" r="10" fill="transparent"'
+      +' onmouseover="document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'visible\');document.getElementById(\''+lnId+'\').setAttribute(\'opacity\',\'.35\')"'
+      +' onmouseout="document.getElementById(\''+ttId+'\').setAttribute(\'visibility\',\'hidden\');document.getElementById(\''+lnId+'\').setAttribute(\'opacity\',\'0\')"'
+      +' style="cursor:crosshair"/>'
+      +'<circle cx="'+p.x+'" cy="'+p.y+'" r="3.5" fill="'+c+'" stroke="#0d0d0f" stroke-width="2" pointer-events="none"/>'
+      +'<line id="'+lnId+'" x1="'+p.x+'" y1="'+pT+'" x2="'+p.x+'" y2="'+(pT+yR)+'" stroke="'+c+'" stroke-width="1" stroke-dasharray="3,3" opacity="0" pointer-events="none"/>'
+      +'<g id="'+ttId+'" visibility="hidden" pointer-events="none">'
+      +'<rect x="'+tx+'" y="'+ty+'" width="72" height="28" rx="4" fill="#16161e" stroke="'+c+'" stroke-width=".7" opacity=".97"/>'
+      +'<text x="'+(tx+36)+'" y="'+(ty+11)+'" text-anchor="middle" font-size="8.5" fill="var(--sub)">'+p.l+'</text>'
+      +'<text x="'+(tx+36)+'" y="'+(ty+23)+'" text-anchor="middle" font-size="9.5" fill="'+c+'" font-family="var(--mono)" font-weight="700">'+lbl+'</text>'
+      +'</g></g>';
+  }).join('');
+  el.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block;min-width:280px">'
+    +'<defs><linearGradient id="'+gId+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+c+'" stop-opacity=".16"/><stop offset="100%" stop-color="'+c+'" stop-opacity="0"/></linearGradient></defs>'
+    +grid
+    +'<path d="'+area+'" fill="url(#'+gId+')" pointer-events="none"/>'
+    +'<path d="'+path+'" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>'
+    +dots+xlbls
+    +'</svg></div>';
+}
+function pieChart(elId,dataArr,title){
+  var el=$(elId); if(!el||!dataArr.length) return;
+  var tot=dataArr.reduce(function(s,d){return s+d.v;},0); if(!tot) return;
+  var isCanal=(elId==='ch-vd-pie'||elId==='ch-ci');
+  var R=isCanal?100:70, iR=isCanal?60:40; 
+  var W=R*2+40, H=R*2+40, cx=W/2, cy=H/2;
+  var uid='pie'+Math.random().toString(36).slice(2,6);
+
+  // Colores degradados sutiles y elegantes
+  var pales = [
+    {id:'g1', c1:'#00d4ff', c2:'#0088cc'}, {id:'g2', c1:'#ff3fa4', c2:'#cc1a7a'},
+    {id:'g3', c1:'#00e5a0', c2:'#00a878'}, {id:'g4', c1:'#ffb020', c2:'#cc8800'},
+    {id:'g5', c1:'#a78bfa', c2:'#7c3aed'}, {id:'g6', c1:'#ff6b6b', c2:'#ee5253'}
+  ];
+
+  var defs='<defs>'+pales.map(function(p){
+    return '<linearGradient id="'+uid+'_'+p.id+'" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="'+p.c1+'" stop-opacity="0.95"/><stop offset="100%" stop-color="'+p.c2+'" stop-opacity="0.75"/></linearGradient>';
+  }).join('')+'</defs>';
+
+  var ang=-Math.PI/2, slices=[];
+  dataArr.slice(0,6).forEach(function(d,i){
+    var sl=d.v/tot*Math.PI*2; if(sl<0.005) return;
+    slices.push({d:d, i:i, ang:ang, sl:sl, p:pales[i%pales.length]}); ang+=sl;
+  });
+
+  var paths=slices.map(function(s){
+    var x1=cx+R*Math.cos(s.ang), y1=cy+R*Math.sin(s.ang);
+    var x2=cx+R*Math.cos(s.ang+s.sl), y2=cy+R*Math.sin(s.ang+s.sl);
+    var ix1=cx+iR*Math.cos(s.ang+s.sl), iy1=cy+iR*Math.sin(s.ang+s.sl);
+    var ix2=cx+iR*Math.cos(s.ang), iy2=cy+iR*Math.sin(s.ang);
+    var lg=s.sl>Math.PI?1:0;
+    var ttId=uid+'_tt'+s.i;
+    return '<g style="cursor:pointer;transition:transform .2s;transform-origin:'+cx+'px '+cy+'px"'
+      +' onmouseover="this.style.transform=\'scale(1.05)\';document.getElementById(\''+ttId+'\').style.opacity=\'1\'"'
+      +' onmouseout="this.style.transform=\'scale(1)\';document.getElementById(\''+ttId+'\').style.opacity=\'0\'">'
+      +'<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+R+','+R+' 0 '+lg+',1 '+x2.toFixed(1)+','+y2.toFixed(1)+' L'+ix1.toFixed(1)+','+iy1.toFixed(1)+' A'+iR+','+iR+' 0 '+lg+',0 '+ix2.toFixed(1)+','+iy2.toFixed(1)+' Z"'
+      +' fill="url(#'+uid+'_'+s.p.id+')" stroke="var(--bg)" stroke-width="2.5"/>'
+      +'<g id="'+ttId+'" style="opacity:0;transition:opacity .2s;pointer-events:none">'
+      +'<rect x="'+(cx-60)+'" y="'+(cy+R+10)+'" width="120" height="30" rx="6" fill="var(--s1)" stroke="'+s.p.c1+'" stroke-width="1" style="box-shadow:0 4px 12px rgba(0,0,0,.5)"/>'
+      +'<text x="'+cx+'" y="'+(cy+R+30)+'" text-anchor="middle" font-size="12" fill="'+s.p.c1+'" font-weight="700">'+s.d.l+' · '+(s.d.v/tot*100).toFixed(1)+'%</text>'
+      +'</g></g>';
+  }).join('');
+
+  var top=dataArr[0], topC=pales[0].c1;
+  var ctr='<text x="'+cx+'" y="'+(cy-12)+'" text-anchor="middle" font-size="12" fill="var(--sub)">'+top.l.split(' ')[0]+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size="'+(isCanal?'26':'20')+'" font-weight="800" fill="'+topC+'" font-family="var(--mono)">'+(top.v/tot*100).toFixed(0)+'%</text>';
+
+  var leg=slices.map(function(s){
+    var pct=(s.d.v/tot*100).toFixed(1);
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03)">'
+      +'<div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg, '+s.p.c1+', '+s.p.c2+');flex-shrink:0"></div>'
+      +'<span style="font-size:13px;color:var(--t);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.d.l+'</span>'
+      +'<span style="font-size:13px;font-family:var(--mono);color:var(--sub);font-weight:700">'+pct+'%</span>'
+      +'</div>';
+  }).join('');
+
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:35px;flex-wrap:wrap;padding:10px 0">'
+    +'<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="overflow:visible;display:block">'+defs+paths+ctr+'</svg>'
+    +'<div style="flex:1;min-width:180px;max-width:280px">'+leg+'</div></div>';
+}
+
+function verticalBarChart(elId,dataArr,color,vFmt){
+  var el=$(elId);if(!el||!dataArr.length)return;
+  var maxV=Math.max.apply(null,dataArr.map(function(d){return d.v;}));if(!maxV)maxV=1;
+  var n=dataArr.length;
+  // Calculamos anchos fijos para evitar que se deformen
+  var bW=Math.min(44, Math.max(16, 300/n)); 
+  var gap=Math.min(24, Math.max(8, 150/n));
+  var pL=15, pR=15, pT=35, pB=45;
+  var W=pL+(bW+gap)*n-gap+pR;
+  var H=180, yR=H-pT-pB;
+  var uid='v'+Math.random().toString(36).slice(2,6);
+  
+  var bars=dataArr.map(function(d,i){
+    var bh=Math.max(4,Math.round(d.v/maxV*yR)), x=pL+i*(bW+gap), y=pT+yR-bh;
+    var c=typeof color==='function'?color(d):(Array.isArray(color)?color[i%color.length]:(color||'#00d4ff'));
+    var lbl=(d.l||'').length>9?(d.l||'').slice(0,8)+'\u2026':(d.l||'');
+    var val=vFmt?vFmt(d.v).replace('$',''):d.v;
+    var ttId=uid+'t'+i;
+    
+    return '<g style="cursor:pointer" onmouseover="document.getElementById(\''+ttId+'\').setAttribute(\'opacity\',\'1\')" onmouseout="document.getElementById(\''+ttId+'\').setAttribute(\'opacity\',\'0\')">'
+      +'<rect x="'+x+'" y="'+y+'" width="'+bW+'" height="'+bh+'" rx="5" fill="'+c+'" opacity=".85" style="transition:all .2s"/>'
+      +'<text x="'+(x+bW/2)+'" y="'+(y-8)+'" text-anchor="middle" font-size="10.5" fill="'+c+'" font-family="var(--mono)" font-weight="600">'+val+'</text>'
+      +'<text x="'+(x+bW/2)+'" y="'+(H-pB+20)+'" text-anchor="middle" font-size="11" fill="var(--sub)">'+lbl+'</text>'
+      +'<g id="'+ttId+'" opacity="0" style="transition:opacity .2s;pointer-events:none">'
+      +'<rect x="'+(Math.max(0,Math.min(x+bW/2-45,W-90)))+'" y="'+(y-40)+'" width="90" height="26" rx="6" fill="var(--s2)" stroke="'+c+'" stroke-width="1" style="box-shadow:0 4px 12px rgba(0,0,0,.5)"/>'
+      +'<text x="'+(x+bW/2)+'" y="'+(y-22)+'" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">'+val+'</text>'
+      +'</g></g>';
+  }).join('');
+  
+  // Envolvemos en un flex para centrarlo limpiamente sin estirar
+  el.innerHTML='<div style="display:flex;justify-content:center;overflow-x:auto;width:100%;padding:10px 0"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="display:block;min-width:'+W+'px">'+bars+'</svg></div>';
+}
+
+// ════ INIT ════
+$('c-fecha').value=new Date().toISOString().split('T')[0];
+initDashSel();
+initDash();
+initMonthSel();
+renderV();
+initAnalisis();
+initDeliveryMesSel();
+renderIngr();
+renderRec();
+renderCnt();
+renderGastos();
+
+function exportGastosPDF(){
+  var now=new Date();
+  var dateStr=now.toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+  var G=GASTOS;
+  // Group by category
+  var byCat={};
+  G.forEach(function(g){ (byCat[g.cat]=byCat[g.cat]||[]).push(g); });
+  var tMes=G.reduce(function(s,g){return s+toMes(g);},0);
+  var tAno=G.reduce(function(s,g){return s+toAno(g);},0);
+  var avgV=SALES.monthly.length?SALES.monthly.reduce(function(s,m){return s+m.venta_neta;},0)/SALES.monthly.length:1;
+
+  var rows=G.map(function(g){
+    return '<tr>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #1e1e2a;font-size:11px;color:#e0e0e8;font-weight:600">'+g.name+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #1e1e2a;font-size:10px;color:#888">'+(GCAT_LABELS[g.cat]||g.cat)+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #1e1e2a;font-size:11px;color:#888">'+g.freq+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #1e1e2a;font-size:11px;color:#aaa;text-align:right;font-family:monospace">'+fmt(Math.round(toMes(g)))+'/mes</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #1e1e2a;font-size:11px;color:#555;text-align:right;font-family:monospace">'+fmt(Math.round(toAno(g)))+'/año</td>'
+      +'</tr>';
+  }).join('');
+
+  var catBlocks=Object.keys(byCat).map(function(cat){
+    var items=byCat[cat];
+    var catTotal=items.reduce(function(s,g){return s+toMes(g);},0);
+    return '<div style="margin-bottom:18px">'
+      +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#00d4ff;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #1e1e2a">'+(GCAT_LABELS[cat]||cat)+' — '+fmt(Math.round(catTotal))+'/mes</div>'
+      +items.map(function(g){
+        return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #141420;font-size:11px">'
+          +'<span style="color:#ccc">'+g.name+'</span>'
+          +'<span style="color:#e0e0e8;font-family:monospace;font-weight:700">'+fmt(Math.round(toMes(g)))+'/mes</span>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+  }).join('');
+
+  var pct=(tMes/avgV*100).toFixed(1);
+  var html2='<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<title>Reporte de Gastos — Street Flags</title>'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d0d0f;color:#e8e8ec;padding:40px}@media print{body{background:#fff;color:#000}.card{background:#fff!important;border:1px solid #ddd!important}.kpi-v{color:#000!important}.kpi-l{color:#555!important}}</style>'
+    +'</head><body style="max-width:800px;margin:0 auto">'
+    // Header
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #1e1e2a">'
+    +'<div><div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px">Street Flags</div>'
+    +'<div style="font-size:13px;color:#555;margin-top:3px">Reporte de Gastos Fijos</div></div>'
+    +'<div style="text-align:right"><div style="font-size:12px;color:#555">'+dateStr+'</div>'
+    +'<div style="font-size:11px;color:#333;margin-top:2px">'+G.length+' gastos registrados</div></div>'
+    +'</div>'
+    // KPIs
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px">'
+    +[
+      {l:'Total mensual',v:fmt(Math.round(tMes)),c:'#00d4ff'},
+      {l:'Total anual',v:fmt(Math.round(tAno)),c:'#00e5a0'},
+      {l:'% sobre venta prom.',v:pct+'%',c:'#ffb420'},
+      {l:'N° de gastos',v:G.length,c:'#a78bfa'}
+    ].map(function(k){
+      return '<div style="background:#16161a;border:1px solid #222;border-radius:10px;padding:16px">'
+        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#555;margin-bottom:8px">'+k.l+'</div>'
+        +'<div style="font-size:20px;font-weight:800;color:'+k.c+';font-family:monospace">'+k.v+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    // Category breakdown
+    +'<div style="background:#16161a;border:1px solid #222;border-radius:10px;padding:20px;margin-bottom:20px">'
+    +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:16px">Desglose por categoría</div>'
+    +catBlocks+'</div>'
+    // Full table
+    +'<div style="background:#16161a;border:1px solid #222;border-radius:10px;padding:20px">'
+    +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:14px">Detalle completo</div>'
+    +'<table style="width:100%;border-collapse:collapse">'
+    +'<thead><tr>'
+    +'<th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#444;border-bottom:1px solid #222">Gasto</th>'
+    +'<th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#444;border-bottom:1px solid #222">Categoría</th>'
+    +'<th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#444;border-bottom:1px solid #222">Freq.</th>'
+    +'<th style="text-align:right;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#444;border-bottom:1px solid #222">Mensual</th>'
+    +'<th style="text-align:right;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#444;border-bottom:1px solid #222">Anual</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody>'
+    +'<tfoot><tr>'
+    +'<td colspan="3" style="padding:10px 10px;font-weight:800;color:#fff;border-top:1px solid #333;font-size:12px">TOTAL</td>'
+    +'<td style="padding:10px;text-align:right;font-family:monospace;font-weight:800;color:#00d4ff;border-top:1px solid #333;font-size:13px">'+fmt(Math.round(tMes))+'/mes</td>'
+    +'<td style="padding:10px;text-align:right;font-family:monospace;color:#555;border-top:1px solid #333;font-size:12px">'+fmt(Math.round(tAno))+'/año</td>'
+    +'</tr></tfoot>'
+    +'</table></div>'
+    +'<div style="margin-top:24px;text-align:center;font-size:10px;color:#2a2a36">Street Flags BI · '+dateStr+'</div>'
+    +'</body></html>';
+
+  var w=window.open('','_blank','width=900,height=700');
+  w.document.write(html2);
+  w.document.close();
+  setTimeout(function(){w.print();},400);
+}
+// ── FLUJO DE CAJA PRO (CON TICKETS Y MEMORIA) ──
+
+const REGLAS_PROVEEDORES = {
+  "HECTOR SALAS": "Gas",
+  "AGUAS DEL ALTIPLANO": "Agua",
+  "CGE": "Electricidad",
+  "TRANSBANK": "Ingreso Web",
+  "PEDIDOSYA": "Ingreso Delivery"
+};
+
+function formatMoney(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
+
+// ─── MOTOR DE LECTURA CSV AVANZADO (Inmune a comas en precios) ───
+function parseCSVRow(text, delimiter) {
+  var ret = [], val = '', inQ = false;
+  for(var i=0; i<text.length; i++) {
+    var c = text[i];
+    if(c === '"') inQ = !inQ;
+    else if(c === delimiter && !inQ) { ret.push(val.replace(/^"|"$/g,'').trim()); val=''; }
+    else val += c;
+  }
+  ret.push(val.replace(/^"|"$/g,'').trim()); 
+  return ret;
+}
+
+// ─── LECTOR BANCO ITAÚ ───
+function handleBankFile(input) {
+  var file = input.files[0]; if(!file) return;
+  var reader = new FileReader();
+  
+  reader.onload = function(e) {
+    var text = e.target.result;
+    var lines = text.split(/\r?\n/).filter(function(x){return x.trim();});
+    
+    // Extracción de año inteligente
+    var year = new Date().getFullYear();
+    var pMatch = text.match(/Período.*?(\d{4})/i) || text.match(/20\d{2}/); 
+    if(pMatch) year = pMatch[1] || pMatch[0];
+    
+    // Detección automática del separador del CSV
+    var delimiter = text.indexOf(';') >= 0 ? ';' : ',';
+    
+    var txs = [];
+    lines.forEach(function(l) {
+      // Uso del motor avanzado en vez del split antiguo
+      var p = parseCSVRow(l, delimiter); 
+      if(p.length < 6) return;
+      
+      var dateStr = p[0].trim();
+      if(/^\d{2}\/\d{2}$/.test(dateStr)) {
+        var pts = dateStr.split('/'); var isoDate = year + '-' + pts[1] + '-' + pts[0];
+        
+        // Limpiamos la basura de los números antes de pasarlos a entero
+        var abono = parseInt(String(p[4]).replace(/[^0-9]/g, '')) || 0;
+        var cargo = parseInt(String(p[5]).replace(/[^0-9]/g, '')) || 0;
+        
+        var descOriginal = p[3].trim().toUpperCase();
+        var etiqueta = "Otros";
+        
+        for (var clave in REGLAS_PROVEEDORES) {
+          if (descOriginal.includes(clave)) {
+            etiqueta = REGLAS_PROVEEDORES[clave];
+            break;
+          }
+        }
+        
+        if(abono > 0 || cargo > 0) txs.push({ 
+          date: isoDate, desc: p[3].trim(), cat: etiqueta, in: abono, out: cargo 
+        });
+      }
+    });
+    
+    if(txs.length > 0) {
+      var existing = JSON.parse(localStorage.getItem('bank_tx') || '[]');
+      var all = existing.concat(txs);
+      
+      // Filtramos duplicados para que no se sumen dos veces si subes el mismo archivo
+      var unique = []; var seen = new Set();
+      all.forEach(function(t) {
+        var str = t.date + t.desc + t.in + t.out;
+        if(!seen.has(str)) { seen.add(str); unique.push(t); }
+      });
+      
+      unique.sort(function(a,b){return b.date.localeCompare(a.date)});
+      localStorage.setItem('bank_tx', JSON.stringify(unique));
+      renderFlujoCaja(false);
+      alert('✓ ' + txs.length + ' movimientos bancarios procesados con éxito.');
+    } else {
+      alert('❌ No se detectaron movimientos. Verifica que sea la cartola de Itaú.');
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+  input.value = ''; 
+}
+
+function filtrarPorProveedor(nombre) {
+  var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
+  var sel = document.getElementById('flujo-mes-sel');
+  var currentMonth = sel ? sel.value : 'all';
+  
+  var filtrados = bankData.filter(function(t) {
+    var coincideMes = currentMonth === 'all' || t.date.startsWith(currentMonth);
+    return coincideMes && t.desc.toUpperCase().includes(nombre.toUpperCase());
+  });
+
+  renderTablaFlujo(filtrados, true, nombre);
+}
+
+function renderTablaFlujo(data, esFiltroManual, nombreProv) {
+  var tbody = document.getElementById('flujo-body');
+  if(!tbody) return;
+
+  var rows = data.map(function(t){
+    var reglasMemoria = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
+    var catAprendida = reglasMemoria[t.desc.toUpperCase()];
+    
+    if(!catAprendida) {
+       for(var clave in REGLAS_PROVEEDORES) {
+          if(t.desc.toUpperCase().includes(clave)) catAprendida = REGLAS_PROVEEDORES[clave];
+       }
+    }
+    var categoriaFinal = (t.cat && t.cat !== "Otros") ? t.cat : (catAprendida || null);
+    
+    // Ticket visual: Verde ● si está registrado, gris ○ si no lo está
+    var statusIcon = categoriaFinal
+      ? '<span style="color:var(--g); margin-right:8px; font-size:12px;">●</span>' 
+      : '<span style="color:var(--sub2); margin-right:8px; font-size:12px;">○</span>';
+
+    var catBadge = categoriaFinal ? '<br><span style="font-size:9.5px;color:var(--m);text-transform:uppercase;font-weight:700;">['+categoriaFinal+']</span>' : '';
+
+    return '<tr>'
+      +'<td><span style="font-size:11px;color:var(--sub)">'+t.date+'</span></td>'
+      +'<td style="text-align:left;font-weight:600;color:var(--t);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color=\'var(--c)\'" onmouseout="this.style.color=\'var(--t)\'" onclick="asociarProveedor(\''+t.desc+'\')" title="Clic para categorizar">'
+      + statusIcon + t.desc + catBadge +'</td>'
+      +'<td class="r mono" style="color:#00e5a0;font-weight:700">'+(t.in>0 ? formatMoney(t.in) : '—')+'</td>'
+      +'<td class="r mono" style="color:#ff4455;font-weight:700">'+(t.out>0 ? formatMoney(t.out) : '—')+'</td>'
+      +'</tr>';
+  }).join('');
+
+  if(esFiltroManual) {
+    tbody.innerHTML = '<tr><td colspan="4" style="background:rgba(0,212,255,0.05);padding:10px;text-align:center;font-size:12px">'
+      +'Mostrando movimientos de: <strong>'+nombreProv+'</strong> '
+      +'<button onclick="renderFlujoCaja(true)" style="background:none;border:none;color:var(--m);cursor:pointer;text-decoration:underline;margin-left:10px">Ver todos</button></td></tr>' + rows;
+  } else {
+    tbody.innerHTML = rows;
+  }
+}
+
+
+
+
+// ─── SINCRONIZADOR AUTOMÁTICO DE RECETAS ───
+function syncRecetasCost() {
+  if (typeof REC === 'undefined' || !REC || typeof INGR === 'undefined') return;
+  
+  REC.forEach(function(receta) {
+    var nuevoCosto = 0;
+    if (receta.ings && receta.ings.length > 0) {
+      receta.ings.forEach(function(item) {
+        // Busca el ingrediente en el inventario
+        var ingDB = INGR.find(function(i) { return i.code === item.code || i.name === item.name; });
+        if (ingDB) {
+          // Calcula el costo considerando si tiene factor de conversión (rinde) o es directo
+          var costoUnidad = ingDB.cost || 0;
+          if (ingDB.conv && ingDB.conv > 0) {
+            costoUnidad = ingDB.cost / ingDB.conv;
+          }
+          nuevoCosto += (costoUnidad * (item.qty || 0));
+        }
+      });
+    }
+    receta.cost = Math.round(nuevoCosto); // Guarda el nuevo precio exacto
+  });
+  
+  // Guardamos las recetas actualizadas
+  localStorage.setItem('app_rec', JSON.stringify(REC));
+  
+  // Si estás en la pestaña de recetas, se refresca la pantalla sola
+  if (typeof renderRec === 'function') renderRec();
+}
+
+
+
+
+
+
+
+
+
+function renderFlujoCaja(isFilterChange){
+  var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
+  var kpiDiv = document.getElementById('kpi-flujo');
+  var sel = document.getElementById('flujo-mes-sel');
+  var panels = document.getElementById('flujo-panels');
+  
+  if(!kpiDiv) return;
+
+  // 1. AUTO-GENERAR MESES (Desde Enero 2025 hasta la actualidad)
+  if (sel && sel.options.length <= 3) { 
+      var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var d = new Date();
+      var currentYear = d.getFullYear();
+      var currentMonth = d.getMonth();
+      var optionsHtml = '<option value="all">Todos los meses</option>';
+      
+      for (var y = currentYear; y >= 2025; y--) {
+          var mStart = (y === currentYear) ? currentMonth : 11;
+          for (var m = mStart; m >= 0; m--) {
+              var val = y + '-' + (m + 1 < 10 ? '0' : '') + (m + 1);
+              var label = mNames[m] + ' ' + y;
+              optionsHtml += '<option value="' + val + '">' + label + '</option>';
+          }
+      }
+      sel.innerHTML = optionsHtml;
+      
+      // Si el filtro no se activó a mano, intentar preseleccionar el mes actual
+      if (!isFilterChange) {
+          var currentVal = currentYear + '-' + (currentMonth + 1 < 10 ? '0' : '') + (currentMonth + 1);
+          if (sel.querySelector('option[value="'+currentVal+'"]')) sel.value = currentVal;
+      }
+  }
+
+  var currentMonth = sel ? sel.value : 'all';
+  var filteredBank = currentMonth === 'all' ? bankData : bankData.filter(function(t){ return t.date.startsWith(currentMonth); });
+
+  // 2. CÁLCULOS DEL BANCO
+  var tIn = 0, tOut = 0;
+  var topOutMap = {}, topInMap = {};
+
+  filteredBank.forEach(function(t){
+    tIn += t.in; tOut += t.out;
+    if(t.out > 0) {
+      var cleanName = t.desc.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').substring(0,25).trim().toUpperCase();
+      topOutMap[cleanName] = (topOutMap[cleanName] || 0) + t.out;
+    }
+    if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
+  });
+
+  // 3. CÁLCULO DE EFECTIVO Y GASTOS MANUALES
+  var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce(function(s, g) {
+      var match = (currentMonth === 'all') || g.date.startsWith(currentMonth);
+      return s + (match ? parseInt(g.monto) : 0);
+  }, 0);
+  
+  var efectivoToteat = 0;
+  if (typeof SALES !== 'undefined' && SALES.monthly) {
+    if (currentMonth === 'all') {
+      efectivoToteat = SALES.monthly.reduce((sum, m) => sum + (m.efectivo || 0), 0);
+    } else {
+      var mArr = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var pts = currentMonth.split('-');
+      if(pts.length === 2) {
+          var targetLabel = mArr[parseInt(pts[1]) - 1] + ' ' + pts[0];
+          var match = SALES.monthly.find(m => m.month === targetLabel);
+          if(match) efectivoToteat = match.efectivo || 0;
+      }
+    }
+  }
+
+  var saldoBanco = tIn - tOut;
+  var cajaRealFisica = efectivoToteat - totalManual;
+
+  // 4. RENDERIZAR KPIs
+  kpiDiv.style.gridTemplateColumns = 'repeat(3, 1fr)'; 
+  kpiDiv.innerHTML = [
+    {l:'Abonos Banco', v:formatMoney(tIn), f:'Total Digital', c:'var(--g)'},
+    {l:'Cargos Banco', v:formatMoney(tOut), f:'Egresos Digitales', c:'var(--r)'},
+    {l:'Saldo Banco', v:formatMoney(saldoBanco), f:'Neto Banco', c:saldoBanco>=0?'var(--g)':'var(--r)'},
+    {l:'Efectivo Entrante', v:formatMoney(efectivoToteat), f:'Ventas Toteat', c:'var(--g)'},
+    {l:'Gastos Efectivo', v:formatMoney(totalManual), f:'Caja Chica', c:'var(--y)'},
+    {l:'Caja Fuerte', v:formatMoney(cajaRealFisica), f:'Billetes Reales', c:cajaRealFisica>=0?'var(--m)':'var(--r)'}
+  ].map(k => '<div class="kpi" style="margin-bottom:10px"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-foot">'+k.f+'</div></div>').join('');
+
+  // 5. RENDERIZAR TABLA Y GRÁFICOS
+  if (!filteredBank.length) {
+      $('flujo-body').innerHTML = '<tr><td colspan="4" class="empty">No hay datos del banco registrados para esta fecha. Los cálculos de Caja Fuerte siguen activos.</td></tr>';
+      if(panels) panels.style.display = 'none';
+  } else {
+      renderTablaFlujo(filteredBank, false);
+      
+      if(panels) {
+        panels.style.display = 'grid';
+        
+        var sortedOut = Object.keys(topOutMap).map(k => ({n:k, v:topOutMap[k]})).sort((a,b) => b.v-a.v);
+        var topDisplay = sortedOut.slice(0, 10);
+        
+        document.getElementById('flujo-top-out').innerHTML = topDisplay.length ? topDisplay.map(function(o){
+          var pct = Math.round((o.v / tOut) * 100) || 0;
+          return '<div onclick="filtrarPorProveedor(\''+o.n+'\')" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer" title="Clic para ver detalle">'
+            +'<span style="font-size:12px;color:var(--m)">'+o.n+'</span>'
+            +'<span style="font-size:12px;color:var(--r);font-family:var(--mono)">'+formatMoney(o.v)+' <span style="color:var(--sub);font-size:10px">('+pct+'%)</span></span></div>';
+        }).join('') : '<div class="empty">Sin registros</div>';
+
+        var sortedIn = Object.keys(topInMap).map(k => ({d:k, v:topInMap[k]})).sort((a,b) => b.v-a.v).slice(0, 5);
+        
+        document.getElementById('flujo-top-in').innerHTML = sortedIn.length ? sortedIn.map(o => {
+          return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+            +'<span style="font-size:12px;color:var(--sub)">' + o.d + '</span>'
+            +'<span style="font-size:12px;color:var(--g);font-family:var(--mono)">' + formatMoney(o.v) + '</span></div>';
+        }).join('') : '<div class="empty">Sin ingresos</div>';
+      }
+  }
+}
+
+
+// ════ SINCRONIZACIÓN FIREBASE (100% BLINDADA) ════
+
+async function saveToCloud(btn) {
+  if(!confirm('¿Guardar todos tus registros actuales en la base de datos de la nube?')) return;
+  
+  var ogText = btn.innerHTML;
+  btn.innerHTML = '⏳ Subiendo...';
+  
+  // Extraemos toda tu memoria actual de la pantalla
+  var dataToSave = {};
+  for(var i=0; i<localStorage.length; i++){
+    var key = localStorage.key(i);
+    
+    // 🔥 EL FILTRO BLINDADO (Vital para que Firebase no rechace la subida)
+    if(key.startsWith('firebase') || /[.#$\[\]\/]/.test(key)) {
+        continue; 
+    }
+    
+    dataToSave[key] = localStorage.getItem(key);
+  }
+  
+  try {
+    // Mandamos los datos directo a Firebase en tiempo real
+    await db.ref('respaldo_principal').set(dataToSave);
+    
+    btn.innerHTML = '✅ Guardado';
+    setTimeout(function(){ btn.innerHTML = ogText; }, 2500);
+  } catch(e) {
+    console.error("Error Firebase:", e);
+    alert('❌ Error al subir a la base de datos.');
+    btn.innerHTML = ogText;
+  }
+}
+
+async function loadFromCloud(btn) {
+  if(!confirm('ALERTA: ¿Sobrescribir tu memoria actual con los datos de Firebase?')) return;
+  
+  var ogText = btn.innerHTML;
+  btn.innerHTML = '⏳ Descargando...';
+  
+  try {
+    // Leemos los datos desde Firebase
+    const snapshot = await db.ref('respaldo_principal').once('value');
+    const data = snapshot.val();
+    
+    // ESCUDO ANTI-BORRADO DEFINITIVO
+    if (!data) {
+      alert('❌ La base de datos en Firebase está vacía en este momento. Sube tus datos primero para no borrar tu memoria local.');
+      btn.innerHTML = ogText;
+      return;
+    }
+    
+    // Si hay datos, los grabamos en tu memoria local
+    for(var key in data) {
+      localStorage.setItem(key, data[key]);
+    }
+    
+    btn.innerHTML = '✅ Listo';
+    setTimeout(function(){ location.reload(); }, 800);
+    
+  } catch(e) {
+    console.error("Error Firebase:", e);
+    alert('❌ Error de conexión al descargar. Tus datos en pantalla NO se borraron.');
+    btn.innerHTML = ogText;
+  }
+}
+
+
+
+function asociarProveedor(nombreOriginal) {
+    var nombreLimpio = nombreOriginal.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').trim();
+    var categoria = prompt("¿A qué categoría pertenece '" + nombreLimpio + "'? (Ej: Gas, Agua, Personal, Arriendo)");
+    
+    if (categoria && categoria.trim() !== "") {
+        var reglasActuales = JSON.parse(localStorage.getItem('reglas_prov') || '{}');
+        reglasActuales[nombreOriginal.toUpperCase()] = categoria.trim();
+        localStorage.setItem('reglas_prov', JSON.stringify(reglasActuales));
+        
+        var bankData = JSON.parse(localStorage.getItem('bank_tx') || '[]');
+        var dataActualizada = bankData.map(function(t) {
+            if (t.desc === nombreOriginal) t.cat = categoria.trim();
+            return t;
+        });
+        localStorage.setItem('bank_tx', JSON.stringify(dataActualizada));
+
+        renderFlujoCaja(true);
+    }
+}
