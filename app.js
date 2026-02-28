@@ -1,12 +1,24 @@
-// Carga automática de ventas desde la memoria
-if (localStorage.getItem('app_sales')) {
-  SALES = JSON.parse(localStorage.getItem('app_sales'));
+// ─── RUNTIME SEGURO (data.js SIEMPRE MANDA) ───
+var INGR = typeof INGR_RAW !== 'undefined' ? JSON.parse(JSON.stringify(INGR_RAW)) : [];
+var GASTOS = typeof GASTOS_INIT !== 'undefined' ? JSON.parse(JSON.stringify(GASTOS_INIT)) : [];
+var CREDENCIALES = typeof CRED_INIT !== 'undefined' ? JSON.parse(JSON.stringify(CRED_INIT)) : [];
+var RECIPES = typeof RECIPES_RAW !== 'undefined' ? JSON.parse(JSON.stringify(RECIPES_RAW)) : [];
+
+try {
+    var localSales = localStorage.getItem('app_sales');
+    if (localSales) { var pSales = JSON.parse(localSales); if (pSales.monthly && pSales.monthly.length > 0) SALES = pSales; }
+    
+    var localIngr = localStorage.getItem('app_ingr');
+    if (localIngr) { var pIngr = JSON.parse(localIngr); if (pIngr.length > 0) INGR = pIngr; }
+    
+    var localRec = localStorage.getItem('app_rec');
+    if (localRec) { var pRec = JSON.parse(localRec); if (pRec.length > 0) RECIPES = pRec; }
+    
+    var localGastos = localStorage.getItem('app_gastos');
+    if (localGastos) { var pGastos = JSON.parse(localGastos); if (pGastos.length > 0) GASTOS = pGastos; }
+} catch(e) {
+    console.warn("Ignorando caché corrupto o vacío.");
 }
-// ─── RUNTIME ───
-var INGR = JSON.parse(JSON.stringify(INGR_RAW));
-var GASTOS = JSON.parse(JSON.stringify(GASTOS_INIT));
-var CREDENCIALES = JSON.parse(JSON.stringify(CRED_INIT));
-var RECIPES = JSON.parse(JSON.stringify(RECIPES_RAW));
 var pendingUpload = null;
 
 // ─── HELPERS ───
@@ -28,15 +40,23 @@ function toggleTheme(){
 function go(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
   document.querySelectorAll('.nt').forEach(function(t){t.classList.remove('on')});
-  $('p-'+id).classList.add('on');
-  $('t-'+id).classList.add('on');
-  var tab=$('t-'+id); if(tab) tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  if(id==='ped') renderPed();
+  
+  // Stock agrupa inventario, pedido y conteo
+  var pageId = id;
+  if(id==='ped' || id==='cnt') pageId = 'stock';
+  
+  $('p-'+pageId).classList.add('on');
+  var tab=$('t-'+pageId); 
+  if(tab){ tab.classList.add('on'); tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+  
+  if(id==='ped'){ setStockTab('ped'); renderPed(); }
+  if(id==='cnt'){ setStockTab('cnt'); renderCnt(); }
+  if(id==='stock') renderIngr();
   if(id==='ventas') renderV();
   if(id==='delivery'){initDeliveryMesSel();initDelivery();}
-  if(id==='gastos'){renderGastos();}
-  if(id==='analisis'){initAnalisis();}
-  if(id==='obj'){renderObjetivos();}
+  if(id==='gastos') renderGastos();
+  if(id==='analisis') initAnalisis();
+  if(id==='obj') renderObjetivos();
 }
 function cm(id){ $(id).classList.remove('on'); }
 
@@ -173,22 +193,29 @@ var DM_BY_LABEL=(function(){
 
 function getVenta(m){
   var dy=(m.delivery_ya||0), du=(m.delivery_uber||0), dt=(m.delivery_transferencia||0);
-  var platforms=dy+du;
-  var local=Math.max(0,m.venta_neta-platforms-dt);
+  var dr=(m.delivery_rappi||0);
+  var ef=(m.efectivo||0), cr=(m.credito||0), db=(m.debito||0), ju=(m.junaeb||0);
+  var ot=(m.otros||0)+(m.ticket||0)+(m.cheque||0);
+  var tarjetas=cr+db;
+  var platforms=dy+du+dr;
+  var local=ef+tarjetas+ju+ot;
   if(vCanal==='all')       return m.venta_neta;
   if(vCanal==='local')     return local;
+  if(vCanal==='efectivo')  return ef;
+  if(vCanal==='tarjetas')  return tarjetas;
+  if(vCanal==='junaeb')    return ju;
   if(vCanal==='intern')    return dt;
-  if(vCanal==='platforms') return platforms;
   if(vCanal==='ya')        return dy;
   if(vCanal==='uber')      return du;
+  if(vCanal==='rappi')     return dr;
+  if(vCanal==='otros')     return ot;
   return m.venta_neta;
 }
 
 function canalLabel(){
-  var labels={'all':'Total','local':'Local','intern':'Del. interno (transf.)','platforms':'Plataformas ext.','ya':'PedidosYa','uber':'Uber Eats'};
+  var labels={'all':'Total','local':'Presencial','efectivo':'Efectivo','tarjetas':'Tarjetas','junaeb':'Junaeb','intern':'Interno','ya':'PedidosYa','uber':'Uber Eats','rappi':'Rappi','otros':'Otros'};
   return labels[vCanal]||vCanal;
 }
-
 
 function renderV(){
   var M=SALES.monthly, D=SALES.daily;
@@ -247,24 +274,51 @@ function renderV(){
   }), '#00e5a0', fmtM);
 
   // --- DESGLOSE DE CANALES ---
-  if(vCanal==='all'&&sm.length>0){
+if(vCanal==='all'&&sm.length>0){
+    var efT=sm.reduce(function(s,m){return s+(m.efectivo||0);},0);
+    var crT=sm.reduce(function(s,m){return s+(m.credito||0);},0);
+    var dbT=sm.reduce(function(s,m){return s+(m.debito||0);},0);
+    var tjT=crT+dbT;
+    var juT=sm.reduce(function(s,m){return s+(m.junaeb||0);},0);
     var yaT=sm.reduce(function(s,m){return s+(m.delivery_ya||0);},0);
     var ubT=sm.reduce(function(s,m){return s+(m.delivery_uber||0);},0);
+    var rpT=sm.reduce(function(s,m){return s+(m.delivery_rappi||0);},0);
     var dtT=sm.reduce(function(s,m){return s+(m.delivery_transferencia||0);},0);
-    var locT=sm.reduce(function(s,m){return s+m.venta_neta;},0)-yaT-ubT-dtT;
-    var tot=yaT+ubT+dtT+locT;
-    
-    // Se inserta de manera limpia debajo del lineChart
+    var otT=sm.reduce(function(s,m){return s+(m.otros||0)+(m.ticket||0)+(m.cheque||0);},0);
+    var tot=efT+tjT+juT+yaT+ubT+rpT+dtT+otT;
+
+    var items=[
+      {l:'Efectivo',v:efT,c:'#00e5a0'},
+      {l:'Tarjetas',v:tjT,c:'#00d4ff',sub:[{l:'Débito',v:dbT},{l:'Crédito',v:crT}]},
+      {l:'Junaeb',v:juT,c:'#ffb020'},
+      {l:'PedidosYa',v:yaT,c:'#ff3fa4'},
+      {l:'Uber Eats',v:ubT,c:'#a78bfa'},
+      {l:'Rappi',v:rpT,c:'#ff6b6b'},
+      {l:'Interno',v:dtT,c:'#33ddff'},
+      {l:'Otros',v:otT,c:'#6b6b88'}
+    ].filter(function(x){return x.v>0;});
+
+    var barsHtml=items.map(function(x){
+      var bar=mkBar(x.l,x.v,tot,x.c,fmtM,120);
+      if(x.sub){
+        bar+='<div style="padding-left:132px;margin-top:-4px;margin-bottom:4px">';
+        x.sub.filter(function(s){return s.v>0;}).forEach(function(s){
+          bar+='<span style="font-size:10px;color:var(--sub);margin-right:12px">'+s.l+': <strong style="font-family:var(--mono);color:var(--t)">'+fmtM(s.v)+'</strong></span>';
+        });
+        bar+='</div>';
+      }
+      return bar;
+    }).join('');
+
     $('ch-vd').innerHTML+='<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--b)">'
-      +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:12px">Desglose por canal</div>'
-      +[{l:'Local',v:locT,c:'#00d4ff'},{l:'Del. interno',v:dtT,c:'#00e5a0'},{l:'PedidosYa',v:yaT,c:'#ff3fa4'},{l:'Uber Eats',v:ubT,c:'#a78bfa'}]
-      .filter(function(x){return x.v>0;})
-      .map(function(x){return mkBar(x.l,x.v,tot,x.c,fmtM,120);}).join('')
-      +'</div>';
-      
-    pieChart('ch-vd-pie',[{l:'Local',v:locT},{l:'Del. interno',v:dtT},{l:'PedidosYa',v:yaT},{l:'Uber Eats',v:ubT}].filter(function(x){return x.v>0;}));
+      +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:12px">Desglose por método de pago</div>'
+      +barsHtml+'</div>';
+
+    pieChart('ch-vd-pie',items.map(function(x){return{l:x.l,v:x.v};}));
   }
 }
+    
+
 
 
 // ════ ANÁLISIS INTELIGENTE ════
@@ -527,21 +581,25 @@ function openEdit(code){
   $('m-ingr').classList.add('on');
 }
 function saveIngr(){
-  var code=$('mi-code').value;
-  var obj={code:code,name:$('mi-name').value.trim(),brand:$('mi-brand').value.trim(),
-    proveedor:$('mi-prov').value.trim(),notes:$('mi-notes').value.trim(),
-    cost:parseFloat($('mi-cost').value)||0,unit:$('mi-unit').value,
-    category:$('mi-cat').value,weekly_avg:parseFloat($('mi-wk').value)||0,
-    stock_min:parseFloat($('mi-min').value)||0,
-    total_cost:parseFloat($('mi-tc').value)||0,total_used:0,
-    purchase_qty:parseFloat($('mi-pqty').value)||0,
-    purchase_unit:$('mi-punit').value.trim(),
-    conv_qty:parseFloat($('mi-conv').value)||0,
-    conv_unit:$('mi-convunit').value.trim()};
-  if(!obj.name){alert('Ingresa un nombre.');return}
-  var idx=INGR.findIndex(function(x){return x.code===code});
-  if(idx>=0) INGR[idx]=obj; else INGR.push(obj);
-  cm('m-ingr');renderIngr();initDash();syncRecetasCost();
+  var code=$('mi-code').value;
+  var obj={code:code,name:$('mi-name').value.trim(),brand:$('mi-brand').value.trim(),
+    proveedor:$('mi-prov').value.trim(),notes:$('mi-notes').value.trim(),
+    cost:parseFloat($('mi-cost').value)||0,unit:$('mi-unit').value,
+    category:$('mi-cat').value,weekly_avg:parseFloat($('mi-wk').value)||0,
+    stock_min:parseFloat($('mi-min').value)||0,
+    total_cost:parseFloat($('mi-tc').value)||0,total_used:0,
+    purchase_qty:parseFloat($('mi-pqty').value)||0,
+    purchase_unit:$('mi-punit').value.trim(),
+    conv_qty:parseFloat($('mi-conv').value)||0,
+    conv_unit:$('mi-convunit').value.trim()};
+  if(!obj.name){alert('Ingresa un nombre.');return}
+  var idx=INGR.findIndex(function(x){return x.code===code});
+  if(idx>=0) INGR[idx]=obj; else INGR.push(obj);
+
+  // ---> CORRECCIÓN: Guardar en memoria local antes de cerrar <---
+  localStorage.setItem('app_ingr', JSON.stringify(INGR));
+
+  cm('m-ingr');renderIngr();initDash();syncRecetasCost();
 }
 function delIngr(){
   if(!confirm('¿Eliminar?')) return;
@@ -564,18 +622,73 @@ function renderPag(id,total,page,per,cb){
   $(id).innerHTML=h;
 }
 
-// ════ UPLOAD ════
-function openUpload(){pendingUpload=null;$('up-st').textContent='';$('up-prev').innerHTML='';$('up-act').style.display='none';$('m-up').classList.add('on')}
-function handleDrop(e){e.preventDefault();$('dz').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFile(f)}
+
+
+// ─── MOTOR DE LECTURA CSV (DEFINICIÓN ÚNICA — borrar la otra) ───
+function parseCSVRow(text, delimiter) {
+  var ret = [], val = '', inQ = false;
+  for(var i=0; i<text.length; i++) {
+    var c = text[i];
+    if(c === '"') inQ = !inQ;
+    else if(c === delimiter && !inQ) { ret.push(val.replace(/^"|"$/g,'').trim()); val=''; }
+    else val += c;
+  }
+  ret.push(val.replace(/^"|"$/g,'').trim()); 
+  return ret;
+}
+
+// ─── EXTRACCIÓN NUMÉRICA ROBUSTA (Formato Chileno Anti-Excel) ───
+function extractNumFromCell(arr, index) {
+  if (!arr || index >= arr.length) return 0;
+  var val = arr[index];
+  if (val == null) return 0;
+  var s = String(val).trim();
+  if (s === '' || s === '-') return 0;
+
+  // 1. Quitar símbolos de dinero, espacios y forzar comas gringas a puntos
+  s = s.replace(/[$\s]/g, '').replace(/,/g, '.');
+  
+  var parts = s.split('.');
+  if (parts.length > 1) {
+      var finalNumStr = parts[0];
+      for (var i = 1; i < parts.length; i++) {
+          var p = parts[i];
+          
+          // 🚨 FIX CRÍTICO: Excel/Toteat a veces trata el separador de miles como decimal 
+          // y borra los ceros a la derecha. (Ej: 354.000 se vuelve 354.00 o 354.0).
+          // En Chile, todo bloque después de un punto DEBE tener 3 números.
+          // Si tiene menos, rellenamos con ceros para recuperar el valor real.
+          while (p.length < 3) {
+              p += '0';
+          }
+          finalNumStr += p;
+      }
+      s = finalNumStr;
+  }
+  
+  var num = parseInt(s, 10);
+  return isNaN(num) ? 0 : num;
+}
+
+function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFileImp(f);}
+
+
+// ════════════════════════════════════════════════════════════════
+// IMPORTACIÓN Y EXTRACCIÓN (MOTOR ANTI-BASURA)
+// ════════════════════════════════════════════════════════════════
 function handleFileImp(file){
   if(!file) return;
   $('imp-st').textContent='Procesando: '+file.name+'...';
+  
+  window.importFileName = file.name.toLowerCase(); 
+  
   var reader=new FileReader();
   reader.onload=function(e){
     try{
       var text = e.target.result;
       var rows = [];
-      if(text.indexOf('<tr')>=0 || text.indexOf('<TR')>=0){
+      
+      if(text.toLowerCase().includes('<tr') || text.toLowerCase().includes('<table')){
         var doc=new DOMParser().parseFromString(text,'text/html');
         doc.querySelectorAll('tr').forEach(function(tr){
           var cells=[];
@@ -583,44 +696,275 @@ function handleFileImp(file){
           if(cells.some(function(c){return c;})) rows.push(cells);
         });
       } else {
-        var delimiter = text.indexOf('\t') >= 0 ? '\t' : (text.indexOf(';') >= 0 ? ';' : ',');
-        text.split(/\r?\n/).forEach(function(l){
+        var tabs = (text.match(/\t/g) || []).length;
+        var semis = (text.match(/;/g) || []).length;
+        var commas = (text.match(/,/g) || []).length;
+        var delimiter = ','; 
+        if (tabs > semis && tabs > commas) delimiter = '\t';
+        else if (semis > commas && semis > tabs) delimiter = ';';
+        var lines = text.split(/\r\n|\n|\r/); 
+        lines.forEach(function(l){
           if(l.trim()){
-            var cells = l.split(delimiter).map(function(c){return c.replace(/^"|"$/g,'').trim();});
+            var cells = parseCSVRow(l, delimiter);
             if(cells.some(function(c){return c;})) rows.push(cells);
           }
         });
       }
-      if(rows.length<2){$('imp-st').textContent='Archivo vacío o sin datos válidos.';return;}
       
-      // ── FIX INFALIBLE: LA FILA MÁS ANCHA ES LA DE LOS DÍAS ──
-      var headerIdx = 0;
-      var maxCols = 0;
-      for (var idx = 0; idx < rows.length; idx++) {
-          if (rows[idx].length > maxCols) {
-              maxCols = rows[idx].length;
-              headerIdx = idx;
+      if(rows.length<2){$('imp-st').textContent='Archivo vacío.';return;}
+
+      window.toteatRows = rows; 
+      importPending = rows; 
+
+      if(typeof importMode !== 'undefined' && importMode === 'inv') {
+          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Inventario detectado</span>';
+          $('imp-act').style.display='flex';
+          return;
+      }
+          
+      var findRow = function(keyword) { 
+          return rows.findIndex(function(r){ 
+              return r.some(function(c){ return String(c).toLowerCase().includes(keyword); }); 
+          }); 
+      };
+
+      var vIdx = findRow('venta neta');
+
+      if(vIdx === -1) {
+          $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró "Venta Neta"</span>';
+          $('imp-act').style.display='none';
+          return;
+      }
+
+      var dayRowIdx = -1;
+      for(var r = 0; r < vIdx; r++) {
+          var isDayRow = rows[r].some(function(c) {
+              var val = String(c).toLowerCase();
+              return val.includes('lunes') || val.includes('martes') || val.includes('miércoles') || val.includes('miercoles') || val.includes('jueves') || val.includes('viernes') || val.includes('sábado') || val.includes('sabado') || val.includes('domingo');
+          });
+          if(isDayRow) { dayRowIdx = r; break; }
+      }
+
+      var dayRow = dayRowIdx >= 0 ? rows[dayRowIdx] : [];
+      var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var sums = {}; 
+      
+      var currentYear = 2025;
+      var currentMonthIdx = 0; 
+      var prevDayNum = 0;
+      
+      for (var i = 0; i < dayRow.length; i++) {
+          var dCell = String(dayRow[i]).toLowerCase().trim();
+          if (!dCell || dCell.includes('total') || dCell.includes('sem')) continue;
+
+          var dayMatch = dCell.match(/\d+/);
+          if (!dayMatch) continue; 
+          
+          var dayNum = parseInt(dayMatch[0]);
+          if (dayNum < 1 || dayNum > 31) continue; 
+
+          if (dayNum < prevDayNum - 10) {
+              currentMonthIdx++;
+              if (currentMonthIdx > 11) { currentMonthIdx = 0; currentYear++; }
+          }
+          prevDayNum = dayNum;
+
+          var label = mNames[currentMonthIdx] + ' ' + currentYear;
+          
+          if(!sums[label]) sums[label] = { 
+            venta_neta: 0, delivery_ya: 0, delivery_uber: 0, 
+            delivery_transferencia: 0, delivery_rappi: 0,
+            efectivo: 0, credito: 0, debito: 0, junaeb: 0, 
+            ticket: 0, cheque: 0, otros: 0
+          };
+
+          sums[label].venta_neta += extractNumFromCell(rows[vIdx], i);
+
+          for (var rowIdx = vIdx + 1; rowIdx < rows.length; rowIdx++) {
+              var metodoStr = String(rows[rowIdx][0] || '').trim();
+              if (!metodoStr) continue;
+
+              var mLower = metodoStr.toLowerCase();
+
+              // 🛡️ ESCUDO ANTI-BASURA TOTEAT
+              if (mLower.includes('total') || mLower.includes('caja') || mLower.includes('propina') || mLower.includes('impuesto') || mLower.includes('venta') || mLower.includes('costo') || mLower.includes('margen') || mLower.includes('descuento') || mLower.includes('bruta') || mLower.includes('%')) {
+                  continue;
+              }
+
+              var monto = extractNumFromCell(rows[rowIdx], i);
+              if (monto === 0) continue; 
+
+              if (mLower.includes('pedidosya') || mLower.includes('pedidos ya') || mLower.includes('voucher') || mLower.includes('cash collection')) sums[label].delivery_ya += monto;
+              else if (mLower.includes('uber')) sums[label].delivery_uber += monto;
+              else if (mLower.includes('rappi')) sums[label].delivery_rappi += monto;
+              else if (mLower.includes('transferencia')) sums[label].delivery_transferencia += monto;
+              else if (mLower.includes('efectivo')) sums[label].efectivo += monto;
+              else if (mLower.includes('débito') || mLower.includes('debito') || mLower.includes('debit')) sums[label].debito += monto;
+              else if (mLower.includes('crédito') || mLower.includes('credito') || mLower.includes('credit')) sums[label].credito += monto;
+              else if (mLower.includes('convenio') || mLower.includes('junaeb')) sums[label].junaeb += monto;
+              else if (mLower.includes('ticket')) sums[label].otros += monto;
+              else if (mLower.includes('cheque')) sums[label].otros += monto;
+              else sums[label].otros += monto;
           }
       }
 
-      var headers = rows[headerIdx];
-      window.importHeaders = headers; 
-      importPending = rows.slice(headerIdx + 1); 
-      
-      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; '+maxCols+' columnas detectadas correctamente</span>';
-      
-      // ── RESTAURAMOS LA VISTA PREVIA PARA QUE SE VEA ──
-      $('imp-prev').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'
-        +'<tr>'+headers.slice(0,10).map(function(c){return '<td style="padding:3px 8px;color:var(--sub);font-weight:700;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>'
-        +importPending.slice(0,4).map(function(r){
-          return '<tr>'+r.slice(0,10).map(function(c){return '<td style="padding:3px 8px;white-space:nowrap">'+(c||'').substring(0,15)+'</td>';}).join('')+'</tr>';
-        }).join('')+'</table>';
+      window.pendingSalesSum = sums;
 
+      $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Carga exitosa. Totales detectados:</span>';
+      
+      var prevHtml = '<div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;max-height:350px;overflow-y:auto;padding-right:5px">';
+      var hasData = false;
+      var fmtPrev = function(v){ return typeof formatMoney==='function'?formatMoney(v):'$'+Math.round(v).toLocaleString('es-CL'); };
+      
+      for(var k in sums) {
+          var d = sums[k];
+          var sumaTotal = d.efectivo + d.debito + d.credito + d.junaeb + d.delivery_ya + d.delivery_uber + d.delivery_rappi + d.delivery_transferencia + d.ticket + d.cheque + d.otros;
+
+          if(sumaTotal > 0) { 
+              prevHtml += '<div style="padding:14px;background:var(--s2);border:1px solid var(--b2);border-left:4px solid var(--c);border-radius:8px;">'
+                        +'<div style="font-weight:800;color:var(--t);margin-bottom:12px;font-size:14px;display:flex;justify-content:space-between;border-bottom:1px solid var(--b);padding-bottom:6px">'
+                            +'<span>'+k+'</span>'
+                            +'<span style="color:var(--g);font-family:var(--mono)">'+fmtPrev(d.venta_neta)+'</span>'
+                        +'</div>'
+                        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+
+              if (d.efectivo > 0)                 prevHtml += '<div style="font-size:11.5px;color:var(--t)">Efectivo: <strong style="font-family:var(--mono)">'+fmtPrev(d.efectivo)+'</strong></div>';
+              if (d.debito > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--t)">Débito: <strong style="font-family:var(--mono)">'+fmtPrev(d.debito)+'</strong></div>';
+              if (d.credito > 0)                  prevHtml += '<div style="font-size:11.5px;color:var(--t)">Crédito: <strong style="font-family:var(--mono)">'+fmtPrev(d.credito)+'</strong></div>';
+              if (d.junaeb > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--t)">Junaeb: <strong style="font-family:var(--mono)">'+fmtPrev(d.junaeb)+'</strong></div>';
+              
+              if (d.delivery_ya > 0)              prevHtml += '<div style="font-size:11.5px;color:var(--m)">PedidosYa: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_ya)+'</strong></div>';
+              if (d.delivery_uber > 0)            prevHtml += '<div style="font-size:11.5px;color:var(--c)">Uber Eats: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_uber)+'</strong></div>';
+              if (d.delivery_rappi > 0)           prevHtml += '<div style="font-size:11.5px;color:#ff6b6b">Rappi: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_rappi)+'</strong></div>';
+              if (d.delivery_transferencia > 0)   prevHtml += '<div style="font-size:11.5px;color:var(--g)">Transf: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_transferencia)+'</strong></div>';
+
+
+            if (d.otros > 0)                    prevHtml += '<div style="font-size:11.5px;color:var(--sub)">Otros: <strong style="font-family:var(--mono)">'+fmtPrev(d.otros)+'</strong></div>';
+              hasData = true;
+          }
+      }
+      prevHtml += '</div>';
+      
+      if(!hasData) prevHtml = '<div class="notice warn">Archivo vacío.</div>';
+      
+      $('imp-prev').innerHTML = prevHtml;
       $('imp-act').style.display='flex';
-    }catch(err){$('imp-st').textContent='Error al leer el archivo: '+err.message;}
+
+    }catch(err){$('imp-st').textContent='Error crítico: '+err.message;}
   };
   reader.readAsText(file,'UTF-8');
 }
+
+function applyImport(){
+  if(importMode === 'inv'){
+    if(!importPending) return;
+    var updated=0, skipped=0;
+    importPending.forEach(function(r){
+      if(r.length<2) return;
+      var name=r[0]; var cost=parseFloat((r[1]||'').replace(/[^0-9.]/g,''))||0;
+      var unit=r[2]||''; var wk=parseFloat(r[3])||0;
+      var idx=INGR.findIndex(function(i){return i.name.toLowerCase().trim()===name.toLowerCase().trim();});
+      if(idx>=0){
+        if(cost>0) INGR[idx].cost=cost;
+        if(unit) INGR[idx].unit=unit;
+        if(wk>0) INGR[idx].weekly_avg=wk;
+        updated++;
+      } else { skipped++; }
+    });
+    
+    localStorage.setItem('app_ingr', JSON.stringify(INGR));
+    if(typeof syncRecetasCost === 'function') syncRecetasCost();
+
+    cm('m-import'); renderIngr(); initDash();
+    alert('✓ Inventario actualizado: '+updated+' ingredientes. Costo de recetas sincronizado.');
+    importPending = null;
+    
+  } else {
+    if(!window.pendingSalesSum) return;
+    
+    var sums = window.pendingSalesSum;
+    var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var updatedCount = 0, createdCount = 0;
+
+    for (var monthLabel in sums) {
+        var data = sums[monthLabel];
+        var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
+        
+        if (!targetMonth) {
+            var pts = monthLabel.split(' ');
+            var mIdx = mNames.indexOf(pts[0]);
+            var yr = parseInt(pts[1]);
+            var daysInMonth = (mIdx>=0 && yr) ? new Date(yr, mIdx+1, 0).getDate() : 30;
+
+            targetMonth = { 
+              month: monthLabel, 
+              venta_bruta: 0, venta_neta: 0, venta_sin_iva: 0,
+              costo: 0, margen_pct: 0,
+              days_active: daysInMonth, avg_daily_sin_iva: 0
+            };
+            SALES.monthly.push(targetMonth);
+            createdCount++;
+        } else {
+            updatedCount++;
+        }
+
+        if (data.venta_neta > 0)              targetMonth.venta_neta = data.venta_neta;
+        if (data.delivery_ya > 0)             targetMonth.delivery_ya = data.delivery_ya;
+        if (data.delivery_uber > 0)           targetMonth.delivery_uber = data.delivery_uber;
+        if (data.delivery_rappi > 0)          targetMonth.delivery_rappi = data.delivery_rappi;
+        if (data.delivery_transferencia > 0)  targetMonth.delivery_transferencia = data.delivery_transferencia;
+        
+        if (data.efectivo > 0)                targetMonth.efectivo = data.efectivo;
+        if (data.debito > 0)                  targetMonth.debito = data.debito;
+        if (data.credito > 0)                 targetMonth.credito = data.credito;
+        if (data.junaeb > 0)                  targetMonth.junaeb = data.junaeb;
+        
+if (data.otros > 0)                   targetMonth.otros = (targetMonth.otros||0) + data.otros;
+        
+        targetMonth.venta_sin_iva = Math.round(targetMonth.venta_neta / 1.19);
+        if (targetMonth.days_active > 0) {
+            targetMonth.avg_daily_sin_iva = Math.round(targetMonth.venta_sin_iva / targetMonth.days_active);
+        }
+        if (!targetMonth.venta_bruta || targetMonth.venta_bruta === 0) {
+            targetMonth.venta_bruta = Math.round(targetMonth.venta_neta * 1.03); 
+        }
+    }
+
+    SALES.monthly.sort(function(a,b){
+      var pa = a.month.split(' '), pb = b.month.split(' ');
+      var ya = parseInt(pa[1]), yb = parseInt(pb[1]);
+      if (ya !== yb) return ya - yb;
+      return mNames.indexOf(pa[0]) - mNames.indexOf(pb[0]);
+    });
+
+    localStorage.setItem('app_sales', JSON.stringify(SALES));
+    
+    if(typeof initDash === 'function') initDash();
+    if(typeof initDashSel === 'function') initDashSel();
+    if(typeof initMonthSel === 'function') initMonthSel();
+    if(typeof renderV === 'function') renderV();
+    if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
+
+    cm('m-import'); 
+    window.pendingSalesSum = null;
+    
+    alert('✓ Ventas y métodos de pago guardados exitosamente.');
+  }
+}
+
+
+
+
+
+
+
+// ════ UPLOAD ════
+function openUpload(){pendingUpload=null;$('up-st').textContent='';$('up-prev').innerHTML='';$('up-act').style.display='none';$('m-up').classList.add('on')}
+function handleDrop(e){e.preventDefault();$('dz').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFile(f)}
+
+
+
+
 function applyUpload(){
   if(!pendingUpload)return;
   var u=0,a=0;
@@ -745,26 +1089,30 @@ function removeRecIng(i){
 }
 
 function saveRec(){
-  var r=RECIPES.find(function(x){return x.id===editingRecId}); if(!r) return;
-  r.name=$('mr-name').value.trim()||r.name;
-  // Read all ingredient rows
-  var newIngs=[];
-  var rows=document.querySelectorAll('[id^="ier_n_"]');
-  rows.forEach(function(el,i){
-    var name=el.value;
-    var qty=parseFloat(document.getElementById('ier_q_'+i).value)||0;
-    var unit=document.getElementById('ier_u_'+i).value;
-    var costTxt=(document.getElementById('ier_c_'+i).textContent||'0').replace(/[^0-9]/g,'');
-    var cost=parseInt(costTxt)||0;
-    if(name&&qty>0) newIngs.push({name:name,qty:qty,unit:unit,cost:cost});
-  });
-  if(!newIngs.length){alert('Agrega al menos un ingrediente.');return;}
-  r.ingredients=newIngs;
-  r.cost=newIngs.reduce(function(s,ing){return s+ing.cost},0);
-  cm('m-rec');
-  renderRec();
-  initDash();
-  alert('✓ Receta guardada.');
+  var r=RECIPES.find(function(x){return x.id===editingRecId}); if(!r) return;
+  r.name=$('mr-name').value.trim()||r.name;
+  // Read all ingredient rows
+  var newIngs=[];
+  var rows=document.querySelectorAll('[id^="ier_n_"]');
+  rows.forEach(function(el,i){
+    var name=el.value;
+    var qty=parseFloat(document.getElementById('ier_q_'+i).value)||0;
+    var unit=document.getElementById('ier_u_'+i).value;
+    var costTxt=(document.getElementById('ier_c_'+i).textContent||'0').replace(/[^0-9]/g,'');
+    var cost=parseInt(costTxt)||0;
+    if(name&&qty>0) newIngs.push({name:name,qty:qty,unit:unit,cost:cost});
+  });
+  if(!newIngs.length){alert('Agrega al menos un ingrediente.');return;}
+  r.ingredients=newIngs;
+  r.cost=newIngs.reduce(function(s,ing){return s+ing.cost},0);
+
+  // ---> CORRECCIÓN: Guardar en memoria local antes de cerrar <---
+  localStorage.setItem('app_rec', JSON.stringify(RECIPES));
+
+  cm('m-rec');
+  renderRec();
+  initDash();
+  alert('✓ Receta guardada.');
 }
 
 // ════ PEDIDO ════
@@ -925,221 +1273,7 @@ function openImport(mode){
   $('m-import').classList.add('on');
 }
 
-// ─── MOTOR DE LECTURA CSV ───
-function parseCSVRow(text, delimiter) {
-  var ret = [], val = '', inQ = false;
-  for(var i=0; i<text.length; i++) {
-    var c = text[i];
-    if(c === '"') inQ = !inQ;
-    else if(c === delimiter && !inQ) { ret.push(val.replace(/^"|"$/g,'').trim()); val=''; }
-    else val += c;
-  }
-  ret.push(val.replace(/^"|"$/g,'').trim()); 
-  return ret;
-}
 
-function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFileImp(f);}
-
-function handleFileImp(file){
-  if(!file) return;
-  $('imp-st').textContent='Procesando: '+file.name+'...';
-  
-  window.importFileName = file.name.toLowerCase(); 
-  
-  var reader=new FileReader();
-  reader.onload=function(e){
-    try{
-      var text = e.target.result;
-      var rows = [];
-      
-      if(text.toLowerCase().includes('<tr') || text.toLowerCase().includes('<table')){
-        var doc=new DOMParser().parseFromString(text,'text/html');
-        doc.querySelectorAll('tr').forEach(function(tr){
-          var cells=[];
-          tr.querySelectorAll('td,th').forEach(function(td){cells.push(td.textContent.trim());});
-          if(cells.some(function(c){return c;})) rows.push(cells);
-        });
-      } else {
-        var tabs = (text.match(/\t/g) || []).length;
-        var semis = (text.match(/;/g) || []).length;
-        var commas = (text.match(/,/g) || []).length;
-        var delimiter = ','; 
-        if (tabs > semis && tabs > commas) delimiter = '\t';
-        else if (semis > commas && semis > tabs) delimiter = ';';
-
-        var lines = text.split(/\r\n|\n|\r/); 
-        lines.forEach(function(l){
-          if(l.trim()){
-            var cells = parseCSVRow(l, delimiter);
-            if(cells.some(function(c){return c;})) rows.push(cells);
-          }
-        });
-      }
-      
-      if(rows.length<2){$('imp-st').textContent='Archivo vacío.';return;}
-
-      window.toteatRows = rows; 
-      importPending = rows; 
-
-      if(typeof importMode !== 'undefined' && importMode === 'inv') {
-          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Inventario detectado</span>';
-          $('imp-act').style.display='flex';
-      } else {
-          
-          var findRow = function(keyword) { 
-              return rows.findIndex(function(r){ 
-                  return r.some(function(c){ return String(c).toLowerCase().includes(keyword); }); 
-              }); 
-          };
-
-          var vIdx = findRow('venta neta');
-          var eIdx = findRow('efectivo');
-          var pyIdx = findRow('pedidosya') === -1 ? findRow('pedidos ya') : findRow('pedidosya');
-          var ubIdx = findRow('uber');
-
-          if(vIdx === -1) {
-              $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró la palabra "Venta Neta"</span>';
-              $('imp-act').style.display='none';
-              return;
-          }
-
-          // FIX CRÍTICO: BUSCAR LA FILA DE DÍAS POR PALABRAS EXACTAS (evita chocar con Descuentos)
-          var dayRowIdx = -1;
-          for(var r = 0; r < vIdx; r++) {
-              var isDayRow = rows[r].some(function(c) {
-                  var val = String(c).toLowerCase();
-                  return val.includes('lunes') || val.includes('martes') || val.includes('miércoles') || val.includes('miercoles') || val.includes('jueves') || val.includes('viernes') || val.includes('sábado') || val.includes('sabado') || val.includes('domingo');
-              });
-              if(isDayRow) {
-                  dayRowIdx = r;
-                  break;
-              }
-          }
-
-          var dayRow = dayRowIdx >= 0 ? rows[dayRowIdx] : [];
-          
-          var rowEfectivo = eIdx >= 0 ? rows[eIdx] : [];
-          var rowPy = pyIdx >= 0 ? rows[pyIdx] : [];
-          var rowUb = ubIdx >= 0 ? rows[ubIdx] : [];
-
-          var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-          var sums = {}; 
-          
-          // INICIO ANCLADO A ENERO 2025 (Punto de partida real de tu archivo)
-          var currentYear = 2025;
-          var currentMonthIdx = 0; 
-          var prevDayNum = 0;
-          
-          for (var i = 0; i < dayRow.length; i++) {
-              var dCell = String(dayRow[i]).toLowerCase().trim();
-              if (!dCell || dCell.includes('total') || dCell.includes('sem')) continue;
-
-              var dayMatch = dCell.match(/\d+/);
-              if (!dayMatch) continue; 
-              
-              var dayNum = parseInt(dayMatch[0]);
-              if (dayNum < 1 || dayNum > 31) continue; 
-
-              // Si cae de fin de mes (ej: 31, 30, 28) a los primeros días (ej: 1 o 2), cambia el mes
-              if (dayNum < prevDayNum - 10) {
-                  currentMonthIdx++;
-                  if (currentMonthIdx > 11) {
-                      currentMonthIdx = 0;
-                      currentYear++;
-                  }
-              }
-              prevDayNum = dayNum;
-
-              var label = mNames[currentMonthIdx] + ' ' + currentYear;
-              
-              if(!sums[label]) sums[label] = { efectivo: 0, py: 0, ub: 0 };
-              
-              var extractNum = function(arr, index) { return parseInt(String(arr[index] || '0').replace(/[^0-9]/g, '')) || 0; };
-
-              sums[label].efectivo += extractNum(rowEfectivo, i);
-              sums[label].py += extractNum(rowPy, i);
-              sums[label].ub += extractNum(rowUb, i);
-          }
-
-          window.pendingSalesSum = sums;
-
-          $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Carga exitosa. Totales detectados:</span>';
-          
-          var prevHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:250px;overflow-y:auto;padding-right:5px">';
-          var hasData = false;
-          
-          for(var k in sums) {
-              var data = sums[k];
-              if(data.efectivo > 0 || data.py > 0 || data.ub > 0) { 
-                  prevHtml += '<div style="padding:12px;background:var(--s2);border:1px solid var(--b2);border-left:3px solid var(--g);border-radius:6px;">'
-                            +'<div style="font-weight:800;color:var(--t);margin-bottom:6px;font-size:13px">'+k+'</div>'
-                            +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px"><span>Efectivo:</span><span style="color:var(--g);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.efectivo):'$'+data.efectivo)+'</span></div>'
-                            +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px"><span>PedidosYa:</span><span style="color:var(--m);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.py):'$'+data.py)+'</span></div>'
-                            +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub)"><span>Uber Eats:</span><span style="color:var(--c);font-family:var(--mono)">'+(typeof formatMoney==='function'?formatMoney(data.ub):'$'+data.ub)+'</span></div>'
-                            +'</div>';
-                  hasData = true;
-              }
-          }
-          prevHtml += '</div>';
-          
-          if(!hasData) {
-              prevHtml = '<div class="notice warn">No se encontró dinero en las filas de Efectivo o Delivery.</div>';
-          }
-          
-          $('imp-prev').innerHTML = prevHtml;
-          $('imp-act').style.display='flex';
-      }
-    }catch(err){$('imp-st').textContent='Error crítico al procesar: '+err.message;}
-  };
-  reader.readAsText(file,'UTF-8');
-}
-
-function applyImport(){
-  if(importMode === 'inv'){
-    if(!importPending) return;
-    var updated=0, skipped=0;
-    importPending.forEach(function(r){
-      if(r.length<2) return;
-      var name=r[0]; var cost=parseFloat((r[1]||'').replace(/[^0-9.]/g,''))||0;
-      var unit=r[2]||''; var wk=parseFloat(r[3])||0;
-      var idx=INGR.findIndex(function(i){return i.name.toLowerCase().trim()===name.toLowerCase().trim();});
-      if(idx>=0){
-        if(cost>0) INGR[idx].cost=cost;
-        if(unit) INGR[idx].unit=unit;
-        if(wk>0) INGR[idx].weekly_avg=wk;
-        updated++;
-      } else { skipped++; }
-    });
-    
-    // ── MAGIA: Guardar inventario y sincronizar recetas automáticamente ──
-    localStorage.setItem('app_ingr', JSON.stringify(INGR));
-    if(typeof syncRecetasCost === 'function') syncRecetasCost();
-
-    cm('m-import'); renderIngr(); initDash();
-    alert('✓ Inventario actualizado: '+updated+' ingredientes. Costo de recetas sincronizado.');
-    importPending = null;
-    
-  } else {
-    if(!window.pendingSalesSum) return;
-    
-    var sums = window.pendingSalesSum;
-    var count = 0;
-    for (var monthLabel in sums) {
-        var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
-        if (targetMonth) {
-            if(sums[monthLabel].efectivo > 0) targetMonth.efectivo = sums[monthLabel].efectivo;
-            count++;
-        }
-    }
-
-    localStorage.setItem('app_sales', JSON.stringify(SALES));
-    
-    if(typeof renderFlujoCaja === 'function') renderFlujoCaja(true);
-    cm('m-import'); 
-    window.pendingSalesSum = null;
-    alert('✓ Datos guardados exitosamente.');
-  }
-}
 
 
 
@@ -1701,6 +1835,7 @@ function openEditGasto(id){
   $('mg-prov').value=g.prov||'';$('mg-notes').value=g.notes||'';
   $('mg-del').style.display='inline-flex';recalcGastoHint();$('m-gasto').classList.add('on');
 }
+
 function saveGasto(){
   var id=$('mg-id').value, name=$('mg-name').value.trim();
   if(!name){alert('Ingresa un nombre.');return;}
@@ -1708,14 +1843,11 @@ function saveGasto(){
     monto:parseFloat($('mg-monto').value)||0,prov:$('mg-prov').value.trim(),notes:$('mg-notes').value.trim(),historico:[]};
   var i=GASTOS.findIndex(function(x){return x.id===id;});
   if(i>=0){obj.historico=GASTOS[i].historico||[];GASTOS[i]=obj;}else GASTOS.push(obj);
+  
+  localStorage.setItem('app_gastos', JSON.stringify(GASTOS)); // <-- Guardado seguro
   cm('m-gasto'); renderGastos();
+  autoSaveToCloud(); // <-- Auto subida a Firebase
 }
-function delGasto(){
-  var id=$('mg-id').value;
-  if(!confirm('\u00bfEliminar este gasto?')) return;
-  GASTOS=GASTOS.filter(function(g){return g.id!==id;}); cm('m-gasto'); renderGastos();
-}
-
 
 
 
@@ -1727,7 +1859,7 @@ var OBJETIVOS = (function(){
     return s ? JSON.parse(s) : {};
   } catch(e) { return {}; }
 })();
-function saveObj(){ try{localStorage.setItem(OBJ_KEY,JSON.stringify(OBJETIVOS));}catch(e){} }
+
 
 function iconSVG(name){
   var ic={
@@ -1745,11 +1877,7 @@ function iconSVG(name){
 }
 
 // ── OBJETIVOS STORAGE ──
-var OBJETIVOS = (function(){
-  try{ return JSON.parse(localStorage.getItem('sf_objetivos')||'{}'); }
-  catch(e){ return {}; }
-})();
-function saveObjetivos(){ try{localStorage.setItem('sf_objetivos',JSON.stringify(OBJETIVOS));}catch(e){} }
+
 
 function updateObj(wk,k,v){ if(!OBJETIVOS[wk]) OBJETIVOS[wk]={}; OBJETIVOS[wk][k]=v; saveObjetivos(); }
 function deleteObj(wk,k){ if(OBJETIVOS[wk]) delete OBJETIVOS[wk][k]; saveObjetivos(); renderObjetivos(); }
@@ -1843,11 +1971,6 @@ function renderObjetivos(){
 }
 
 
-function updateObj(weekKey,key,val){
-  if(!OBJETIVOS[weekKey]) OBJETIVOS[weekKey]={};
-  OBJETIVOS[weekKey][key]=val;
-  saveObj();
-}
 
 // ════ EXPORT MODAL ════
 function openExport(){
@@ -2089,18 +2212,68 @@ function verticalBarChart(elId,dataArr,color,vFmt){
   el.innerHTML='<div style="display:flex;justify-content:center;overflow-x:auto;width:100%;padding:10px 0"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="display:block;min-width:'+W+'px">'+bars+'</svg></div>';
 }
 
-// ════ INIT ════
+
+
+
+
+// ════ INIT CLOUD FIRST INTELIGENTE ════
 $('c-fecha').value=new Date().toISOString().split('T')[0];
-initDashSel();
-initDash();
-initMonthSel();
-renderV();
-initAnalisis();
-initDeliveryMesSel();
-renderIngr();
-renderRec();
-renderCnt();
-renderGastos();
+
+db.ref('respaldo_principal').once('value').then(function(snapshot) {
+  var data = snapshot.val();
+  if (data) {
+    try { 
+        if (data['app_sales'] && data['app_sales'].length > 10) { 
+            var pSales = JSON.parse(data['app_sales']);
+            if(pSales.monthly && pSales.monthly.length > 0) { SALES = pSales; localStorage.setItem('app_sales', data['app_sales']); }
+        } 
+    } catch(e) {}
+    try { 
+        if (data['app_ingr'] && data['app_ingr'].length > 10) { 
+            var pIngr = JSON.parse(data['app_ingr']);
+            if(pIngr.length > 0) { INGR = pIngr; localStorage.setItem('app_ingr', data['app_ingr']); }
+        } 
+    } catch(e) {}
+    try { 
+        if (data['app_rec'] && data['app_rec'].length > 10) { 
+            var pRec = JSON.parse(data['app_rec']);
+            if(pRec.length > 0) { RECIPES = pRec; localStorage.setItem('app_rec', data['app_rec']); }
+        } 
+    } catch(e) {}
+    try { 
+        if (data['app_gastos'] && data['app_gastos'].length > 10) { 
+            var pGastos = JSON.parse(data['app_gastos']);
+            if(pGastos.length > 0) { GASTOS = pGastos; localStorage.setItem('app_gastos', data['app_gastos']); }
+        } 
+    } catch(e) {}
+  }
+  renderAppSeguro();
+}).catch(function(e) {
+  renderAppSeguro();
+});
+
+function renderAppSeguro() {
+   try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
+   try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
+   try { initAnalisis(); } catch(e) { console.error("Error Analisis", e); }
+   try { initDeliveryMesSel(); } catch(e) { console.error("Error Delivery", e); }
+   try { renderIngr(); } catch(e) { console.error("Error Insumos", e); }
+   try { renderRec(); } catch(e) { console.error("Error Recetas", e); }
+   try { renderCnt(); } catch(e) { console.error("Error Conteo", e); }
+   try { renderGastos(); } catch(e) { console.error("Error Gastos", e); }
+}
+
+
+function renderAppSeguro() {
+   try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
+   try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
+   try { initAnalisis(); } catch(e) { console.error("Error Analisis", e); }
+   try { initDeliveryMesSel(); } catch(e) { console.error("Error Delivery", e); }
+   try { renderIngr(); } catch(e) { console.error("Error Insumos", e); }
+   try { renderRec(); } catch(e) { console.error("Error Recetas", e); }
+   try { renderCnt(); } catch(e) { console.error("Error Conteo", e); }
+   try { renderGastos(); } catch(e) { console.error("Error Gastos", e); }
+}
 
 function exportGastosPDF(){
   var now=new Date();
@@ -2204,18 +2377,6 @@ const REGLAS_PROVEEDORES = {
 
 function formatMoney(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
 
-// ─── MOTOR DE LECTURA CSV AVANZADO (Inmune a comas en precios) ───
-function parseCSVRow(text, delimiter) {
-  var ret = [], val = '', inQ = false;
-  for(var i=0; i<text.length; i++) {
-    var c = text[i];
-    if(c === '"') inQ = !inQ;
-    else if(c === delimiter && !inQ) { ret.push(val.replace(/^"|"$/g,'').trim()); val=''; }
-    else val += c;
-  }
-  ret.push(val.replace(/^"|"$/g,'').trim()); 
-  return ret;
-}
 
 // ─── LECTOR BANCO ITAÚ ───
 function handleBankFile(input) {
@@ -2430,27 +2591,14 @@ function renderFlujoCaja(isFilterChange){
     if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
   });
 
-  // 3. CÁLCULO DE EFECTIVO Y GASTOS MANUALES
-  var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce(function(s, g) {
-      var match = (currentMonth === 'all') || g.date.startsWith(currentMonth);
-      return s + (match ? parseInt(g.monto) : 0);
-  }, 0);
+// 3. CÁLCULO DE GASTOS FIJOS MENSUALES (desde GASTOS en memoria)
+var totalManual = 0;
+if(typeof GASTOS !== 'undefined') {
+    totalManual = GASTOS.reduce(function(s, g) {
+        return s + toMes(g);
+    }, 0);
+}
   
-  var efectivoToteat = 0;
-  if (typeof SALES !== 'undefined' && SALES.monthly) {
-    if (currentMonth === 'all') {
-      efectivoToteat = SALES.monthly.reduce((sum, m) => sum + (m.efectivo || 0), 0);
-    } else {
-      var mArr = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      var pts = currentMonth.split('-');
-      if(pts.length === 2) {
-          var targetLabel = mArr[parseInt(pts[1]) - 1] + ' ' + pts[0];
-          var match = SALES.monthly.find(m => m.month === targetLabel);
-          if(match) efectivoToteat = match.efectivo || 0;
-      }
-    }
-  }
-
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
@@ -2495,75 +2643,77 @@ function renderFlujoCaja(isFilterChange){
       }
   }
 }
-// ════ SINCRONIZACIÓN CON GOOGLE DRIVE (CLOUD) ════
-const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzQeVRcatdllVHgoDHccnmqigBtLZpYM_K7uz0Vf2QJtYySwhIjGEUf1zNCT3bdmqRdnw/exec";
+
+
+// ════ SINCRONIZACIÓN FIREBASE (100% BLINDADA) ════
 
 async function saveToCloud(btn) {
-  if(!confirm('¿Guardar todos tus registros actuales (gastos manuales, reglas, conteos) en Google Drive?')) return;
+  if(!confirm('¿Guardar todos tus registros actuales en la base de datos de la nube?')) return;
   
   var ogText = btn.innerHTML;
   btn.innerHTML = '⏳ Subiendo...';
   
-  // Recopilamos todo lo que está en la memoria del navegador
+  // Extraemos toda tu memoria actual de la pantalla
   var dataToSave = {};
   for(var i=0; i<localStorage.length; i++){
     var key = localStorage.key(i);
+    
+    // 🔥 EL FILTRO BLINDADO (Vital para que Firebase no rechace la subida)
+    if(key.startsWith('firebase') || /[.#$\[\]\/]/.test(key)) {
+        continue; 
+    }
+    
     dataToSave[key] = localStorage.getItem(key);
   }
   
   try {
-    var res = await fetch(CLOUD_URL, {
-      method: 'POST',
-      body: JSON.stringify(dataToSave),
-      headers: {'Content-Type': 'text/plain'} // Text plain evita bloqueos de seguridad del navegador
-    });
-    var json = await res.json();
+    // Mandamos los datos directo a Firebase en tiempo real
+    await db.ref('respaldo_principal').set(dataToSave);
     
-    if(json.status === 'ok') {
-      btn.innerHTML = '✅ Guardado';
-      setTimeout(function(){ btn.innerHTML = ogText; }, 2500);
-    } else {
-      alert('Error en el servidor: ' + json.message);
-      btn.innerHTML = ogText;
-    }
+    btn.innerHTML = '✅ Guardado';
+    setTimeout(function(){ btn.innerHTML = ogText; }, 2500);
   } catch(e) {
-    alert('Error de conexión. Verifica tu internet.');
+    console.error("Error Firebase:", e);
+    alert('❌ Error al subir a la base de datos.');
     btn.innerHTML = ogText;
   }
 }
 
 async function loadFromCloud(btn) {
-  if(!confirm('ALERTA: ¿Sobrescribir tu memoria actual con los datos de la nube? (La página se recargará)')) return;
+  if(!confirm('ALERTA: ¿Sobrescribir tu memoria actual con los datos de Firebase?')) return;
   
   var ogText = btn.innerHTML;
   btn.innerHTML = '⏳ Descargando...';
   
   try {
-    var res = await fetch(CLOUD_URL);
-    var data = await res.json();
+    // Leemos los datos desde Firebase
+    const snapshot = await db.ref('respaldo_principal').once('value');
+    const data = snapshot.val();
     
-    if(data.status === "empty") {
-      alert('Aún no hay ningún archivo de respaldo guardado en tu Drive.');
+    // ESCUDO ANTI-BORRADO DEFINITIVO
+    if (!data) {
+      alert('❌ La base de datos en Firebase está vacía en este momento. Sube tus datos primero para no borrar tu memoria local.');
       btn.innerHTML = ogText;
       return;
     }
     
-    // Limpiamos la memoria actual y volcamos lo descargado
-    localStorage.clear();
+    // Si hay datos, los grabamos en tu memoria local
     for(var key in data) {
-      if(data.hasOwnProperty(key)) {
-        localStorage.setItem(key, data[key]);
-      }
+      localStorage.setItem(key, data[key]);
     }
     
     btn.innerHTML = '✅ Listo';
     setTimeout(function(){ location.reload(); }, 800);
     
   } catch(e) {
-    alert('Error al descargar desde la nube.');
+    console.error("Error Firebase:", e);
+    alert('❌ Error de conexión al descargar. Tus datos en pantalla NO se borraron.');
     btn.innerHTML = ogText;
   }
 }
+
+
+
 function asociarProveedor(nombreOriginal) {
     var nombreLimpio = nombreOriginal.replace(/Transferencia A /i, '').replace(/Transferencia De /i, '').trim();
     var categoria = prompt("¿A qué categoría pertenece '" + nombreLimpio + "'? (Ej: Gas, Agua, Personal, Arriendo)");
