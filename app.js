@@ -1,12 +1,24 @@
-// Carga automática de ventas desde la memoria
-if (localStorage.getItem('app_sales')) {
-  SALES = JSON.parse(localStorage.getItem('app_sales'));
+// ─── RUNTIME SEGURO (data.js SIEMPRE MANDA) ───
+var INGR = typeof INGR_RAW !== 'undefined' ? JSON.parse(JSON.stringify(INGR_RAW)) : [];
+var GASTOS = typeof GASTOS_INIT !== 'undefined' ? JSON.parse(JSON.stringify(GASTOS_INIT)) : [];
+var CREDENCIALES = typeof CRED_INIT !== 'undefined' ? JSON.parse(JSON.stringify(CRED_INIT)) : [];
+var RECIPES = typeof RECIPES_RAW !== 'undefined' ? JSON.parse(JSON.stringify(RECIPES_RAW)) : [];
+
+try {
+    var localSales = localStorage.getItem('app_sales');
+    if (localSales) { var pSales = JSON.parse(localSales); if (pSales.monthly && pSales.monthly.length > 0) SALES = pSales; }
+    
+    var localIngr = localStorage.getItem('app_ingr');
+    if (localIngr) { var pIngr = JSON.parse(localIngr); if (pIngr.length > 0) INGR = pIngr; }
+    
+    var localRec = localStorage.getItem('app_rec');
+    if (localRec) { var pRec = JSON.parse(localRec); if (pRec.length > 0) RECIPES = pRec; }
+    
+    var localGastos = localStorage.getItem('app_gastos');
+    if (localGastos) { var pGastos = JSON.parse(localGastos); if (pGastos.length > 0) GASTOS = pGastos; }
+} catch(e) {
+    console.warn("Ignorando caché corrupto o vacío.");
 }
-// ─── RUNTIME ───
-var INGR = JSON.parse(JSON.stringify(INGR_RAW));
-var GASTOS = JSON.parse(JSON.stringify(GASTOS_INIT));
-var CREDENCIALES = JSON.parse(JSON.stringify(CRED_INIT));
-var RECIPES = JSON.parse(JSON.stringify(RECIPES_RAW));
 var pendingUpload = null;
 
 // ─── HELPERS ───
@@ -2200,26 +2212,57 @@ function verticalBarChart(elId,dataArr,color,vFmt){
   el.innerHTML='<div style="display:flex;justify-content:center;overflow-x:auto;width:100%;padding:10px 0"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="display:block;min-width:'+W+'px">'+bars+'</svg></div>';
 }
 
-// ════ INIT CLOUD FIRST BLINDADO ════
+
+
+
+
+// ════ INIT CLOUD FIRST INTELIGENTE ════
 $('c-fecha').value=new Date().toISOString().split('T')[0];
-console.log("Conectando con la nube...");
 
 db.ref('respaldo_principal').once('value').then(function(snapshot) {
   var data = snapshot.val();
   if (data) {
-    for(var key in data) {
-      localStorage.setItem(key, data[key]);
-    }
-    try { if (data['app_sales']) SALES = JSON.parse(data['app_sales']); } catch(e) { console.error("Error SALES:", e); }
-    try { if (data['app_ingr']) INGR = JSON.parse(data['app_ingr']); } catch(e) { console.error("Error INGR:", e); }
-    try { if (data['app_rec']) RECIPES = JSON.parse(data['app_rec']); } catch(e) { console.error("Error RECIPES:", e); }
-    try { if (data['app_gastos']) GASTOS = JSON.parse(data['app_gastos']); } catch(e) { console.error("Error GASTOS:", e); }
+    try { 
+        if (data['app_sales'] && data['app_sales'].length > 10) { 
+            var pSales = JSON.parse(data['app_sales']);
+            if(pSales.monthly && pSales.monthly.length > 0) { SALES = pSales; localStorage.setItem('app_sales', data['app_sales']); }
+        } 
+    } catch(e) {}
+    try { 
+        if (data['app_ingr'] && data['app_ingr'].length > 10) { 
+            var pIngr = JSON.parse(data['app_ingr']);
+            if(pIngr.length > 0) { INGR = pIngr; localStorage.setItem('app_ingr', data['app_ingr']); }
+        } 
+    } catch(e) {}
+    try { 
+        if (data['app_rec'] && data['app_rec'].length > 10) { 
+            var pRec = JSON.parse(data['app_rec']);
+            if(pRec.length > 0) { RECIPES = pRec; localStorage.setItem('app_rec', data['app_rec']); }
+        } 
+    } catch(e) {}
+    try { 
+        if (data['app_gastos'] && data['app_gastos'].length > 10) { 
+            var pGastos = JSON.parse(data['app_gastos']);
+            if(pGastos.length > 0) { GASTOS = pGastos; localStorage.setItem('app_gastos', data['app_gastos']); }
+        } 
+    } catch(e) {}
   }
   renderAppSeguro();
 }).catch(function(e) {
-  console.error("Error Firebase:", e);
   renderAppSeguro();
 });
+
+function renderAppSeguro() {
+   try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
+   try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
+   try { initAnalisis(); } catch(e) { console.error("Error Analisis", e); }
+   try { initDeliveryMesSel(); } catch(e) { console.error("Error Delivery", e); }
+   try { renderIngr(); } catch(e) { console.error("Error Insumos", e); }
+   try { renderRec(); } catch(e) { console.error("Error Recetas", e); }
+   try { renderCnt(); } catch(e) { console.error("Error Conteo", e); }
+   try { renderGastos(); } catch(e) { console.error("Error Gastos", e); }
+}
+
 
 function renderAppSeguro() {
    try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
@@ -2555,9 +2598,7 @@ if(typeof GASTOS !== 'undefined') {
         return s + toMes(g);
     }, 0);
 }
-    }
-  }
-
+  
   var saldoBanco = tIn - tOut;
   var cajaRealFisica = efectivoToteat - totalManual;
 
