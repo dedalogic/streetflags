@@ -2400,79 +2400,31 @@ function verticalBarChart(elId,dataArr,color,vFmt){
   el.innerHTML='<div style="display:flex;justify-content:center;overflow-x:auto;width:100%;padding:10px 0"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="display:block;min-width:'+W+'px">'+bars+'</svg></div>';
 }
 
-
-// ════ INIT CLOUD FIRST INTELIGENTE ════
+// ════ INIT ESTRICTAMENTE LOCAL Y MANUAL ════
 var cf2 = $('c-fecha');
 if(cf2) cf2.value=new Date().toISOString().split('T')[0];
 
-var cloudDone = false;
-
-function startApp() {
-    if(cloudDone) return;
-    cloudDone = true;
-    renderAppSeguro();
-}
-
-// Timeout: si Firebase no responde en 4 seg, arrancar sin él
-var cloudTimer = setTimeout(startApp, 4000);
-
-if(typeof db !== 'undefined' && db && db.ref) {
-    console.log("Conectando con la nube...");
-    db.ref('respaldo_principal').once('value').then(function(snapshot) {
-      if(cloudDone) return;
-      clearTimeout(cloudTimer);
-      var data = snapshot.val();
-      if (data) {
-        try { 
-            if (data['app_sales'] && data['app_sales'].length > 10) { 
-                var pSales = JSON.parse(data['app_sales']);
-                if(pSales.monthly && pSales.monthly.length > 0) { SALES = pSales; localStorage.setItem('app_sales', data['app_sales']); }
-            } 
-        } catch(e) {}
-        try { 
-            if (data['app_ingr'] && data['app_ingr'].length > 10) { 
-                var pIngr = JSON.parse(data['app_ingr']);
-                if(pIngr.length > 0) { INGR = pIngr; localStorage.setItem('app_ingr', data['app_ingr']); }
-            } 
-        } catch(e) {}
-        try { 
-            if (data['app_rec'] && data['app_rec'].length > 10) { 
-                var pRec = JSON.parse(data['app_rec']);
-                if(pRec.length > 0) { RECIPES = pRec; localStorage.setItem('app_rec', data['app_rec']); }
-            } 
-        } catch(e) {}
-        try { 
-            if (data['app_gastos'] && data['app_gastos'].length > 10) { 
-                var pGastos = JSON.parse(data['app_gastos']);
-                if(pGastos.length > 0) { GASTOS = pGastos; localStorage.setItem('app_gastos', data['app_gastos']); }
-            } 
-        } catch(e) {}
-      }
-      startApp();
-    }).catch(function(e) {
-      console.error("Error Firebase:", e);
-      clearTimeout(cloudTimer);
-      startApp();
-    });
-} else {
-    clearTimeout(cloudTimer);
-    startApp();
-}
+// Arrancamos la aplicación inmediatamente sin esperar ni preguntar a Firebase
+renderAppSeguro();
 
 function renderAppSeguro() {
-   // PROTECCIÓN: si Firebase/localStorage dejaron todo vacío, restaurar desde data.js
+   // PROTECCIÓN: si localStorage dejó todo vacío, restaurar desde data.js
    if ((!INGR || INGR.length === 0) && typeof INGR_RAW !== 'undefined' && INGR_RAW.length > 0) INGR = JSON.parse(JSON.stringify(INGR_RAW));
    if ((!RECIPES || RECIPES.length === 0) && typeof RECIPES_RAW !== 'undefined' && RECIPES_RAW.length > 0) RECIPES = JSON.parse(JSON.stringify(RECIPES_RAW));
    if ((!GASTOS || GASTOS.length === 0) && typeof GASTOS_INIT !== 'undefined' && GASTOS_INIT.length > 0) GASTOS = JSON.parse(JSON.stringify(GASTOS_INIT));
+   if ((!SALES.monthly || SALES.monthly.length === 0) && typeof SALES !== 'undefined') {
+     // SALES ya viene de data.js como const, no debería estar vacío
+   }
 
    try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
    try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
    try { initAnalisis(); } catch(e) { console.error("Error Analisis", e); }
-   try { initDeliveryMesSel(); } catch(e) { console.error("Error Delivery", e); }
+   try { initDeliveryMesSel(); initDelivery(); } catch(e) { console.error("Error Delivery", e); }
    try { renderIngr(); } catch(e) { console.error("Error Insumos", e); }
    try { renderRec(); } catch(e) { console.error("Error Recetas", e); }
    try { renderCnt(); } catch(e) { console.error("Error Conteo", e); }
    try { renderGastos(); } catch(e) { console.error("Error Gastos", e); }
+   try { renderObjetivos(); } catch(e) { console.error("Error Objetivos", e); }
 }
 
 function exportGastosPDF(){
@@ -2612,7 +2564,7 @@ function handleBankFile(input) {
       unique.sort(function(a,b){return b.date.localeCompare(a.date);});
       localStorage.setItem('bank_tx', JSON.stringify(unique));
       renderFlujoCaja(false);
-      autoSaveToCloud();
+      // autoSaveToCloud(); // <-- Desactivado
       alert('✓ ' + txs.length + ' movimientos bancarios procesados.');
     } else {
       alert('❌ No se detectaron movimientos.');
@@ -2732,13 +2684,11 @@ function renderFlujoCaja(isFilterChange){
     if(t['in'] > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t['in'];
   });
 
-  // Gastos fijos mensuales
   var totalManual = 0;
   if(typeof GASTOS !== 'undefined') {
       totalManual = GASTOS.reduce(function(s, g){ return s + toMes(g); }, 0);
   }
   
-  // Efectivo desde ventas Toteat (último mes seleccionado o promedio)
   var efectivoToteat = 0;
   if(typeof SALES !== 'undefined' && SALES.monthly) {
       var sm = SALES.monthly;
@@ -2808,7 +2758,10 @@ function renderFlujoCaja(isFilterChange){
   }
 }
 
-// ════ SINCRONIZACIÓN FIREBASE ════
+// ════ SINCRONIZACIÓN FIREBASE (MANUAL) ════
+function autoSaveToCloud() {
+  // Desactivado a petición del usuario.
+}
 
 function saveToCloud(btn) {
   if(!confirm('¿Guardar todos tus registros en la nube?')) return;
