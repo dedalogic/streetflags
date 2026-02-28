@@ -3,6 +3,13 @@ var INGR = typeof INGR_RAW !== 'undefined' ? JSON.parse(JSON.stringify(INGR_RAW)
 var GASTOS = typeof GASTOS_INIT !== 'undefined' ? JSON.parse(JSON.stringify(GASTOS_INIT)) : [];
 var CREDENCIALES = typeof CRED_INIT !== 'undefined' ? JSON.parse(JSON.stringify(CRED_INIT)) : [];
 var RECIPES = typeof RECIPES_RAW !== 'undefined' ? JSON.parse(JSON.stringify(RECIPES_RAW)) : [];
+var PRODUCT_SALES = typeof PRODUCT_SALES !== 'undefined' ? PRODUCT_SALES : [];
+var DAY_PATTERNS = typeof DAY_PATTERNS !== 'undefined' ? DAY_PATTERNS : {};
+var DELIVERY_MONTHLY = typeof DELIVERY_MONTHLY !== 'undefined' ? DELIVERY_MONTHLY : [];
+var HEATMAP = typeof HEATMAP !== 'undefined' ? HEATMAP : [];
+var DISHES_6M = typeof DISHES_6M !== 'undefined' ? DISHES_6M : [];
+var DISHES_RECENT = typeof DISHES_RECENT !== 'undefined' ? DISHES_RECENT : [];
+var efectivoToteat = typeof efectivoToteat !== 'undefined' ? efectivoToteat : 0;
 
 try {
     var localSales = localStorage.getItem('app_sales');
@@ -2251,18 +2258,6 @@ db.ref('respaldo_principal').once('value').then(function(snapshot) {
 }).catch(function(e) {
   renderAppSeguro();
 });
-
-function renderAppSeguro() {
-   try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
-   try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
-   try { initAnalisis(); } catch(e) { console.error("Error Analisis", e); }
-   try { initDeliveryMesSel(); } catch(e) { console.error("Error Delivery", e); }
-   try { renderIngr(); } catch(e) { console.error("Error Insumos", e); }
-   try { renderRec(); } catch(e) { console.error("Error Recetas", e); }
-   try { renderCnt(); } catch(e) { console.error("Error Conteo", e); }
-   try { renderGastos(); } catch(e) { console.error("Error Gastos", e); }
-}
-
 
 function renderAppSeguro() {
    try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
