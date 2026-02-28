@@ -14,12 +14,12 @@ var INGR = safeParseData('app_ingr', typeof INGR_RAW !== 'undefined' ? JSON.pars
 var GASTOS = safeParseData('app_gastos', typeof GASTOS_INIT !== 'undefined' ? JSON.parse(JSON.stringify(GASTOS_INIT)) : []);
 var CREDENCIALES = safeParseData('app_cred', typeof CRED_INIT !== 'undefined' ? JSON.parse(JSON.stringify(CRED_INIT)) : []);
 var RECIPES = safeParseData('app_rec', typeof RECIPES_RAW !== 'undefined' ? JSON.parse(JSON.stringify(RECIPES_RAW)) : []);
+var SALES = typeof SALES !== 'undefined' ? SALES : { monthly:[], daily:[] };
 
-// CORRECCIÓN: Actualizamos la variable SALES que viene de data.js sin volver a declararla.
-var cachedSales = safeParseData('app_sales', null);
-if (cachedSales && cachedSales.monthly && cachedSales.monthly.length > 0) {
-    SALES = cachedSales;
-}
+try {
+    var localSales = localStorage.getItem('app_sales');
+    if (localSales) { var pSales = JSON.parse(localSales); if (pSales.monthly && pSales.monthly.length > 0) SALES = pSales; }
+} catch(e) {}
 
 var pendingUpload = null;
 
@@ -187,7 +187,9 @@ function getVenta(m){
   var ef=(m.efectivo||0), cr=(m.credito||0), db=(m.debito||0), ju=(m.junaeb||0);
   var ot=(m.otros||0)+(m.ticket||0)+(m.cheque||0);
   var tarjetas=cr+db;
-  var local=ef+tarjetas+ju+ot;
+  var platforms=dy+du+dr;
+  var local=Math.max(0, m.venta_neta - platforms - dt);
+  
   if(vCanal==='all')       return m.venta_neta||0;
   if(vCanal==='local')     return local;
   if(vCanal==='efectivo')  return ef;
@@ -202,7 +204,7 @@ function getVenta(m){
 }
 
 function canalLabel(){
-  var labels={'all':'Total','local':'Presencial','efectivo':'Efectivo','tarjetas':'Tarjetas','junaeb':'Junaeb','intern':'Interno','ya':'PedidosYa','uber':'Uber Eats','rappi':'Rappi','otros':'Otros'};
+  var labels={'all':'Total','local':'Local','efectivo':'Efectivo','tarjetas':'Tarjetas','junaeb':'Junaeb','intern':'Del. interno (transf.)','ya':'PedidosYa','uber':'Uber Eats','rappi':'Rappi','otros':'Otros'};
   return labels[vCanal]||vCanal;
 }
 
@@ -263,48 +265,22 @@ function renderV(){
   }), '#00e5a0', fmtM);
 
   if(vCanal==='all'&&sm.length>0){
-    var efT=sm.reduce(function(s,m){return s+(m.efectivo||0);},0);
-    var crT=sm.reduce(function(s,m){return s+(m.credito||0);},0);
-    var dbT=sm.reduce(function(s,m){return s+(m.debito||0);},0);
-    var tjT=crT+dbT;
-    var juT=sm.reduce(function(s,m){return s+(m.junaeb||0);},0);
     var yaT=sm.reduce(function(s,m){return s+(m.delivery_ya||0);},0);
     var ubT=sm.reduce(function(s,m){return s+(m.delivery_uber||0);},0);
-    var rpT=sm.reduce(function(s,m){return s+(m.delivery_rappi||0);},0);
     var dtT=sm.reduce(function(s,m){return s+(m.delivery_transferencia||0);},0);
-    var otT=sm.reduce(function(s,m){return s+(m.otros||0)+(m.ticket||0)+(m.cheque||0);},0);
-    var tot=efT+tjT+juT+yaT+ubT+rpT+dtT+otT;
-
-    var items=[
-      {l:'Efectivo',v:efT,c:'#00e5a0'},
-      {l:'Tarjetas',v:tjT,c:'#00d4ff',sub:[{l:'Débito',v:dbT},{l:'Crédito',v:crT}]},
-      {l:'Junaeb',v:juT,c:'#ffb020'},
-      {l:'PedidosYa',v:yaT,c:'#ff3fa4'},
-      {l:'Uber Eats',v:ubT,c:'#a78bfa'},
-      {l:'Rappi',v:rpT,c:'#ff6b6b'},
-      {l:'Interno',v:dtT,c:'#33ddff'},
-      {l:'Otros',v:otT,c:'#6b6b88'}
-    ].filter(function(x){return x.v>0;});
-
-    var barsHtml=items.map(function(x){
-      var bar=mkBar(x.l,x.v,tot,x.c,fmtM,120);
-      if(x.sub){
-        bar+='<div style="padding-left:132px;margin-top:-4px;margin-bottom:4px">';
-        x.sub.filter(function(s){return s.v>0;}).forEach(function(s){
-          bar+='<span style="font-size:10px;color:var(--sub);margin-right:12px">'+s.l+': <strong style="font-family:var(--mono);color:var(--t)">'+fmtM(s.v)+'</strong></span>';
-        });
-        bar+='</div>';
-      }
-      return bar;
-    }).join('');
+    var locT=sm.reduce(function(s,m){return s+m.venta_neta;},0)-yaT-ubT-dtT;
+    var tot=yaT+ubT+dtT+locT;
 
     var chvd = $('ch-vd');
     if(chvd){
         chvd.innerHTML+='<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--b)">'
-          +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:12px">Desglose por método de pago</div>'
-          +barsHtml+'</div>';
+          +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:12px">Desglose por canal</div>'
+          +[{l:'Local',v:locT,c:'#00d4ff'},{l:'Del. interno',v:dtT,c:'#00e5a0'},{l:'PedidosYa',v:yaT,c:'#ff3fa4'},{l:'Uber Eats',v:ubT,c:'#a78bfa'}]
+          .filter(function(x){return x.v>0;})
+          .map(function(x){return mkBar(x.l,x.v,tot,x.c,fmtM,120);}).join('')
+          +'</div>';
     }
-    pieChart('ch-vd-pie',items.map(function(x){return{l:x.l,v:x.v};}));
+    pieChart('ch-vd-pie',[{l:'Local',v:locT},{l:'Del. interno',v:dtT},{l:'PedidosYa',v:yaT},{l:'Uber Eats',v:ubT}].filter(function(x){return x.v>0;}));
   }
 }
 
@@ -553,7 +529,6 @@ function saveIngr(){
 
   localStorage.setItem('app_ingr', JSON.stringify(INGR));
   cm('m-ingr');renderIngr();initDash();syncRecetasCost();
-  autoSaveToCloud();
 }
 function delIngr(){
   if(!confirm('¿Eliminar?')) return;
@@ -561,7 +536,6 @@ function delIngr(){
   
   localStorage.setItem('app_ingr', JSON.stringify(INGR));
   cm('m-ingr');renderIngr();initDash();
-  autoSaveToCloud();
 }
 
 function renderPag(id,total,page,per,cb){
@@ -598,19 +572,22 @@ function extractNumFromCell(arr, index) {
   var s = String(val).trim();
   if (s === '' || s === '-') return 0;
 
-  s = s.replace(/[$\s]/g, '').replace(/,/g, '.');
-  var parts = s.split('.');
-  if (parts.length > 1) {
-      var finalNumStr = parts[0];
-      for (var i = 1; i < parts.length; i++) {
-          var p = parts[i];
-          while (p.length < 3) { p += '0'; }
-          finalNumStr += p;
+  s = s.replace(/[$\s]/g, '');
+  if (s.indexOf(',') > -1) {
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else {
+    var dotCount = (s.match(/\./g) || []).length;
+    if (dotCount > 1) {
+      s = s.replace(/\./g, '');
+    } else if (dotCount === 1) {
+      var afterDot = s.split('.')[1];
+      if (afterDot && afterDot.length === 3 && /^\d+$/.test(afterDot)) {
+        s = s.replace('.', '');
       }
-      s = finalNumStr;
+    }
   }
-  var num = parseInt(s, 10);
-  return isNaN(num) ? 0 : num;
+  var num = parseFloat(s);
+  return isNaN(num) ? 0 : Math.round(num);
 }
 
 function handleDropImp(e){e.preventDefault();$('dz-imp').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFileImp(f);}
@@ -665,7 +642,7 @@ function handleFileImp(file){
 
       var vIdx = findRow('venta neta');
       if(vIdx === -1) {
-          $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró "Venta Neta"</span>';
+          $('imp-st').innerHTML='<span style="color:var(--r)">❌ No se encontró "Venta Neta" en el archivo</span>';
           $('imp-act').style.display='none';
           return;
       }
@@ -707,35 +684,51 @@ function handleFileImp(file){
           if(!sums[label]) sums[label] = { 
             venta_neta: 0, delivery_ya: 0, delivery_uber: 0, 
             delivery_transferencia: 0, delivery_rappi: 0,
-            efectivo: 0, credito: 0, debito: 0, junaeb: 0, 
-            ticket: 0, cheque: 0, otros: 0
+            local_efectivo: 0, local_credito: 0, local_debito: 0, 
+            local_convenio: 0, local_junaeb: 0, otros: 0
           };
 
           sums[label].venta_neta += extractNumFromCell(rows[vIdx], i);
 
           for (var rowIdx = vIdx + 1; rowIdx < rows.length; rowIdx++) {
               var metodoStr = String(rows[rowIdx][0] || '').trim();
-              if (!metodoStr) continue;
-
-              var mLower = metodoStr.toLowerCase();
-              if (mLower.includes('total') || mLower.includes('caja') || mLower.includes('propina') || mLower.includes('impuesto') || mLower.includes('venta') || mLower.includes('costo') || mLower.includes('margen') || mLower.includes('descuento') || mLower.includes('bruta') || mLower.includes('%')) {
-                  continue;
-              }
+              if (!metodoStr || metodoStr === 'Total') continue;
 
               var monto = extractNumFromCell(rows[rowIdx], i);
               if (monto === 0) continue; 
 
-              if (mLower.includes('pedidosya') || mLower.includes('pedidos ya') || mLower.includes('voucher') || mLower.includes('cash collection')) sums[label].delivery_ya += monto;
-              else if (mLower.includes('uber')) sums[label].delivery_uber += monto;
-              else if (mLower.includes('rappi')) sums[label].delivery_rappi += monto;
-              else if (mLower.includes('transferencia')) sums[label].delivery_transferencia += monto;
-              else if (mLower.includes('efectivo')) sums[label].efectivo += monto;
-              else if (mLower.includes('débito') || mLower.includes('debito') || mLower.includes('debit')) sums[label].debito += monto;
-              else if (mLower.includes('crédito') || mLower.includes('credito') || mLower.includes('credit')) sums[label].credito += monto;
-              else if (mLower.includes('convenio') || mLower.includes('junaeb')) sums[label].junaeb += monto;
-              else if (mLower.includes('ticket')) sums[label].otros += monto;
-              else if (mLower.includes('cheque')) sums[label].otros += monto;
-              else sums[label].otros += monto;
+              var mLower = metodoStr.toLowerCase();
+
+              if (mLower.includes('pedidosya') || mLower.includes('pedidos ya')) {
+                  sums[label].delivery_ya += monto;
+              } 
+              else if (mLower.includes('uber')) {
+                  sums[label].delivery_uber += monto;
+              } 
+              else if (mLower.includes('rappi')) {
+                  sums[label].delivery_rappi += monto;
+              } 
+              else if (mLower.includes('transferencia')) {
+                  sums[label].delivery_transferencia += monto;
+              } 
+              else if (mLower.includes('efectivo')) {
+                  sums[label].local_efectivo += monto;
+              }
+              else if (mLower.includes('crédito') || mLower.includes('credito') || mLower.includes('credit')) {
+                  sums[label].local_credito += monto;
+              }
+              else if (mLower.includes('débito') || mLower.includes('debito') || mLower.includes('debit')) {
+                  sums[label].local_debito += monto;
+              }
+              else if (mLower.includes('convenio')) {
+                  sums[label].local_convenio += monto;
+              }
+              else if (mLower.includes('junaeb')) {
+                  sums[label].local_junaeb += monto;
+              }
+              else {
+                  sums[label].otros += monto;
+              }
           }
       }
 
@@ -743,36 +736,51 @@ function handleFileImp(file){
 
       $('imp-st').innerHTML='<span style="color:var(--g)">&#10003; Carga exitosa. Totales detectados:</span>';
       
-      var prevHtml = '<div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;max-height:350px;overflow-y:auto;padding-right:5px">';
+      var prevHtml = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:300px;overflow-y:auto;padding-right:5px">';
       var hasData = false;
       var fmtPrev = function(v){ return typeof formatMoney==='function'?formatMoney(v):'$'+Math.round(v).toLocaleString('es-CL'); };
       
       for(var k in sums) {
           var d = sums[k];
-          var sumaTotal = d.efectivo + d.debito + d.credito + d.junaeb + d.delivery_ya + d.delivery_uber + d.delivery_rappi + d.delivery_transferencia + d.ticket + d.cheque + d.otros;
+          var localTotal = (d.local_efectivo||0) + (d.local_credito||0) + (d.local_debito||0) + (d.local_convenio||0) + (d.local_junaeb||0);
+          var sumaTotal = localTotal + (d.delivery_ya||0) + (d.delivery_uber||0) + (d.delivery_transferencia||0) + (d.delivery_rappi||0) + (d.otros||0);
 
           if(sumaTotal > 0) { 
-              prevHtml += '<div style="padding:14px;background:var(--s2);border:1px solid var(--b2);border-left:4px solid var(--c);border-radius:8px;">'
-                        +'<div style="font-weight:800;color:var(--t);margin-bottom:12px;font-size:14px;display:flex;justify-content:space-between;border-bottom:1px solid var(--b);padding-bottom:6px">'
+              prevHtml += '<div style="padding:12px;background:var(--s2);border:1px solid var(--b2);border-left:3px solid var(--c);border-radius:6px;">'
+                        +'<div style="font-weight:800;color:var(--t);margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;">'
                             +'<span>'+k+'</span>'
                             +'<span style="color:var(--g);font-family:var(--mono)">'+fmtPrev(d.venta_neta)+'</span>'
                         +'</div>'
-                        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
-              if (d.efectivo > 0)                 prevHtml += '<div style="font-size:11.5px;color:var(--t)">Efectivo: <strong style="font-family:var(--mono)">'+fmtPrev(d.efectivo)+'</strong></div>';
-              if (d.debito > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--t)">Débito: <strong style="font-family:var(--mono)">'+fmtPrev(d.debito)+'</strong></div>';
-              if (d.credito > 0)                  prevHtml += '<div style="font-size:11.5px;color:var(--t)">Crédito: <strong style="font-family:var(--mono)">'+fmtPrev(d.credito)+'</strong></div>';
-              if (d.junaeb > 0)                   prevHtml += '<div style="font-size:11.5px;color:var(--t)">Junaeb: <strong style="font-family:var(--mono)">'+fmtPrev(d.junaeb)+'</strong></div>';
-              if (d.delivery_ya > 0)              prevHtml += '<div style="font-size:11.5px;color:var(--m)">PedidosYa: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_ya)+'</strong></div>';
-              if (d.delivery_uber > 0)            prevHtml += '<div style="font-size:11.5px;color:var(--c)">Uber Eats: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_uber)+'</strong></div>';
-              if (d.delivery_rappi > 0)           prevHtml += '<div style="font-size:11.5px;color:#ff6b6b">Rappi: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_rappi)+'</strong></div>';
-              if (d.delivery_transferencia > 0)   prevHtml += '<div style="font-size:11.5px;color:var(--g)">Transf: <strong style="font-family:var(--mono)">'+fmtPrev(d.delivery_transferencia)+'</strong></div>';
-              if (d.otros > 0)                    prevHtml += '<div style="font-size:11.5px;color:var(--sub)">Otros: <strong style="font-family:var(--mono)">'+fmtPrev(d.otros)+'</strong></div>';
+                        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">';
+
+              if (d.delivery_ya > 0)              prevHtml += '<div style="font-size:11px;color:var(--sub)">PedidosYa: <span style="color:var(--m);font-family:var(--mono)">'+fmtPrev(d.delivery_ya)+'</span></div>';
+              if (d.delivery_uber > 0)            prevHtml += '<div style="font-size:11px;color:var(--sub)">Uber Eats: <span style="color:var(--c);font-family:var(--mono)">'+fmtPrev(d.delivery_uber)+'</span></div>';
+              if (d.delivery_rappi > 0)           prevHtml += '<div style="font-size:11px;color:var(--sub)">Rappi: <span style="color:var(--c);font-family:var(--mono)">'+fmtPrev(d.delivery_rappi)+'</span></div>';
+              if (d.delivery_transferencia > 0)   prevHtml += '<div style="font-size:11px;color:var(--sub)">Del. Interno: <span style="color:var(--t);font-family:var(--mono)">'+fmtPrev(d.delivery_transferencia)+'</span></div>';
+              if (localTotal > 0)                 prevHtml += '<div style="font-size:11px;color:var(--sub)">Local: <span style="color:var(--t);font-family:var(--mono)">'+fmtPrev(localTotal)+'</span></div>';
+              if (d.otros > 0)                    prevHtml += '<div style="font-size:11px;color:var(--sub)">Otros: <span style="color:var(--t);font-family:var(--mono)">'+fmtPrev(d.otros)+'</span></div>';
+
+              if (localTotal > 0) {
+                  prevHtml += '<details style="grid-column:1/-1;margin-top:4px"><summary style="font-size:10px;color:var(--sub);cursor:pointer">Detalle local</summary>'
+                    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:4px 0">';
+                  if(d.local_efectivo>0)  prevHtml += '<div style="font-size:10px;color:var(--sub)">Efectivo: '+fmtPrev(d.local_efectivo)+'</div>';
+                  if(d.local_credito>0)   prevHtml += '<div style="font-size:10px;color:var(--sub)">Crédito: '+fmtPrev(d.local_credito)+'</div>';
+                  if(d.local_debito>0)    prevHtml += '<div style="font-size:10px;color:var(--sub)">Débito: '+fmtPrev(d.local_debito)+'</div>';
+                  if(d.local_convenio>0)  prevHtml += '<div style="font-size:10px;color:var(--sub)">Convenio: '+fmtPrev(d.local_convenio)+'</div>';
+                  if(d.local_junaeb>0)    prevHtml += '<div style="font-size:10px;color:var(--sub)">Junaeb: '+fmtPrev(d.local_junaeb)+'</div>';
+                  prevHtml += '</div></details>';
+              }
+
+              prevHtml += '</div></div>';
               hasData = true;
           }
       }
       prevHtml += '</div>';
       
-      if(!hasData) prevHtml = '<div class="notice warn">Archivo vacío.</div>';
+      if(!hasData) {
+          prevHtml = '<div class="notice warn">El archivo parece vacío o sin montos reconocidos. Verifica el formato de exportación de Toteat.</div>';
+      }
+      
       $('imp-prev').innerHTML = prevHtml;
       $('imp-act').style.display='flex';
 
@@ -804,9 +812,10 @@ function applyImport(){
     cm('m-import'); renderIngr(); initDash();
     alert('✓ Inventario actualizado: '+updated+' ingredientes. Costo de recetas sincronizado.');
     importPending = null;
-    autoSaveToCloud();
+    
   } else {
     if(!window.pendingSalesSum) return;
+    
     var sums = window.pendingSalesSum;
     var mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     var updatedCount = 0, createdCount = 0;
@@ -814,6 +823,7 @@ function applyImport(){
     for (var monthLabel in sums) {
         var data = sums[monthLabel];
         var targetMonth = SALES.monthly.find(function(m){ return m.month === monthLabel; });
+        
         if (!targetMonth) {
             var pts = monthLabel.split(' ');
             var mIdx = mNames.indexOf(pts[0]);
@@ -824,7 +834,8 @@ function applyImport(){
               month: monthLabel, 
               venta_bruta: 0, venta_neta: 0, venta_sin_iva: 0,
               costo: 0, margen_pct: 0,
-              days_active: daysInMonth, avg_daily_sin_iva: 0
+              days_active: daysInMonth, avg_daily_sin_iva: 0,
+              delivery_ya: 0, delivery_uber: 0, delivery_transferencia: 0
             };
             SALES.monthly.push(targetMonth);
             createdCount++;
@@ -835,28 +846,20 @@ function applyImport(){
         if (data.venta_neta > 0)              targetMonth.venta_neta = data.venta_neta;
         if (data.delivery_ya > 0)             targetMonth.delivery_ya = data.delivery_ya;
         if (data.delivery_uber > 0)           targetMonth.delivery_uber = data.delivery_uber;
-        if (data.delivery_rappi > 0)          targetMonth.delivery_rappi = data.delivery_rappi;
         if (data.delivery_transferencia > 0)  targetMonth.delivery_transferencia = data.delivery_transferencia;
         
-        if (data.efectivo > 0)                targetMonth.efectivo = data.efectivo;
-        if (data.debito > 0)                  targetMonth.debito = data.debito;
-        if (data.credito > 0)                 targetMonth.credito = data.credito;
-        if (data.junaeb > 0)                  targetMonth.junaeb = data.junaeb;
-        
-        if (data.otros > 0)                   targetMonth.otros = (targetMonth.otros||0) + data.otros;
-        
-        targetMonth.venta_sin_iva = Math.round((targetMonth.venta_neta||0) / 1.19);
+        targetMonth.venta_sin_iva = Math.round(targetMonth.venta_neta / 1.19);
         if (targetMonth.days_active > 0) {
             targetMonth.avg_daily_sin_iva = Math.round(targetMonth.venta_sin_iva / targetMonth.days_active);
         }
         if (!targetMonth.venta_bruta || targetMonth.venta_bruta === 0) {
-            targetMonth.venta_bruta = Math.round((targetMonth.venta_neta||0) * 1.03); 
+            targetMonth.venta_bruta = Math.round(targetMonth.venta_neta * 1.03); 
         }
     }
 
     SALES.monthly.sort(function(a,b){
-      var pa = (a.month||'').split(' '), pb = (b.month||'').split(' ');
-      var ya = parseInt(pa[1]||0), yb = parseInt(pb[1]||0);
+      var pa = a.month.split(' '), pb = b.month.split(' ');
+      var ya = parseInt(pa[1]), yb = parseInt(pb[1]);
       if (ya !== yb) return ya - yb;
       return mNames.indexOf(pa[0]) - mNames.indexOf(pb[0]);
     });
@@ -871,9 +874,29 @@ function applyImport(){
 
     cm('m-import'); 
     window.pendingSalesSum = null;
-    alert('✓ Ventas y métodos de pago guardados exitosamente.');
-    autoSaveToCloud();
+    
+    var msg = '✓ Ventas guardadas: ' + updatedCount + ' mes(es) actualizados';
+    if (createdCount > 0) msg += ', ' + createdCount + ' mes(es) nuevos creados';
+    alert(msg);
   }
+}
+
+// ════ UPLOAD ════
+function openUpload(){pendingUpload=null;$('up-st').textContent='';$('up-prev').innerHTML='';$('up-act').style.display='none';$('m-up').classList.add('on')}
+function handleDrop(e){e.preventDefault();$('dz').classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleFile(f)}
+
+function applyUpload(){
+  if(!pendingUpload)return;
+  var u=0,a=0;
+  pendingUpload.forEach(function(p){
+    var idx=INGR.findIndex(function(i){return i.code===p.code});
+    if(idx>=0){INGR[idx].name=p.name;INGR[idx].brand=p.brand;INGR[idx].cost=p.cost;INGR[idx].unit=p.unit;u++}
+    else{INGR.push({code:p.code,name:p.name,brand:p.brand,cost:p.cost,unit:p.unit,category:'IC.010',weekly_avg:0,total_cost:0,total_used:0});a++}
+  });
+  localStorage.setItem('app_ingr', JSON.stringify(INGR));
+  if(typeof syncRecetasCost === 'function') syncRecetasCost();
+  pendingUpload=null;cm('m-up');renderIngr();initDash();
+  alert('✓ Actualizado: '+u+' existentes, '+a+' nuevos.');
 }
 
 // ════ RECETAS ════
@@ -1014,7 +1037,6 @@ function saveRec(){
   renderRec();
   initDash();
   alert('✓ Receta guardada.');
-  autoSaveToCloud();
 }
 
 function syncRecetasCost() {
@@ -1235,7 +1257,6 @@ function saveGasto(){
   
   localStorage.setItem('app_gastos', JSON.stringify(GASTOS));
   cm('m-gasto'); renderGastos();
-  autoSaveToCloud();
 }
 function delGasto(){
   var id=$('mg-id').value;
@@ -1243,7 +1264,6 @@ function delGasto(){
   GASTOS=GASTOS.filter(function(g){return g.id!==id;}); 
   localStorage.setItem('app_gastos', JSON.stringify(GASTOS));
   cm('m-gasto'); renderGastos();
-  autoSaveToCloud();
 }
 
 function renderGHistSel(){
@@ -1273,11 +1293,10 @@ function delHist(gIdx,hIdx){
   g.historico.splice(hIdx,1); 
   localStorage.setItem('app_gastos', JSON.stringify(GASTOS));
   renderGHistorial();
-  autoSaveToCloud();
 }
 
 // ════ FLUJO DE CAJA ════
-const REGLAS_PROVEEDORES = {
+var REGLAS_PROVEEDORES = {
   "HECTOR SALAS": "Gas", "AGUAS DEL ALTIPLANO": "Agua", "CGE": "Electricidad",
   "TRANSBANK": "Ingreso Web", "PEDIDOSYA": "Ingreso Delivery"
 };
@@ -1364,44 +1383,17 @@ function renderFlujoCaja(isFilterChange){
   }
 }
 
-// ════ INIT CLOUD FIRST (COMPLETAMENTE BLINDADO) ════
-function parseCloudData(val) {
-    if (!val) return null;
-    if (typeof val === 'object') return val;
-    if (typeof val === 'string') { try { return JSON.parse(val); } catch(e) { return null; } }
-    return null;
-}
+// ── INIT ESTRICTAMENTE LOCAL Y MANUAL ──
+var cf2 = $('c-fecha');
+if(cf2) cf2.value=new Date().toISOString().split('T')[0];
 
-var cf = $('c-fecha');
-if(cf) cf.value=new Date().toISOString().split('T')[0];
-
-if(typeof db !== 'undefined' && db.ref) {
-    console.log("Conectando con Firebase...");
-    db.ref('respaldo_principal').once('value').then(function(snapshot) {
-      var data = snapshot.val();
-      if (data) {
-        var pSales = parseCloudData(data['app_sales']);
-        if(pSales && pSales.monthly && pSales.monthly.length > 0) { SALES = pSales; localStorage.setItem('app_sales', typeof data['app_sales'] === 'string' ? data['app_sales'] : JSON.stringify(pSales)); }
-        
-        var pIngr = parseCloudData(data['app_ingr']);
-        if(pIngr && pIngr.length > 0) { INGR = pIngr; localStorage.setItem('app_ingr', typeof data['app_ingr'] === 'string' ? data['app_ingr'] : JSON.stringify(pIngr)); }
-        
-        var pRec = parseCloudData(data['app_rec']);
-        if(pRec && pRec.length > 0) { RECIPES = pRec; localStorage.setItem('app_rec', typeof data['app_rec'] === 'string' ? data['app_rec'] : JSON.stringify(pRec)); }
-        
-        var pGastos = parseCloudData(data['app_gastos']);
-        if(pGastos && pGastos.length > 0) { GASTOS = pGastos; localStorage.setItem('app_gastos', typeof data['app_gastos'] === 'string' ? data['app_gastos'] : JSON.stringify(pGastos)); }
-      }
-      renderAppSeguro();
-    }).catch(function(e) {
-      console.error("Error Firebase:", e);
-      renderAppSeguro();
-    });
-} else {
-    renderAppSeguro();
-}
+renderAppSeguro();
 
 function renderAppSeguro() {
+   if ((!INGR || INGR.length === 0) && typeof INGR_RAW !== 'undefined' && INGR_RAW.length > 0) INGR = JSON.parse(JSON.stringify(INGR_RAW));
+   if ((!RECIPES || RECIPES.length === 0) && typeof RECIPES_RAW !== 'undefined' && RECIPES_RAW.length > 0) RECIPES = JSON.parse(JSON.stringify(RECIPES_RAW));
+   if ((!GASTOS || GASTOS.length === 0) && typeof GASTOS_INIT !== 'undefined' && GASTOS_INIT.length > 0) GASTOS = JSON.parse(JSON.stringify(GASTOS_INIT));
+
    try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
    try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
    try { initAnalisis(); } catch(e) { console.error("Error Analisis", e); }
@@ -1410,5 +1402,4 @@ function renderAppSeguro() {
    try { renderRec(); } catch(e) { console.error("Error Recetas", e); }
    try { renderCnt(); } catch(e) { console.error("Error Conteo", e); }
    try { renderGastos(); } catch(e) { console.error("Error Gastos", e); }
-   try { renderObjetivos(); } catch(e) { console.error("Error Objetivos", e); }
 }
