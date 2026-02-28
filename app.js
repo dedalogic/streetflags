@@ -64,6 +64,8 @@ function go(id){
   if(id==='gastos') renderGastos();
   if(id==='analisis') initAnalisis();
   if(id==='obj') renderObjetivos();
+if(id==='dash'){initDashSel();initDash();}
+if(id==='rec') renderRec();
 }
 function cm(id){ $(id).classList.remove('on'); }
 
@@ -2254,6 +2256,22 @@ db.ref('respaldo_principal').once('value').then(function(snapshot) {
         } 
     } catch(e) {}
   }
+    // ── FUNCIONES FALTANTES ──
+function saveObjetivos(){ localStorage.setItem(OBJ_KEY, JSON.stringify(OBJETIVOS)); }
+
+function delGasto(){
+  if(!confirm('¿Eliminar?')) return;
+  var id=$('mg-id').value;
+  GASTOS=GASTOS.filter(function(g){return g.id!==id;});
+  localStorage.setItem('app_gastos',JSON.stringify(GASTOS));
+  cm('m-gasto'); renderGastos();
+}
+
+function autoSaveToCloud(){ /* sync manual via menú */ }
+
+function handleFile(file){ handleFileImp(file); }
+
+    
   renderAppSeguro();
 }).catch(function(e) {
   renderAppSeguro();
