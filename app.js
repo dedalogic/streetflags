@@ -28,15 +28,23 @@ function toggleTheme(){
 function go(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
   document.querySelectorAll('.nt').forEach(function(t){t.classList.remove('on')});
-  $('p-'+id).classList.add('on');
-  $('t-'+id).classList.add('on');
-  var tab=$('t-'+id); if(tab) tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  if(id==='ped') renderPed();
+  
+  // Stock agrupa inventario, pedido y conteo
+  var pageId = id;
+  if(id==='ped' || id==='cnt') pageId = 'stock';
+  
+  $('p-'+pageId).classList.add('on');
+  var tab=$('t-'+pageId); 
+  if(tab){ tab.classList.add('on'); tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+  
+  if(id==='ped'){ setStockTab('ped'); renderPed(); }
+  if(id==='cnt'){ setStockTab('cnt'); renderCnt(); }
+  if(id==='stock') renderIngr();
   if(id==='ventas') renderV();
   if(id==='delivery'){initDeliveryMesSel();initDelivery();}
-  if(id==='gastos'){renderGastos();}
-  if(id==='analisis'){initAnalisis();}
-  if(id==='obj'){renderObjetivos();}
+  if(id==='gastos') renderGastos();
+  if(id==='analisis') initAnalisis();
+  if(id==='obj') renderObjetivos();
 }
 function cm(id){ $(id).classList.remove('on'); }
 
@@ -1815,18 +1823,7 @@ function openEditGasto(id){
   $('mg-prov').value=g.prov||'';$('mg-notes').value=g.notes||'';
   $('mg-del').style.display='inline-flex';recalcGastoHint();$('m-gasto').classList.add('on');
 }
-function saveGasto(){
-  var id=$('mg-id').value, name=$('mg-name').value.trim();
-  if(!name){alert('Ingresa un nombre.');return;}
-  var obj={id:id,name:name,cat:$('mg-cat').value,freq:$('mg-freq').value,
-    monto:parseFloat($('mg-monto').value)||0,prov:$('mg-prov').value.trim(),notes:$('mg-notes').value.trim(),historico:[]};
-  var i=GASTOS.findIndex(function(x){return x.id===id;});
-  if(i>=0){obj.historico=GASTOS[i].historico||[];GASTOS[i]=obj;}else GASTOS.push(obj);
-  
-  localStorage.setItem('app_gastos', JSON.stringify(GASTOS)); // <-- Guardado seguro
-  cm('m-gasto'); renderGastos();
-  autoSaveToCloud(); // <-- Auto subida a Firebase
-}
+
 function saveGasto(){
   var id=$('mg-id').value, name=$('mg-name').value.trim();
   if(!name){alert('Ingresa un nombre.');return;}
@@ -1850,7 +1847,7 @@ var OBJETIVOS = (function(){
     return s ? JSON.parse(s) : {};
   } catch(e) { return {}; }
 })();
-function saveObj(){ try{localStorage.setItem(OBJ_KEY,JSON.stringify(OBJETIVOS));}catch(e){} }
+
 
 function iconSVG(name){
   var ic={
@@ -1868,11 +1865,7 @@ function iconSVG(name){
 }
 
 // ── OBJETIVOS STORAGE ──
-var OBJETIVOS = (function(){
-  try{ return JSON.parse(localStorage.getItem('sf_objetivos')||'{}'); }
-  catch(e){ return {}; }
-})();
-function saveObjetivos(){ try{localStorage.setItem('sf_objetivos',JSON.stringify(OBJETIVOS));}catch(e){} }
+
 
 function updateObj(wk,k,v){ if(!OBJETIVOS[wk]) OBJETIVOS[wk]={}; OBJETIVOS[wk][k]=v; saveObjetivos(); }
 function deleteObj(wk,k){ if(OBJETIVOS[wk]) delete OBJETIVOS[wk][k]; saveObjetivos(); renderObjetivos(); }
@@ -1966,11 +1959,6 @@ function renderObjetivos(){
 }
 
 
-function updateObj(weekKey,key,val){
-  if(!OBJETIVOS[weekKey]) OBJETIVOS[weekKey]={};
-  OBJETIVOS[weekKey][key]=val;
-  saveObj();
-}
 
 // ════ EXPORT MODAL ════
 function openExport(){
@@ -2346,18 +2334,6 @@ const REGLAS_PROVEEDORES = {
 
 function formatMoney(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
 
-// ─── MOTOR DE LECTURA CSV AVANZADO (Inmune a comas en precios) ───
-function parseCSVRow(text, delimiter) {
-  var ret = [], val = '', inQ = false;
-  for(var i=0; i<text.length; i++) {
-    var c = text[i];
-    if(c === '"') inQ = !inQ;
-    else if(c === delimiter && !inQ) { ret.push(val.replace(/^"|"$/g,'').trim()); val=''; }
-    else val += c;
-  }
-  ret.push(val.replace(/^"|"$/g,'').trim()); 
-  return ret;
-}
 
 // ─── LECTOR BANCO ITAÚ ───
 function handleBankFile(input) {
@@ -2572,24 +2548,13 @@ function renderFlujoCaja(isFilterChange){
     if(t.in > 0) topInMap[t.date] = (topInMap[t.date] || 0) + t.in;
   });
 
-  // 3. CÁLCULO DE EFECTIVO Y GASTOS MANUALES
-  var totalManual = JSON.parse(localStorage.getItem('app_gastos') || '[]').reduce(function(s, g) {
-      var match = (currentMonth === 'all') || g.date.startsWith(currentMonth);
-      return s + (match ? parseInt(g.monto) : 0);
-  }, 0);
-  
-  var efectivoToteat = 0;
-  if (typeof SALES !== 'undefined' && SALES.monthly) {
-    if (currentMonth === 'all') {
-      efectivoToteat = SALES.monthly.reduce((sum, m) => sum + (m.efectivo || 0), 0);
-    } else {
-      var mArr = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      var pts = currentMonth.split('-');
-      if(pts.length === 2) {
-          var targetLabel = mArr[parseInt(pts[1]) - 1] + ' ' + pts[0];
-          var match = SALES.monthly.find(m => m.month === targetLabel);
-          if(match) efectivoToteat = match.efectivo || 0;
-      }
+// 3. CÁLCULO DE GASTOS FIJOS MENSUALES (desde GASTOS en memoria)
+var totalManual = 0;
+if(typeof GASTOS !== 'undefined') {
+    totalManual = GASTOS.reduce(function(s, g) {
+        return s + toMes(g);
+    }, 0);
+}
     }
   }
 
