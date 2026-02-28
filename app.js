@@ -1822,14 +1822,23 @@ function saveGasto(){
     monto:parseFloat($('mg-monto').value)||0,prov:$('mg-prov').value.trim(),notes:$('mg-notes').value.trim(),historico:[]};
   var i=GASTOS.findIndex(function(x){return x.id===id;});
   if(i>=0){obj.historico=GASTOS[i].historico||[];GASTOS[i]=obj;}else GASTOS.push(obj);
+  
+  localStorage.setItem('app_gastos', JSON.stringify(GASTOS)); // <-- Guardado seguro
   cm('m-gasto'); renderGastos();
+  autoSaveToCloud(); // <-- Auto subida a Firebase
 }
-function delGasto(){
-  var id=$('mg-id').value;
-  if(!confirm('\u00bfEliminar este gasto?')) return;
-  GASTOS=GASTOS.filter(function(g){return g.id!==id;}); cm('m-gasto'); renderGastos();
+function saveGasto(){
+  var id=$('mg-id').value, name=$('mg-name').value.trim();
+  if(!name){alert('Ingresa un nombre.');return;}
+  var obj={id:id,name:name,cat:$('mg-cat').value,freq:$('mg-freq').value,
+    monto:parseFloat($('mg-monto').value)||0,prov:$('mg-prov').value.trim(),notes:$('mg-notes').value.trim(),historico:[]};
+  var i=GASTOS.findIndex(function(x){return x.id===id;});
+  if(i>=0){obj.historico=GASTOS[i].historico||[];GASTOS[i]=obj;}else GASTOS.push(obj);
+  
+  localStorage.setItem('app_gastos', JSON.stringify(GASTOS)); // <-- Guardado seguro
+  cm('m-gasto'); renderGastos();
+  autoSaveToCloud(); // <-- Auto subida a Firebase
 }
-
 
 
 
