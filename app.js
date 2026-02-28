@@ -561,21 +561,25 @@ function openEdit(code){
   $('m-ingr').classList.add('on');
 }
 function saveIngr(){
-  var code=$('mi-code').value;
-  var obj={code:code,name:$('mi-name').value.trim(),brand:$('mi-brand').value.trim(),
-    proveedor:$('mi-prov').value.trim(),notes:$('mi-notes').value.trim(),
-    cost:parseFloat($('mi-cost').value)||0,unit:$('mi-unit').value,
-    category:$('mi-cat').value,weekly_avg:parseFloat($('mi-wk').value)||0,
-    stock_min:parseFloat($('mi-min').value)||0,
-    total_cost:parseFloat($('mi-tc').value)||0,total_used:0,
-    purchase_qty:parseFloat($('mi-pqty').value)||0,
-    purchase_unit:$('mi-punit').value.trim(),
-    conv_qty:parseFloat($('mi-conv').value)||0,
-    conv_unit:$('mi-convunit').value.trim()};
-  if(!obj.name){alert('Ingresa un nombre.');return}
-  var idx=INGR.findIndex(function(x){return x.code===code});
-  if(idx>=0) INGR[idx]=obj; else INGR.push(obj);
-  cm('m-ingr');renderIngr();initDash();syncRecetasCost();
+  var code=$('mi-code').value;
+  var obj={code:code,name:$('mi-name').value.trim(),brand:$('mi-brand').value.trim(),
+    proveedor:$('mi-prov').value.trim(),notes:$('mi-notes').value.trim(),
+    cost:parseFloat($('mi-cost').value)||0,unit:$('mi-unit').value,
+    category:$('mi-cat').value,weekly_avg:parseFloat($('mi-wk').value)||0,
+    stock_min:parseFloat($('mi-min').value)||0,
+    total_cost:parseFloat($('mi-tc').value)||0,total_used:0,
+    purchase_qty:parseFloat($('mi-pqty').value)||0,
+    purchase_unit:$('mi-punit').value.trim(),
+    conv_qty:parseFloat($('mi-conv').value)||0,
+    conv_unit:$('mi-convunit').value.trim()};
+  if(!obj.name){alert('Ingresa un nombre.');return}
+  var idx=INGR.findIndex(function(x){return x.code===code});
+  if(idx>=0) INGR[idx]=obj; else INGR.push(obj);
+
+  // ---> CORRECCIÓN: Guardar en memoria local antes de cerrar <---
+  localStorage.setItem('app_ingr', JSON.stringify(INGR));
+
+  cm('m-ingr');renderIngr();initDash();syncRecetasCost();
 }
 function delIngr(){
   if(!confirm('¿Eliminar?')) return;
@@ -1065,26 +1069,30 @@ function removeRecIng(i){
 }
 
 function saveRec(){
-  var r=RECIPES.find(function(x){return x.id===editingRecId}); if(!r) return;
-  r.name=$('mr-name').value.trim()||r.name;
-  // Read all ingredient rows
-  var newIngs=[];
-  var rows=document.querySelectorAll('[id^="ier_n_"]');
-  rows.forEach(function(el,i){
-    var name=el.value;
-    var qty=parseFloat(document.getElementById('ier_q_'+i).value)||0;
-    var unit=document.getElementById('ier_u_'+i).value;
-    var costTxt=(document.getElementById('ier_c_'+i).textContent||'0').replace(/[^0-9]/g,'');
-    var cost=parseInt(costTxt)||0;
-    if(name&&qty>0) newIngs.push({name:name,qty:qty,unit:unit,cost:cost});
-  });
-  if(!newIngs.length){alert('Agrega al menos un ingrediente.');return;}
-  r.ingredients=newIngs;
-  r.cost=newIngs.reduce(function(s,ing){return s+ing.cost},0);
-  cm('m-rec');
-  renderRec();
-  initDash();
-  alert('✓ Receta guardada.');
+  var r=RECIPES.find(function(x){return x.id===editingRecId}); if(!r) return;
+  r.name=$('mr-name').value.trim()||r.name;
+  // Read all ingredient rows
+  var newIngs=[];
+  var rows=document.querySelectorAll('[id^="ier_n_"]');
+  rows.forEach(function(el,i){
+    var name=el.value;
+    var qty=parseFloat(document.getElementById('ier_q_'+i).value)||0;
+    var unit=document.getElementById('ier_u_'+i).value;
+    var costTxt=(document.getElementById('ier_c_'+i).textContent||'0').replace(/[^0-9]/g,'');
+    var cost=parseInt(costTxt)||0;
+    if(name&&qty>0) newIngs.push({name:name,qty:qty,unit:unit,cost:cost});
+  });
+  if(!newIngs.length){alert('Agrega al menos un ingrediente.');return;}
+  r.ingredients=newIngs;
+  r.cost=newIngs.reduce(function(s,ing){return s+ing.cost},0);
+
+  // ---> CORRECCIÓN: Guardar en memoria local antes de cerrar <---
+  localStorage.setItem('app_rec', JSON.stringify(RECIPES));
+
+  cm('m-rec');
+  renderRec();
+  initDash();
+  alert('✓ Receta guardada.');
 }
 
 // ════ PEDIDO ════
@@ -2195,18 +2203,37 @@ function verticalBarChart(elId,dataArr,color,vFmt){
   el.innerHTML='<div style="display:flex;justify-content:center;overflow-x:auto;width:100%;padding:10px 0"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="display:block;min-width:'+W+'px">'+bars+'</svg></div>';
 }
 
-// ════ INIT ════
+// ════ INIT CLOUD FIRST BLINDADO ════
 $('c-fecha').value=new Date().toISOString().split('T')[0];
-initDashSel();
-initDash();
-initMonthSel();
-renderV();
-initAnalisis();
-initDeliveryMesSel();
-renderIngr();
-renderRec();
-renderCnt();
-renderGastos();
+console.log("Conectando con la nube...");
+
+db.ref('respaldo_principal').once('value').then(function(snapshot) {
+  var data = snapshot.val();
+  if (data) {
+    for(var key in data) {
+      localStorage.setItem(key, data[key]);
+    }
+    try { if (data['app_sales']) SALES = JSON.parse(data['app_sales']); } catch(e) { console.error("Error SALES:", e); }
+    try { if (data['app_ingr']) INGR = JSON.parse(data['app_ingr']); } catch(e) { console.error("Error INGR:", e); }
+    try { if (data['app_rec']) RECIPES = JSON.parse(data['app_rec']); } catch(e) { console.error("Error RECIPES:", e); }
+    try { if (data['app_gastos']) GASTOS = JSON.parse(data['app_gastos']); } catch(e) { console.error("Error GASTOS:", e); }
+  }
+  renderAppSeguro();
+}).catch(function(e) {
+  console.error("Error Firebase:", e);
+  renderAppSeguro();
+});
+
+function renderAppSeguro() {
+   try { initDashSel(); initDash(); } catch(e) { console.error("Error Dash", e); }
+   try { initMonthSel(); renderV(); } catch(e) { console.error("Error Ventas", e); }
+   try { initAnalisis(); } catch(e) { console.error("Error Analisis", e); }
+   try { initDeliveryMesSel(); } catch(e) { console.error("Error Delivery", e); }
+   try { renderIngr(); } catch(e) { console.error("Error Insumos", e); }
+   try { renderRec(); } catch(e) { console.error("Error Recetas", e); }
+   try { renderCnt(); } catch(e) { console.error("Error Conteo", e); }
+   try { renderGastos(); } catch(e) { console.error("Error Gastos", e); }
+}
 
 function exportGastosPDF(){
   var now=new Date();
